@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/Services/">
+    <Project Path="AuditService/AuditService.csproj" Id="cef651a8-e608-4f28-a716-bf5b73a7a24f" />
+    <Project Path="AuthService/AuthService.csproj" Id="3a3db6eb-78f6-4a71-9b84-db79fd949f77" />
+    <Project Path="FacilityService/FacilityService.csproj" />
+    <Project Path="InventoryService/InventoryService.csproj" />
+    <Project Path="LogisticsService/LogisticsService.csproj" />
+    <Project Path="NotificationService/NotificationService.csproj" />
+    <Project Path="ProcurementService/ProcurementService.csproj" />
+    <Project Path="TelemetryService/TelemetryService.csproj" />
+  </Folder>
+  <Project Path="Frontend/Frontend.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="Gateway/Gateway.csproj" />
+  <Project Path="Shared/Shared.csproj" Id="e4ebc8f9-5c87-4db6-9917-fd26a89d9984" />
+</Solution>
