@@ -1,0 +1,180 @@
+# MediPulseMicro — full stack: SQL Server + 8 microservices + Ocelot Gateway + Angular frontend.
+# Run from repo root:   docker compose up --build
+#
+# Defaults assume a .env file exists with SA_PASSWORD set (see .env.example).
+
+name: medipulse
+
+x-service-defaults: &service-defaults
+  build:
+    context: .
+    dockerfile: Dockerfile.service
+  restart: unless-stopped
+  environment: &service-env
+    ASPNETCORE_ENVIRONMENT: Development
+    ASPNETCORE_URLS: http://+:8080
+    ConnectionStrings__DefaultConnection: "Server=mssql,1433;Database=MedipulseMain;User Id=sa;Password=${SA_PASSWORD};TrustServerCertificate=True;Encrypt=False;"
+    Jwt__Key: "MediPulse@SuperSecretJWT_Key_2024!ForDev"
+    Jwt__Issuer: "MediPulse"
+    Jwt__Audience: "MediPulseUsers"
+    Jwt__ExpiryHours: "8"
+    AuditService__BaseUrl: "http://auditservice:8080"
+    NotificationService__BaseUrl: "http://notificationservice:8080"
+  depends_on:
+    db-init:
+      condition: service_completed_successfully
+  networks: [medipulse-net]
+
+services:
+
+  # ---------------- SQL Server ----------------
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: medipulse-mssql
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SA_PASSWORD}
+      MSSQL_PID: Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -No -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [medipulse-net]
+
+  # ---------------- One-shot DB bootstrap ----------------
+  # Creates MedipulseMain database if it doesn't exist, then exits.
+  db-init:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: medipulse-db-init
+    depends_on:
+      mssql:
+        condition: service_healthy
+    entrypoint: >
+      /opt/mssql-tools/bin/sqlcmd -S mssql -U sa -P "${SA_PASSWORD}"
+      -Q "IF DB_ID('MedipulseMain') IS NULL CREATE DATABASE MedipulseMain;"
+    networks: [medipulse-net]
+
+  # ---------------- Microservices ----------------
+  authservice:
+    <<: *service-defaults
+    container_name: medipulse-auth
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: AuthService
+
+  facilityservice:
+    <<: *service-defaults
+    container_name: medipulse-facility
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: FacilityService
+
+  inventoryservice:
+    <<: *service-defaults
+    container_name: medipulse-inventory
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: InventoryService
+
+  procurementservice:
+    <<: *service-defaults
+    container_name: medipulse-procurement
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: ProcurementService
+
+  logisticsservice:
+    <<: *service-defaults
+    container_name: medipulse-logistics
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: LogisticsService
+
+  telemetryservice:
+    <<: *service-defaults
+    container_name: medipulse-telemetry
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: TelemetryService
+
+  notificationservice:
+    <<: *service-defaults
+    container_name: medipulse-notification
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: NotificationService
+
+  auditservice:
+    <<: *service-defaults
+    container_name: medipulse-audit
+    build:
+      context: .
+      dockerfile: Dockerfile.service
+      args:
+        SERVICE: AuditService
+
+  # ---------------- Gateway ----------------
+  gateway:
+    build:
+      context: .
+      dockerfile: Gateway/Dockerfile
+    container_name: medipulse-gateway
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+    # Override the committed ocelot.json with the docker variant (container hostnames)
+    volumes:
+      - ./Gateway/ocelot.docker.json:/app/ocelot.json:ro
+    ports:
+      - "5000:8080"
+    depends_on:
+      - authservice
+      - facilityservice
+      - inventoryservice
+      - procurementservice
+      - logisticsservice
+      - telemetryservice
+      - notificationservice
+      - auditservice
+    networks: [medipulse-net]
+
+  # ---------------- Frontend (Angular + nginx) ----------------
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    container_name: medipulse-frontend
+    restart: unless-stopped
+    ports:
+      - "4200:80"
+    depends_on:
+      - gateway
+    networks: [medipulse-net]
+
+volumes:
+  mssql-data:
+
+networks:
+  medipulse-net:
+    driver: bridge

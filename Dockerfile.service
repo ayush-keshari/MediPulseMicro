@@ -1,0 +1,27 @@
+# Shared Dockerfile for all 8 microservices (Auth/Audit/Facility/Inventory/Logistics/Notification/Procurement/Telemetry).
+# Build context = repo root. Pass SERVICE as build arg, e.g. --build-arg SERVICE=AuthService.
+
+# ---------- Build stage ----------
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+ARG SERVICE
+WORKDIR /src
+
+# Copy Shared first (every service references it) then the service folder
+COPY Shared/ ./Shared/
+COPY ${SERVICE}/ ./${SERVICE}/
+
+WORKDIR /src/${SERVICE}
+RUN dotnet restore
+RUN dotnet publish -c Release -o /app/publish --no-restore
+
+# ---------- Runtime stage ----------
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+ARG SERVICE
+ENV SERVICE_DLL=${SERVICE}.dll
+ENV ASPNETCORE_URLS=http://+:8080
+WORKDIR /app
+COPY --from=build /app/publish .
+EXPOSE 8080
+
+# SERVICE_DLL is an env var so it expands at runtime
+ENTRYPOINT ["sh", "-c", "dotnet $SERVICE_DLL"]
