@@ -19,6 +19,7 @@ builder.Services.AddScoped<ITelemetryService, TelemetryServiceImpl>();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<TelemetryDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

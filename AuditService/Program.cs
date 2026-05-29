@@ -20,6 +20,7 @@ builder.Services.AddScoped<IAuditLogService, AuditLogServiceImpl>();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<AuditDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

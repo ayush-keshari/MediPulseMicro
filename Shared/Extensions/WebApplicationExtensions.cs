@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Shared.Extensions;
 
@@ -21,6 +23,16 @@ public static class WebApplicationExtensions
         app.UseCors("AllowAngular");
         app.UseAuthentication();
         app.UseAuthorization();
+        return app;
+    }
+
+    // Apply pending EF Core migrations on startup.
+    // Why: in Docker the DB starts empty, so each service must create its own schema before serving requests.
+    public static WebApplication MigrateDatabase<TContext>(this WebApplication app) where TContext : DbContext
+    {
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<TContext>();
+        db.Database.Migrate();
         return app;
     }
 }

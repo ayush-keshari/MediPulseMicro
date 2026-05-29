@@ -19,6 +19,7 @@ builder.Services.AddScoped<ILogisticsService, LogisticsServiceImpl>();
 
 // ── BUILD & PIPELINE ──────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<LogisticsDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

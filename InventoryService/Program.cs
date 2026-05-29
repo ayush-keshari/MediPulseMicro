@@ -21,6 +21,7 @@ builder.Services.AddScoped<IReplenishmentService, ReplenishmentServiceImpl>();
 
 // ── BUILD & PIPELINE ──────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<InventoryDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

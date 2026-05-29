@@ -19,6 +19,7 @@ builder.Services.AddScoped<IAuthService, AuthServiceImpl>();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<AuthDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

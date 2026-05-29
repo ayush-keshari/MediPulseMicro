@@ -19,6 +19,7 @@ builder.Services.AddScoped<IFacilityService, FacilityServiceImpl>();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<FacilityDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

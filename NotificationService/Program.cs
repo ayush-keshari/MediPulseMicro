@@ -19,6 +19,7 @@ builder.Services.AddScoped<INotificationService, NotificationServiceImpl>();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<NotificationDbContext>();
 
 if (app.Environment.IsDevelopment())
 {

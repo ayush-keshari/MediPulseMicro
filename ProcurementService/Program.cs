@@ -19,6 +19,7 @@ builder.Services.AddScoped<IProcurementService, ProcurementServiceImpl>();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+app.MigrateDatabase<ProcurementDbContext>();
 
 if (app.Environment.IsDevelopment())
 {
