@@ -21,8 +21,8 @@
     <!-- Swashbuckle — used by AddMediPulseSwagger() extension method -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
 
-    <!-- EF Core — used by MigrateDatabase() extension method -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.4" />
+    <!-- EF Core Relational — provides the Migrate() extension method used by MigrateDatabase() -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.4" />
   </ItemGroup>
 
 </Project>
