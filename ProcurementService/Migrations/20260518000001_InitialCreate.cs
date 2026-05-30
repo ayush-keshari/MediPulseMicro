@@ -11,9 +11,6 @@ namespace ProcurementService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // ProcurementService owns Supplier, PurchaseOrder, Receipt.
-            // All FK constraints are enforced within this single database.
-
             migrationBuilder.CreateTable(
                 name: "Supplier",
                 columns: table => new
@@ -22,8 +19,7 @@ namespace ProcurementService.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     SupplierType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false,
-                        defaultValue: "Active")
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Active")
                 },
                 constraints: table =>
                 {
@@ -39,8 +35,7 @@ namespace ProcurementService.Migrations
                     SupplierID = table.Column<int>(type: "int", nullable: false),
                     OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExpectedDeliveryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false,
-                        defaultValue: "Draft"),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Draft"),
                     Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
@@ -61,13 +56,11 @@ namespace ProcurementService.Migrations
                     ReceiptID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     POID = table.Column<int>(type: "int", nullable: false),
-                    SupplierLot = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     ReceivedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    ReceivedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    QualityStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false,
-                        defaultValue: "Accepted"),
                     QuantityReceived = table.Column<int>(type: "int", nullable: false),
-                    Remarks = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                    ReceivedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    QualityStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Accepted"),
+                    SupplierLot = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {

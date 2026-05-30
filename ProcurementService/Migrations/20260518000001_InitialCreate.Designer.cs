@@ -12,7 +12,7 @@ using ProcurementService.Data;
 namespace ProcurementService.Migrations
 {
     [DbContext(typeof(ProcurementDbContext))]
-    [Migration("20260518000000_InitialCreate")]
+    [Migration("20260518000001_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -92,10 +92,6 @@ namespace ProcurementService.Migrations
 
                     b.Property<DateTime>("ReceivedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Remarks")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SupplierLot")
                         .HasMaxLength(100)

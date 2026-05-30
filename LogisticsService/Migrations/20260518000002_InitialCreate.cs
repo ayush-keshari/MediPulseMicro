@@ -17,13 +17,13 @@ namespace LogisticsService.Migrations
                 {
                     ConsumptionId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ItemId        = table.Column<int>(type: "int", nullable: false),
-                    ItemName      = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    FacilityId    = table.Column<int>(type: "int", nullable: false),
-                    WardId        = table.Column<int>(type: "int", nullable: true),
+                    ItemId = table.Column<int>(type: "int", nullable: false),
+                    ItemName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    FacilityId = table.Column<int>(type: "int", nullable: false),
+                    WardId = table.Column<int>(type: "int", nullable: true),
                     QuantityConsumed = table.Column<int>(type: "int", nullable: false),
-                    ConsumedBy    = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    ConsumedDate  = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    ConsumedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ConsumedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -34,16 +34,15 @@ namespace LogisticsService.Migrations
                 name: "TransferOrder",
                 columns: table => new
                 {
-                    TransferOrderId  = table.Column<int>(type: "int", nullable: false)
+                    TransferOrderId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    FromFacilityId   = table.Column<int>(type: "int", nullable: false),
+                    FromFacilityId = table.Column<int>(type: "int", nullable: false),
                     FromFacilityName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    ToFacilityId     = table.Column<int>(type: "int", nullable: false),
-                    ToFacilityName   = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    RequestedBy      = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    RequestedDate    = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status           = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false,
-                        defaultValue: "Draft")
+                    ToFacilityId = table.Column<int>(type: "int", nullable: false),
+                    ToFacilityName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RequestedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RequestedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Draft")
                 },
                 constraints: table =>
                 {
@@ -57,9 +56,9 @@ namespace LogisticsService.Migrations
                     TransferOrderItemId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TransferOrderId = table.Column<int>(type: "int", nullable: false),
-                    ItemId          = table.Column<int>(type: "int", nullable: false),
-                    ItemName        = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Quantity        = table.Column<int>(type: "int", nullable: false)
+                    ItemId = table.Column<int>(type: "int", nullable: false),
+                    ItemName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
