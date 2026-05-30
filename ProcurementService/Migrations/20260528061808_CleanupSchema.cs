@@ -10,9 +10,7 @@ namespace ProcurementService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "Remarks",
-                table: "Receipt");
+            migrationBuilder.Sql("IF COL_LENGTH('Receipt','Remarks') IS NOT NULL ALTER TABLE [Receipt] DROP COLUMN [Remarks]");
         }
 
         /// <inheritdoc />

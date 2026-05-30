@@ -10,9 +10,7 @@ namespace TelemetryService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "ExcursionNote",
-                table: "TelemetryRecord");
+            migrationBuilder.Sql("IF COL_LENGTH('TelemetryRecord','ExcursionNote') IS NOT NULL ALTER TABLE [TelemetryRecord] DROP COLUMN [ExcursionNote]");
         }
 
         /// <inheritdoc />
