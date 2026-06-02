@@ -29,6 +29,7 @@ public class TelemetryServiceImpl : ITelemetryService
     {
         var sensor = new SensorDevice
         {
+            DeviceName       = request.DeviceName,
             DeviceType       = request.DeviceType,
             AssignedTo       = request.AssignedTo,
             AssignedEntityId = request.AssignedEntityId,
@@ -44,6 +45,7 @@ public class TelemetryServiceImpl : ITelemetryService
         var sensor = await _db.SensorDevices.FindAsync(id);
         if (sensor == null) return false;
 
+        sensor.DeviceName       = request.DeviceName;
         sensor.DeviceType       = request.DeviceType;
         sensor.AssignedTo       = request.AssignedTo;
         sensor.AssignedEntityId = request.AssignedEntityId;
@@ -175,6 +177,7 @@ public class TelemetryServiceImpl : ITelemetryService
     private static SensorDeviceDto ToSensorDto(SensorDevice s) => new()
     {
         SensorId         = s.SensorId,
+        DeviceName       = s.DeviceName,
         DeviceType       = s.DeviceType,
         AssignedTo       = s.AssignedTo,
         AssignedEntityId = s.AssignedEntityId,

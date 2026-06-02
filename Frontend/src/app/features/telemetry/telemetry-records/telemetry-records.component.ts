@@ -5,6 +5,8 @@ import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TelemetryService } from '../../../services/telemetry/telemetry.service';
 import { TelemetryRecordDto, SensorDeviceDto } from '../../../services/telemetry/telemetry.models';
+import { FacilityService } from '../../../services/facility/facility.service';
+import { StorageZoneDto } from '../../../services/facility/facility.models';
 
 @Component({
   selector: 'app-telemetry-records',
@@ -17,6 +19,7 @@ export class TelemetryRecordsComponent implements OnInit {
   records: TelemetryRecordDto[] = [];
   filtered: TelemetryRecordDto[] = [];
   sensors: SensorDeviceDto[] = [];
+  zones: StorageZoneDto[] = [];
   isLoading = false;
   successMessage = ''; errorMessage = '';
   search = ''; filterExcursion = '';
@@ -25,13 +28,22 @@ export class TelemetryRecordsComponent implements OnInit {
   form: FormGroup;
   showDeleteConfirm = false; deleteTarget: TelemetryRecordDto | null = null; isDeleting = false;
 
-  constructor(private svc: TelemetryService, private fb: FormBuilder) {
+  constructor(private svc: TelemetryService, private fb: FormBuilder, private facilitySvc: FacilityService) {
     this.form = this.fb.group({
       sensorId:    [null, Validators.required],
       timestamp:   [this.nowLocal(), Validators.required],
       temperature: [null],
       humidity:    [null],
       location:    [''],
+    });
+
+    // Auto-fill location when sensor changes
+    this.form.get('sensorId')!.valueChanges.subscribe((id: number | null) => {
+      if (!id) return;
+      const sensor = this.sensors.find(s => s.sensorId === +id);
+      if (!sensor?.assignedEntityId) return;
+      const zone = this.zones.find(z => z.zoneId === sensor.assignedEntityId);
+      if (zone?.name) this.form.patchValue({ location: zone.name }, { emitEvent: false });
     });
   }
 
@@ -44,6 +56,7 @@ export class TelemetryRecordsComponent implements OnInit {
       error: () => { this.errorMessage = 'Failed to load telemetry records.'; this.isLoading = false; },
     });
     this.svc.getSensors().subscribe({ next: (s) => this.sensors = s });
+    this.facilitySvc.getZones().subscribe({ next: (z) => this.zones = z });
   }
 
   applyFilter() {

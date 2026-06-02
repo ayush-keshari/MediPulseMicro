@@ -10,6 +10,10 @@ public class SensorDevice
     [Key]
     public int SensorId { get; set; }
 
+    // Human-readable label for this sensor (e.g. "Cold Room Alpha #1").
+    [Required, MaxLength(100)]
+    public string DeviceName { get; set; } = string.Empty;
+
     // The kind of measurement this sensor captures: Temp | Humidity | GPS.
     [Required, MaxLength(50)]
     public string DeviceType { get; set; } = string.Empty;

@@ -5,6 +5,8 @@ import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } 
 import { HttpErrorResponse } from '@angular/common/http';
 import { TelemetryService } from '../../../services/telemetry/telemetry.service';
 import { SensorDeviceDto } from '../../../services/telemetry/telemetry.models';
+import { FacilityService } from '../../../services/facility/facility.service';
+import { StorageZoneDto } from '../../../services/facility/facility.models';
 
 @Component({
   selector: 'app-sensor-devices',
@@ -24,20 +26,25 @@ export class SensorDevicesComponent implements OnInit {
   form: FormGroup;
   showDeleteConfirm = false; deleteTarget: SensorDeviceDto | null = null; isDeleting = false;
 
+  zones: StorageZoneDto[] = [];
+
   deviceTypes = ['Temp', 'Humidity', 'GPS'];
-  assignedTos  = ['Shipment', 'Zone'];
   statuses     = ['Active', 'Inactive', 'Faulty'];
 
-  constructor(private svc: TelemetryService, private fb: FormBuilder) {
+  constructor(private svc: TelemetryService, private fb: FormBuilder, private facilitySvc: FacilityService) {
     this.form = this.fb.group({
+      deviceName:      ['', Validators.required],
       deviceType:      ['Temp', Validators.required],
-      assignedTo:      ['Zone', Validators.required],
-      assignedEntityId:[null],
+      assignedTo:      ['Zone'],
+      assignedEntityId:[null, Validators.required],
       status:          ['Active', Validators.required],
     });
   }
 
-  ngOnInit() { this.load(); }
+  ngOnInit() {
+    this.load();
+    this.facilitySvc.getZones().subscribe({ next: (z) => this.zones = z });
+  }
 
   load() {
     this.isLoading = true;
@@ -50,15 +57,15 @@ export class SensorDevicesComponent implements OnInit {
   applyFilter() {
     const q = this.search.toLowerCase();
     this.filtered = this.sensors.filter(s =>
-      (!q || s.deviceType.toLowerCase().includes(q) || s.assignedTo.toLowerCase().includes(q)) &&
+      (!q || s.deviceName.toLowerCase().includes(q) || s.deviceType.toLowerCase().includes(q) || s.assignedTo.toLowerCase().includes(q)) &&
       (!this.filterStatus || s.status === this.filterStatus)
     );
   }
 
-  openAdd() { this.editId = null; this.form.reset({ deviceType: 'Temp', assignedTo: 'Zone', status: 'Active' }); this.showModal = true; }
+  openAdd() { this.editId = null; this.form.reset({ deviceName: '', deviceType: 'Temp', assignedTo: 'Zone', assignedEntityId: null, status: 'Active' }); this.showModal = true; }
   openEdit(s: SensorDeviceDto) {
     this.editId = s.sensorId;
-    this.form.setValue({ deviceType: s.deviceType, assignedTo: s.assignedTo, assignedEntityId: s.assignedEntityId ?? null, status: s.status });
+    this.form.setValue({ deviceName: s.deviceName, deviceType: s.deviceType, assignedTo: s.assignedTo, assignedEntityId: s.assignedEntityId ?? null, status: s.status });
     this.showModal = true;
   }
   closeModal() { this.showModal = false; }

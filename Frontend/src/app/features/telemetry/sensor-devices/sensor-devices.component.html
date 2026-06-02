@@ -88,9 +88,10 @@
               <thead>
                 <tr>
                   <th style="width:46px">#</th>
+                  <th>Device name</th>
                   <th>Device type</th>
                   <th>Assigned to</th>
-                  <th>Entity ID</th>
+                  <th>Zone</th>
                   <th>Status</th>
                   <th class="text-center" style="width:120px">Actions</th>
                 </tr>
@@ -102,11 +103,15 @@
                     <td>
                       <div class="d-flex align-items-center gap-2">
                         <div class="avatar-icon"><i class="bi bi-cpu"></i></div>
-                        <span class="badge-status" [ngClass]="typeBadge(s.deviceType)">{{ s.deviceType }}</span>
+                        <span class="fw-semibold">{{ s.deviceName }}</span>
                       </div>
                     </td>
+                    <td><span class="badge-status" [ngClass]="typeBadge(s.deviceType)">{{ s.deviceType }}</span></td>
                     <td class="text-muted">{{ s.assignedTo }}</td>
-                    <td class="text-muted">{{ s.assignedEntityId ?? '—' }}</td>
+                    <td class="text-muted">
+                      @let zoneName = zones.find(z => z.zoneId === s.assignedEntityId)?.name;
+                      {{ zoneName ?? '—' }}
+                    </td>
                     <td><span class="badge-status" [ngClass]="statusBadge(s.status)">{{ s.status }}</span></td>
                     <td class="text-center">
                       <div class="d-flex justify-content-center gap-1">
@@ -138,6 +143,16 @@
         <div class="modal-body">
           <form [formGroup]="form">
             <div class="row g-3 mb-3">
+              <div class="col-12">
+                <label class="form-label">Device name *</label>
+                <input class="form-control" formControlName="deviceName" placeholder="e.g. Cold Room Alpha Sensor 1"
+                  [class.is-invalid]="form.get('deviceName')?.invalid && form.get('deviceName')?.touched" />
+                @if (form.get('deviceName')?.invalid && form.get('deviceName')?.touched) {
+                  <div class="invalid-feedback">Device name is required.</div>
+                }
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
               <div class="col-6">
                 <label class="form-label">Device type *</label>
                 <select class="form-select" formControlName="deviceType">
@@ -152,15 +167,18 @@
               </div>
             </div>
             <div class="row g-3">
-              <div class="col-6">
-                <label class="form-label">Assigned to *</label>
-                <select class="form-select" formControlName="assignedTo">
-                  @for (a of assignedTos; track a) { <option [value]="a">{{ a }}</option> }
+              <div class="col-12">
+                <label class="form-label">Zone *</label>
+                <select class="form-select" formControlName="assignedEntityId"
+                  [class.is-invalid]="form.get('assignedEntityId')?.invalid && form.get('assignedEntityId')?.touched">
+                  <option [ngValue]="null" disabled>Select a zone…</option>
+                  @for (z of zones; track z.zoneId) {
+                    <option [ngValue]="z.zoneId">{{ z.name }}</option>
+                  }
                 </select>
-              </div>
-              <div class="col-6">
-                <label class="form-label">Entity ID <span style="color:#9A9892;font-weight:400">(optional)</span></label>
-                <input class="form-control" type="number" formControlName="assignedEntityId" placeholder="Shipment or zone ID" />
+                @if (form.get('assignedEntityId')?.invalid && form.get('assignedEntityId')?.touched) {
+                  <div class="invalid-feedback">Please select a zone.</div>
+                }
               </div>
             </div>
           </form>
@@ -187,7 +205,7 @@
             <i class="bi bi-trash-fill"></i>
           </div>
           <h5 style="font-family:'Fraunces',serif;font-weight:500;color:#14202C;margin-bottom:8px">Delete sensor?</h5>
-          <p style="font-size:13px;color:#6B6A66">Delete sensor <strong>#{{ deleteTarget?.sensorId }}</strong> ({{ deleteTarget?.deviceType }})? This cannot be undone.</p>
+          <p style="font-size:13px;color:#6B6A66">Delete sensor <strong>{{ deleteTarget?.deviceName }}</strong> ({{ deleteTarget?.deviceType }})? This cannot be undone.</p>
         </div>
         <div class="modal-footer justify-content-center gap-2">
           <button class="btn btn-secondary" (click)="cancelDelete()">Cancel</button>

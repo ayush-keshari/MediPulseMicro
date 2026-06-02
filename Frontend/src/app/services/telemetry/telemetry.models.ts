@@ -1,12 +1,13 @@
 export interface SensorDeviceDto {
   sensorId: number;
+  deviceName: string;
   deviceType: string;
   assignedTo: string;
   assignedEntityId?: number;
   status: string;
 }
-export interface CreateSensorDeviceRequest { deviceType: string; assignedTo: string; assignedEntityId?: number; status?: string; }
-export interface UpdateSensorDeviceRequest { deviceType: string; assignedTo: string; assignedEntityId?: number; status: string; }
+export interface CreateSensorDeviceRequest { deviceName: string; deviceType: string; assignedTo: string; assignedEntityId?: number; status?: string; }
+export interface UpdateSensorDeviceRequest { deviceName: string; deviceType: string; assignedTo: string; assignedEntityId?: number; status: string; }
 
 export interface TelemetryRecordDto {
   telemetryId: number;
