@@ -1,4 +1,3 @@
-﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -11,60 +10,52 @@ namespace TelemetryService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "SensorDevice",
-                columns: table => new
-                {
-                    SensorID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DeviceType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    AssignedTo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    AssignedEntityId = table.Column<int>(type: "int", nullable: true),
-                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Active")
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SensorDevice", x => x.SensorID);
-                });
+            // Tables already created by InitialCreate — nothing to do
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SensorDevice')
+                BEGIN
+                    CREATE TABLE [SensorDevice] (
+                        [SensorID] int IDENTITY(1,1) NOT NULL,
+                        [DeviceType] nvarchar(50) NOT NULL,
+                        [AssignedTo] nvarchar(50) NOT NULL,
+                        [AssignedEntityId] int NULL,
+                        [Status] nvarchar(50) NOT NULL DEFAULT 'Active',
+                        CONSTRAINT [PK_SensorDevice] PRIMARY KEY ([SensorID])
+                    );
+                END
+            ");
 
-            migrationBuilder.CreateTable(
-                name: "TelemetryRecord",
-                columns: table => new
-                {
-                    TelemetryID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SensorID = table.Column<int>(type: "int", nullable: false),
-                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Temperature = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
-                    Humidity = table.Column<decimal>(type: "decimal(5,2)", nullable: true),
-                    Location = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
-                    IsExcursion = table.Column<bool>(type: "bit", nullable: false, defaultValue: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TelemetryRecord", x => x.TelemetryID);
-                    table.ForeignKey(
-                        name: "FK_TelemetryRecord_SensorDevice",
-                        column: x => x.SensorID,
-                        principalTable: "SensorDevice",
-                        principalColumn: "SensorID",
-                        onDelete: ReferentialAction.Cascade);
-                });
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'TelemetryRecord')
+                BEGIN
+                    CREATE TABLE [TelemetryRecord] (
+                        [TelemetryID] int IDENTITY(1,1) NOT NULL,
+                        [SensorID] int NOT NULL,
+                        [Timestamp] datetime2 NOT NULL,
+                        [Temperature] decimal(5,2) NULL,
+                        [Humidity] decimal(5,2) NULL,
+                        [Location] nvarchar(200) NULL,
+                        [IsExcursion] bit NOT NULL DEFAULT 0,
+                        CONSTRAINT [PK_TelemetryRecord] PRIMARY KEY ([TelemetryID]),
+                        CONSTRAINT [FK_TelemetryRecord_SensorDevice] FOREIGN KEY ([SensorID])
+                            REFERENCES [SensorDevice] ([SensorID]) ON DELETE CASCADE
+                    );
+                END
+            ");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_TelemetryRecord_SensorID",
-                table: "TelemetryRecord",
-                column: "SensorID");
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TelemetryRecord_SensorID')
+                BEGIN
+                    CREATE INDEX [IX_TelemetryRecord_SensorID] ON [TelemetryRecord] ([SensorID]);
+                END
+            ");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "TelemetryRecord");
-
-            migrationBuilder.DropTable(
-                name: "SensorDevice");
+            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'TelemetryRecord') DROP TABLE [TelemetryRecord];");
+            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'SensorDevice') DROP TABLE [SensorDevice];");
         }
     }
 }
