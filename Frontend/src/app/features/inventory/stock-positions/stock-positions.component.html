@@ -147,22 +147,40 @@
                     <option [value]="item.itemId">{{ item.name }} ({{ item.itemCode }})</option>
                   }
                 </select>
+                @if (form.get('itemId')?.touched && form.get('itemId')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
               </div>
               <div class="col-md-6">
                 <label class="form-label">Lot ID *</label>
                 <input class="form-control" formControlName="lotId" placeholder="e.g. LOT-2024-001" />
+                @if (form.get('lotId')?.touched && form.get('lotId')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
               </div>
               <div class="col-md-4">
                 <label class="form-label">Quantity *</label>
                 <input type="number" class="form-control" formControlName="quantity" min="1" />
+                @if (form.get('quantity')?.touched && form.get('quantity')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
+                @if (form.get('quantity')?.touched && form.get('quantity')?.hasError('min')) {
+                  <div class="text-danger small mt-1">Must be at least 1.</div>
+                }
               </div>
               <div class="col-md-4">
                 <label class="form-label">Safety Stock</label>
                 <input type="number" class="form-control" formControlName="safetyStock" min="0" />
+                @if (form.get('safetyStock')?.touched && form.get('safetyStock')?.hasError('min')) {
+                  <div class="text-danger small mt-1">Must be 0 or greater.</div>
+                }
               </div>
               <div class="col-md-4">
                 <label class="form-label">Expiry Date *</label>
                 <input type="date" class="form-control" formControlName="expiryDate" />
+                @if (form.get('expiryDate')?.touched && form.get('expiryDate')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
               </div>
               <div class="col-md-4">
                 <label class="form-label">Facility *</label>
@@ -170,6 +188,9 @@
                   <option value="">— Select facility —</option>
                   @for (f of facilities; track f.facilityId) { <option [value]="f.facilityId">{{ f.name }}</option> }
                 </select>
+                @if (form.get('facilityId')?.touched && form.get('facilityId')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
               </div>
               <div class="col-md-4">
                 <label class="form-label">Storage Zone *</label>
@@ -177,6 +198,9 @@
                   <option value="">— Select zone —</option>
                   @for (z of filteredZones; track z.zoneId) { <option [value]="z.zoneId">{{ z.name ?? ('Zone #' + z.zoneId) }}</option> }
                 </select>
+                @if (form.get('storageZoneId')?.touched && form.get('storageZoneId')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
               </div>
             </div>
           </form>

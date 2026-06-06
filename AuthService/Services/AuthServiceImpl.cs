@@ -54,6 +54,8 @@ public class AuthServiceImpl : IAuthService
         return new AuthResponse
         {
             Token     = GenerateJwtToken(user, expiresAt),
+            Name      = user.Name,
+            Email     = user.Email,
             Role      = user.Role,
             ExpiresAt = expiresAt
         };

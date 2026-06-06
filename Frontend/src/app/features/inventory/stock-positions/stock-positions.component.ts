@@ -49,7 +49,7 @@ export class StockPositionsComponent implements OnInit {
       quantity:      [1, [Validators.required, Validators.min(1)]],
       facilityId:    ['', Validators.required],
       storageZoneId: ['', Validators.required],
-      safetyStock:   [0, [Validators.required, Validators.min(0)]],
+      safetyStock:   [0, Validators.min(0)],
     });
   }
 
@@ -113,9 +113,10 @@ export class StockPositionsComponent implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSaving = true;
     const val = this.form.value;
+    const safetyStock = val.safetyStock ?? 0;
     const obs = this.editId
-      ? this.svc.updatePosition(this.editId, { quantity: val.quantity, facilityId: +val.facilityId, storageZoneId: +val.storageZoneId, safetyStock: val.safetyStock, expiryDate: val.expiryDate })
-      : this.svc.createPosition({ ...val, itemId: +val.itemId, facilityId: +val.facilityId, storageZoneId: +val.storageZoneId });
+      ? this.svc.updatePosition(this.editId, { quantity: val.quantity, facilityId: +val.facilityId, storageZoneId: +val.storageZoneId, safetyStock, expiryDate: val.expiryDate })
+      : this.svc.createPosition({ ...val, itemId: +val.itemId, facilityId: +val.facilityId, storageZoneId: +val.storageZoneId, safetyStock });
     obs.subscribe({
       next: () => { this.isSaving = false; this.closeModal(); this.showSuccess(this.editId ? 'Position updated.' : 'Stock lot added.'); this.loadAll(); },
       error: (e: HttpErrorResponse) => { this.isSaving = false; this.errorMessage = e.error?.message ?? 'Save failed.'; },

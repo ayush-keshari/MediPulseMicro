@@ -40,7 +40,7 @@ export class ItemsComponent implements OnInit {
       category:           ['Drug', Validators.required],
       unit:               ['', [Validators.required, Validators.maxLength(20)]],
       storageRequirement: ['Ambient', Validators.required],
-      safetyStock:        [0, [Validators.required, Validators.min(0)]],
+      safetyStock:        [0, Validators.min(0)],
     });
   }
 
@@ -89,9 +89,10 @@ export class ItemsComponent implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSaving = true;
     const val = this.form.getRawValue();
+    const safetyStock = val.safetyStock ?? 0;
     const obs = this.editId
-      ? this.svc.updateItem(this.editId, { name: val.name, category: val.category, unit: val.unit, storageRequirement: val.storageRequirement, safetyStock: val.safetyStock })
-      : this.svc.createItem(val);
+      ? this.svc.updateItem(this.editId, { name: val.name, category: val.category, unit: val.unit, storageRequirement: val.storageRequirement, safetyStock })
+      : this.svc.createItem({ ...val, safetyStock });
     obs.subscribe({
       next: () => { this.isSaving = false; this.closeModal(); this.showSuccess(this.editId ? 'Item updated.' : 'Item created.'); this.load(); },
       error: (e: HttpErrorResponse) => { this.isSaving = false; this.errorMessage = e.error?.message ?? 'Save failed.'; },

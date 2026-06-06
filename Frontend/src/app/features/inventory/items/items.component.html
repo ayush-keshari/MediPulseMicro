@@ -144,6 +144,9 @@
               <div class="col-md-4">
                 <label class="form-label">Unit *</label>
                 <input class="form-control" formControlName="unit" placeholder="e.g. tablet, vial, box" />
+                @if (form.get('unit')?.touched && form.get('unit')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
               </div>
               <div class="col-md-4">
                 <label class="form-label">Storage *</label>
@@ -154,6 +157,9 @@
               <div class="col-md-4">
                 <label class="form-label">Safety Stock *</label>
                 <input type="number" class="form-control" formControlName="safetyStock" min="0" />
+                @if (form.get('safetyStock')?.touched && form.get('safetyStock')?.hasError('min')) {
+                  <div class="text-danger small mt-1">Must be 0 or greater.</div>
+                }
               </div>
             </div>
           </form>

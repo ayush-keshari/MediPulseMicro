@@ -167,6 +167,9 @@ public class LogisticsServiceImpl : ILogisticsService
 
         _db.ConsumptionRecords.Add(record);
         await _db.SaveChangesAsync();
+
+        await DeductStockAsync(request.ItemId, request.FacilityId, request.QuantityConsumed);
+
         return true;
     }
 
@@ -191,6 +194,28 @@ public class LogisticsServiceImpl : ILogisticsService
         _db.ConsumptionRecords.Remove(record);
         await _db.SaveChangesAsync();
         return true;
+    }
+
+    // ── Stock deduction (FEFO) ────────────────────────────────────────────
+    // Deducts quantity from InventoryPositions directly in the shared DB.
+    // Positions are consumed soonest-expiry-first (FEFO).
+    private async Task DeductStockAsync(int itemId, int facilityId, int quantity)
+    {
+        var positions = await _db.InventoryPositions
+            .Where(p => p.ItemId == itemId && p.FacilityId == facilityId && p.Quantity > 0)
+            .OrderBy(p => p.ExpiryDate)
+            .ToListAsync();
+
+        var remaining = quantity;
+        foreach (var pos in positions)
+        {
+            if (remaining <= 0) break;
+            var take    = Math.Min(pos.Quantity, remaining);
+            pos.Quantity -= take;
+            remaining    -= take;
+        }
+
+        await _db.SaveChangesAsync();
     }
 
     // ── Private helpers ───────────────────────────────────────────────────

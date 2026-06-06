@@ -136,7 +136,10 @@
               </div>
               <div class="col-md-12">
                 <label class="form-label">Requested By *</label>
-                <input class="form-control" formControlName="requestedBy" />
+                <input class="form-control" formControlName="requestedBy" placeholder="Enter requester name" />
+                @if (form.get('requestedBy')?.touched && form.get('requestedBy')?.hasError('required')) {
+                  <div class="text-danger small mt-1">Required.</div>
+                }
               </div>
             </div>
 
@@ -148,16 +151,29 @@
               </div>
               <div formArrayName="items">
                 @for (row of itemsArray.controls; track $index) {
-                  <div [formGroupName]="$index" class="row g-2 mb-2 align-items-end">
-                    <div class="col-9">
-                      <select class="form-select form-select-sm" formControlName="itemId">
-                        <option value="">— Select item —</option>
-                        @for (item of items; track item.itemId) { <option [value]="item.itemId">{{ item.name }} ({{ item.itemCode }})</option> }
-                      </select>
-                    </div>
-                    <div class="col-2"><input type="number" class="form-control form-control-sm" formControlName="quantity" placeholder="Qty" min="1" /></div>
-                    <div class="col-1">
-                      <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeItemRow($index)" [disabled]="itemsArray.length===1"><i class="bi bi-x"></i></button>
+                  <div [formGroupName]="$index" class="mb-2">
+                    <div class="row g-2 align-items-start">
+                      <div class="col-9">
+                        <select class="form-select form-select-sm" formControlName="itemId">
+                          <option value="">— Select item —</option>
+                          @for (item of items; track item.itemId) { <option [value]="item.itemId">{{ item.name }} ({{ item.itemCode }})</option> }
+                        </select>
+                        @if (itemsArray.at($index).get('itemId')?.touched && itemsArray.at($index).get('itemId')?.hasError('required')) {
+                          <div class="text-danger small mt-1">Select an item.</div>
+                        }
+                      </div>
+                      <div class="col-2">
+                        <input type="number" class="form-control form-control-sm" formControlName="quantity" placeholder="Qty" min="1" />
+                        @if (itemsArray.at($index).get('quantity')?.touched && itemsArray.at($index).get('quantity')?.hasError('required')) {
+                          <div class="text-danger small mt-1">Required.</div>
+                        }
+                        @if (itemsArray.at($index).get('quantity')?.touched && itemsArray.at($index).get('quantity')?.hasError('min')) {
+                          <div class="text-danger small mt-1">Min 1.</div>
+                        }
+                      </div>
+                      <div class="col-1">
+                        <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeItemRow($index)" [disabled]="itemsArray.length===1"><i class="bi bi-x"></i></button>
+                      </div>
                     </div>
                   </div>
                 }
