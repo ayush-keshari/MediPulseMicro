@@ -140,6 +140,12 @@ export class UserManagementComponent implements OnInit {
       role:     user.role,
       password: '',
     });
+    // Admin cannot change their own role via edit modal
+    if (this.isSelf(user)) {
+      this.editForm.get('role')?.disable();
+    } else {
+      this.editForm.get('role')?.enable();
+    }
     this.errorMessage = '';
     this.showEditModal = true;
   }
@@ -150,7 +156,7 @@ export class UserManagementComponent implements OnInit {
     if (!user) return;
     if (this.editForm.invalid) { this.editForm.markAllAsTouched(); return; }
     this.isEditing = true;
-    const v = this.editForm.value;
+    const v = this.editForm.getRawValue();
     // Only send password when admin actually typed one; blank means "keep the current hash".
     this.authService.updateUser(user.userId, {
       name:     v.name,

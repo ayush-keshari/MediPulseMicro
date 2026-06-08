@@ -94,7 +94,10 @@
                         <button class="btn btn-sm btn-outline-secondary" title="Edit profile" (click)="openEditModal(user)">
                           <i class="bi bi-person-lines-fill"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-primary" title="Change role" (click)="openRoleModal(user)">
+                        <button class="btn btn-sm btn-outline-primary"
+                                [disabled]="isSelf(user)"
+                                [title]="isSelf(user) ? 'You cannot change your own role' : 'Change role'"
+                                (click)="!isSelf(user) && openRoleModal(user)">
                           <i class="bi bi-pencil-fill"></i>
                         </button>
                         <button class="btn btn-sm btn-outline-danger"
@@ -266,6 +269,9 @@
                     <option [value]="role">{{ getRoleDisplayName(role) }}</option>
                   }
                 </select>
+                @if (isSelf(userToEdit!)) {
+                  <div class="text-muted small mt-1">You cannot change your own role.</div>
+                }
               </div>
             </div>
             <div class="mb-1">
