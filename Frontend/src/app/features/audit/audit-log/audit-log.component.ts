@@ -33,7 +33,7 @@ export class AuditLogComponent implements OnInit {
 
   selectedLog: AuditLogDto | null = null;
 
-  methods  = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+  methods  = [ 'POST', 'PUT', 'PATCH', 'DELETE'];
   services = ['AuthService', 'FacilityService', 'InventoryService', 'ProcurementService', 'TelemetryService', 'LogisticsService', 'NotificationService', 'AuditService'];
 
   constructor(private svc: AuditService) {}

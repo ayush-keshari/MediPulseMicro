@@ -7,7 +7,7 @@ public interface IInventoryService
     // Items
     Task<IEnumerable<ItemResponse>> GetAllItemsAsync();
     Task<ItemResponse?> GetItemByIdAsync(int id);
-    Task<bool> CreateItemAsync(CreateItemRequest request);
+    Task<(ItemResponse? Item, string? Error)> CreateItemAsync(CreateItemRequest request);
     Task<bool> UpdateItemAsync(int id, UpdateItemRequest request);
     Task<bool> DeleteItemAsync(int id);
 
