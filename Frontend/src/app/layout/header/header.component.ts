@@ -64,30 +64,43 @@ export class HeaderComponent implements OnInit, OnDestroy {
   get isNursing()     { return this.role === 'Nurse'; }
   get isCompliance()  { return this.role === 'ComplianceOfficer'; }
 
-  // ── Permission getters ──────────────────────────────────────────────────
-  get canSeeFacilities()  { return this.isAdmin || this.isSupply || this.isPharmacy || this.isProcurement || this.isColdChain || this.isBiomedical || this.isCompliance; }
-  get canSeeSuppliers()   { return this.isAdmin || this.isProcurement || this.isPharmacy || this.isCompliance; }
-  get canSeeZones()       { return this.isAdmin || this.isSupply || this.isColdChain || this.isCompliance; }
-  get canSeeItems()       { return this.isAdmin || this.isSupply || this.isPharmacy || this.isBiomedical || this.isCompliance; }
-  get canSeeMasterData()  { return this.canSeeFacilities || this.canSeeSuppliers || this.canSeeZones || this.canSeeItems; }
+  // ── Permission getters — mirror backend controller [RoleAuthorize] attributes ──
+  // FacilitiesController: all 8 roles
+  get canSeeFacilities()  { return this.isAdmin || this.isSupply || this.isPharmacy || this.isProcurement || this.isColdChain || this.isBiomedical || this.isCompliance || this.isNursing; }
+  // StorageZonesController: Admin, Supply, ColdChain, Compliance, Nurse
+  get canSeeZones()       { return this.isAdmin || this.isSupply || this.isColdChain || this.isCompliance || this.isNursing; }
+  // SuppliersController: Admin, Supply, Procurement, Compliance
+  get canSeeSuppliers()   { return this.isAdmin || this.isSupply || this.isProcurement || this.isCompliance; }
+  // ItemsController + InventoryController: JwtAuth (all authenticated roles)
+  get canSeeItems()          { return !!this.currentUser; }
+  get canSeeStockPositions() { return !!this.currentUser; }
+  get canSeeMasterData()     { return this.canSeeFacilities || this.canSeeSuppliers || this.canSeeZones || this.canSeeItems; }
 
-  get canSeePOs()         { return this.isAdmin || this.isProcurement || this.isPharmacy || this.isSupply; }
-  get canSeeReceipts()    { return this.isAdmin || this.isProcurement || this.isPharmacy; }
+  // PurchaseOrdersController: Admin, Supply, Procurement, Compliance
+  get canSeePOs()         { return this.isAdmin || this.isSupply || this.isProcurement || this.isCompliance; }
+  // ReceiptsController: Admin, Supply, Pharmacy, Procurement, Compliance
+  get canSeeReceipts()    { return this.isAdmin || this.isSupply || this.isPharmacy || this.isProcurement || this.isCompliance; }
   get canSeeProcurement() { return this.canSeePOs || this.canSeeReceipts; }
 
-  get canSeeStockPositions() { return this.isAdmin || this.isSupply || this.isPharmacy || this.isBiomedical || this.isNursing || this.isCompliance; }
-  get canSeeExceptions()     { return this.isAdmin || this.isSupply || this.isPharmacy || this.isBiomedical || this.isCompliance; }
-  get canSeeReplenishment()  { return this.isAdmin || this.isSupply || this.isPharmacy; }
-  get canSeeInventory()      { return this.canSeeItems || this.canSeeStockPositions || this.canSeeExceptions || this.canSeeReplenishment; }
+  // ExceptionsController: Admin, Supply, Pharmacy, Device, Compliance
+  get canSeeExceptions()    { return this.isAdmin || this.isSupply || this.isPharmacy || this.isBiomedical || this.isCompliance; }
+  // ReplenishmentController: Admin, Supply, Pharmacy, Procurement
+  get canSeeReplenishment() { return this.isAdmin || this.isSupply || this.isPharmacy || this.isProcurement; }
+  get canSeeInventory()     { return this.canSeeItems || this.canSeeStockPositions || this.canSeeExceptions || this.canSeeReplenishment; }
 
-  get canSeeSensors()       { return this.isAdmin || this.isColdChain; }
-  get canSeeTelemetryData() { return this.isAdmin || this.isColdChain || this.isCompliance; }
+  // SensorDevicesController: Admin, Supply, ColdChain
+  get canSeeSensors()       { return this.isAdmin || this.isSupply || this.isColdChain; }
+  // TelemetryRecordsController: Admin, Supply, ColdChain, Compliance
+  get canSeeTelemetryData() { return this.isAdmin || this.isSupply || this.isColdChain || this.isCompliance; }
   get canSeeColdChain()     { return this.canSeeSensors || this.canSeeTelemetryData; }
 
-  get canSeeTransfers()   { return this.isAdmin || this.isSupply || this.isBiomedical || this.isProcurement; }
-  get canSeeConsumption() { return this.isAdmin || this.isSupply || this.isNursing || this.isPharmacy; }
+  // TransferOrdersController: Admin, Supply, Procurement, Device
+  get canSeeTransfers()   { return this.isAdmin || this.isSupply || this.isProcurement || this.isBiomedical; }
+  // ConsumptionController: Admin, Supply, Pharmacy, Nurse
+  get canSeeConsumption() { return this.isAdmin || this.isSupply || this.isPharmacy || this.isNursing; }
   get canSeeDistrib()     { return this.canSeeTransfers || this.canSeeConsumption; }
 
+  // AuditController: Admin, ComplianceOfficer
   get canSeeAudit()       { return this.isAdmin || this.isCompliance; }
 
   get roleDisplayName(): string { return this.currentUser ? getRoleDisplayName(this.currentUser.role) : ''; }

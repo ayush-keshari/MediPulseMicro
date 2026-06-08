@@ -89,8 +89,8 @@
                       <div class="text-muted" style="font-size:11px">{{ p.itemCode }}</div>
                     </td>
                     <td><code style="font-size:12px">{{ p.lotId }}</code></td>
-                    <td class="text-muted">{{ p.facilityId }}</td>
-                    <td class="text-muted">{{ p.storageZoneId }}</td>
+                    <td class="text-muted">{{ getFacilityName(p.facilityId) }}</td>
+                    <td class="text-muted">{{ getZoneName(p.storageZoneId) }}</td>
                     <td class="text-end fw-semibold" [class.text-danger]="p.isBelowSafetyStock">{{ p.quantity }}</td>
                     <td class="text-end text-muted">{{ p.safetyStock }}</td>
                     <td [class.text-danger]="p.isExpired" [class.text-warning]="p.isExpiringSoon && !p.isExpired">

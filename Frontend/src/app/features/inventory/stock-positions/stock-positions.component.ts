@@ -140,6 +140,14 @@ export class StockPositionsComponent implements OnInit {
     return '';
   }
 
+  getFacilityName(id: number): string {
+    return this.facilities.find(f => f.facilityId === id)?.name ?? `Facility #${id}`;
+  }
+
+  getZoneName(id: number): string {
+    return this.allZones.find(z => z.zoneId === id)?.name ?? `Zone #${id}`;
+  }
+
   private showSuccess(msg: string) { this.successMessage = msg; this.errorMessage = ''; setTimeout(() => this.successMessage = '', 3500); }
 
   get expiredCount()     { return this.positions.filter(p => p.isExpired).length; }

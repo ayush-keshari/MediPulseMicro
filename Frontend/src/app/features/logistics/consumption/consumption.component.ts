@@ -26,6 +26,9 @@ export class ConsumptionComponent implements OnInit {
 
   facilities: FacilityDto[] = [];
   items: ItemResponse[] = [];
+  itemsForFacility: ItemResponse[] = [];
+  facilityStockMap = new Map<number, number>();
+  facilityItemsLoading = false;
 
   showModal = false;
   isSaving = false;
@@ -56,6 +59,31 @@ export class ConsumptionComponent implements OnInit {
     this.load();
     this.facilitySvc.getFacilities().subscribe({ next: (d) => this.facilities = d });
     this.inventorySvc.getItems().subscribe({ next: (d) => this.items = d });
+
+    this.form.get('facilityId')!.valueChanges.subscribe(facilityId => {
+      this.onFacilityChange(facilityId);
+    });
+  }
+
+  onFacilityChange(facilityId: any) {
+    this.form.get('itemId')!.setValue('', { emitEvent: false });
+    this.itemsForFacility = [];
+    this.facilityStockMap = new Map();
+    if (!facilityId) return;
+    this.facilityItemsLoading = true;
+    this.inventorySvc.getFacilityStock(+facilityId).subscribe({
+      next: (stock) => {
+        const ids = stock.map(s => s.itemId);
+        this.itemsForFacility = this.items.filter(i => ids.includes(i.itemId));
+        this.facilityStockMap = new Map(stock.map(s => [s.itemId, s.availableQty]));
+        this.facilityItemsLoading = false;
+      },
+      error: () => { this.itemsForFacility = []; this.facilityItemsLoading = false; },
+    });
+  }
+
+  get displayItems(): ItemResponse[] {
+    return this.form.get('facilityId')?.value ? this.itemsForFacility : this.items;
   }
 
   load() {
@@ -75,6 +103,8 @@ export class ConsumptionComponent implements OnInit {
 
   openAdd() {
     this.editId = null;
+    this.itemsForFacility = [];
+    this.facilityStockMap = new Map();
     const today = new Date().toISOString().substring(0, 10);
     this.form.reset({ quantityConsumed: 1, consumedDate: today });
     this.showModal = true;
@@ -82,6 +112,8 @@ export class ConsumptionComponent implements OnInit {
 
   openEdit(r: ConsumptionRecordDto) {
     this.editId = r.consumptionId;
+    this.itemsForFacility = [];
+    this.facilityStockMap = new Map();
     this.form.patchValue({
       facilityId:       r.facilityId,
       wardId:           r.wardId ?? '',
@@ -90,6 +122,8 @@ export class ConsumptionComponent implements OnInit {
       consumedDate:     r.consumedDate.substring(0, 10),
       consumedBy:       r.consumedBy,
     });
+    // Load stock for the pre-selected facility so the item dropdown is populated
+    this.onFacilityChange(r.facilityId);
     this.showModal = true;
   }
 

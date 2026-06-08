@@ -105,6 +105,6 @@ public class NotificationServiceImpl : INotificationService
         Title          = n.Title,
         Message        = n.Message,
         IsRead         = n.IsRead,
-        CreatedAt      = n.CreatedAt
+        CreatedAt      = DateTime.SpecifyKind(n.CreatedAt, DateTimeKind.Utc)
     };
 }

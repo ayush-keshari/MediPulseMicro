@@ -152,8 +152,16 @@
               <div formArrayName="items">
                 @for (row of itemsArray.controls; track $index) {
                   <div [formGroupName]="$index" class="mb-2">
+                    @if ($index === 0) {
+                      <div class="row g-2 mb-1" style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em">
+                        <div class="col-5">Item</div>
+                        <div class="col-4">Destination Zone</div>
+                        <div class="col-2">Qty</div>
+                        <div class="col-1"></div>
+                      </div>
+                    }
                     <div class="row g-2 align-items-start">
-                      <div class="col-9">
+                      <div class="col-5">
                         <select class="form-select form-select-sm" formControlName="itemId">
                           <option value="">
                             @if (facilityItemsLoading) { Loading… }
@@ -167,6 +175,20 @@
                           <div class="text-danger small mt-1">Select an item.</div>
                         }
                       </div>
+                      <div class="col-4">
+                        <select class="form-select form-select-sm" formControlName="toStorageZoneId">
+                          <option value="">
+                            @if (destZonesLoading) { Loading… }
+                            @else if (!form.get('toFacilityId')?.value) { — Select dest. facility first — }
+                            @else if (destinationZones.length === 0) { No zones available }
+                            @else { — Destination zone — }
+                          </option>
+                          @for (z of destinationZones; track z.zoneId) { <option [value]="z.zoneId">{{ z.name }}</option> }
+                        </select>
+                        @if (itemsArray.at($index).get('toStorageZoneId')?.touched && itemsArray.at($index).get('toStorageZoneId')?.hasError('required')) {
+                          <div class="text-danger small mt-1">Select a destination zone.</div>
+                        }
+                      </div>
                       <div class="col-2">
                         <input type="number" class="form-control form-control-sm"
                           [class.is-invalid]="isQtyExceeded($index)"
@@ -178,11 +200,11 @@
                           <div class="text-danger small mt-1">Min 1.</div>
                         }
                         @if (isQtyExceeded($index)) {
-                          <div class="text-danger small mt-1">Exceeds available stock.</div>
+                          <div class="text-danger small mt-1">Exceeds stock.</div>
                         }
-                        @if (itemsArray.at($index).get('itemId')?.value && getAvailableQty(itemsArray.at($index).get('itemId')?.value) > 0) {
+                        @if (itemsArray.at($index).get('itemId')?.value) {
                           <div class="text-muted" style="font-size:11px;margin-top:2px">
-                            Available: {{ getAvailableQty(itemsArray.at($index).get('itemId')?.value) }}
+                            Avail: {{ getAvailableQty(itemsArray.at($index).get('itemId')?.value, $index) }}
                           </div>
                         }
                       </div>

@@ -10,6 +10,7 @@ public class TransferOrderItemDto
     public int    ItemId              { get; set; }
     public string ItemName            { get; set; } = string.Empty;
     public int    Quantity            { get; set; }
+    public int    ToStorageZoneId     { get; set; }
 }
 
 public class TransferOrderItemRequest
@@ -24,6 +25,10 @@ public class TransferOrderItemRequest
     [Required(ErrorMessage = "Quantity is required.")]
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
     public int Quantity { get; set; }
+
+    [Required(ErrorMessage = "Destination storage zone is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "Select a valid destination zone.")]
+    public int ToStorageZoneId { get; set; }
 }
 
 // ── TransferOrder DTOs ────────────────────────────────────────────────────

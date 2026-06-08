@@ -66,9 +66,10 @@ public class LogisticsServiceImpl : ILogisticsService
             Status           = "Draft",
             Items            = request.Items.Select(i => new TransferOrderItem
             {
-                ItemId   = i.ItemId,
-                ItemName = i.ItemName,
-                Quantity = i.Quantity
+                ItemId          = i.ItemId,
+                ItemName        = i.ItemName,
+                Quantity        = i.Quantity,
+                ToStorageZoneId = i.ToStorageZoneId
             }).ToList()
         };
 
@@ -96,7 +97,8 @@ public class LogisticsServiceImpl : ILogisticsService
             TransferOrderId = id,
             ItemId          = i.ItemId,
             ItemName        = i.ItemName,
-            Quantity        = i.Quantity
+            Quantity        = i.Quantity,
+            ToStorageZoneId = i.ToStorageZoneId
         }).ToList();
 
         await _db.SaveChangesAsync();
@@ -121,7 +123,7 @@ public class LogisticsServiceImpl : ILogisticsService
         if (request.Status == "Completed")
         {
             foreach (var item in order.Items)
-                await MoveStockAsync(item.ItemId, order.FromFacilityId, order.ToFacilityId, item.Quantity, order.TransferOrderId);
+                await MoveStockAsync(item.ItemId, order.FromFacilityId, order.ToFacilityId, item.Quantity, order.TransferOrderId, item.ToStorageZoneId);
         }
 
         return true;
@@ -244,7 +246,7 @@ public class LogisticsServiceImpl : ILogisticsService
     // Deducts from source facility (FEFO) and credits destination facility.
     // At destination: adds to an existing position for that item, or creates
     // a new one using the source lot's metadata as a template.
-    private async Task MoveStockAsync(int itemId, int fromFacilityId, int toFacilityId, int quantity, int transferOrderId)
+    private async Task MoveStockAsync(int itemId, int fromFacilityId, int toFacilityId, int quantity, int transferOrderId, int toStorageZoneId)
     {
         // ── 1. Deduct from source (FEFO) ──────────────────────────────────
         var sourcePositions = await _db.InventoryPositions
@@ -266,29 +268,29 @@ public class LogisticsServiceImpl : ILogisticsService
         }
 
         // ── 2. Credit destination ─────────────────────────────────────────
+        // Find an existing position for this item at the destination in the SAME zone the user chose
         var destPosition = await _db.InventoryPositions
-            .Where(p => p.ItemId == itemId && p.FacilityId == toFacilityId)
+            .Where(p => p.ItemId == itemId && p.FacilityId == toFacilityId && p.StorageZoneId == toStorageZoneId)
             .OrderBy(p => p.PositionId)
             .FirstOrDefaultAsync();
 
         if (destPosition != null)
         {
-            // Item already exists at destination — just add to that position.
+            // Item already exists in that zone at destination — just add to that position.
             destPosition.Quantity += quantity;
         }
         else
         {
-            // Item has never been stocked at destination — create a new position
-            // using the source lot's zone and expiry as a template.
+            // No position exists for this item in the chosen zone — create one.
             _db.InventoryPositions.Add(new InventoryPosition
             {
                 ItemId        = itemId,
                 LotId         = $"XFER-{transferOrderId}",
                 FacilityId    = toFacilityId,
-                StorageZoneId = sourceTemplate?.StorageZoneId ?? 0,
+                StorageZoneId = toStorageZoneId,
                 Quantity      = quantity,
-                SafetyStock   = sourceTemplate?.SafetyStock   ?? 0,
-                ExpiryDate    = sourceTemplate?.ExpiryDate    ?? DateTime.UtcNow.AddYears(2),
+                SafetyStock   = sourceTemplate?.SafetyStock ?? 0,
+                ExpiryDate    = sourceTemplate?.ExpiryDate  ?? DateTime.UtcNow.AddYears(2),
             });
         }
 
@@ -312,7 +314,8 @@ public class LogisticsServiceImpl : ILogisticsService
             TransferOrderItemId = i.TransferOrderItemId,
             ItemId              = i.ItemId,
             ItemName            = i.ItemName,
-            Quantity            = i.Quantity
+            Quantity            = i.Quantity,
+            ToStorageZoneId     = i.ToStorageZoneId
         }).ToList()
     };
 

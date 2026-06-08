@@ -101,8 +101,13 @@
               <div class="col-md-12">
                 <label class="form-label">Item *</label>
                 <select class="form-select" formControlName="itemId">
-                  <option value="">— Select item —</option>
-                  @for (item of items; track item.itemId) { <option [value]="item.itemId">{{ item.name }} ({{ item.itemCode }})</option> }
+                  <option value="">
+                    @if (facilityItemsLoading) { Loading… }
+                    @else if (!form.get('facilityId')?.value) { — Select facility first — }
+                    @else if (displayItems.length === 0) { No stock at this facility }
+                    @else { — Select item — }
+                  </option>
+                  @for (item of displayItems; track item.itemId) { <option [value]="item.itemId">{{ item.name }} ({{ item.itemCode }})</option> }
                 </select>
                 @if (form.get('itemId')?.touched && form.get('itemId')?.hasError('required')) {
                   <div class="text-danger small mt-1">Required.</div>

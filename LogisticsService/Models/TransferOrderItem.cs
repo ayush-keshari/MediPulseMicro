@@ -25,6 +25,9 @@ public class TransferOrderItem
     [Range(1, int.MaxValue)]
     public int Quantity { get; set; }
 
+    // The storage zone inside the destination facility where this item will be placed
+    public int ToStorageZoneId { get; set; }
+
     // Navigation to parent TransferOrder
     [ForeignKey(nameof(TransferOrderId))]
     public TransferOrder? TransferOrder { get; set; }

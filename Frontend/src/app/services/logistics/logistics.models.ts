@@ -4,6 +4,7 @@ export interface TransferOrderItemDto {
   itemId: number;
   itemName: string;
   quantity: number;
+  toStorageZoneId: number;
 }
 
 export interface TransferOrderDto {
@@ -22,6 +23,7 @@ export interface TransferOrderItemRequest {
   itemId: number;
   itemName: string;
   quantity: number;
+  toStorageZoneId: number;
 }
 
 export interface CreateTransferOrderRequest {

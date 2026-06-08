@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { LogisticsService } from '../../../services/logistics/logistics.service';
 import { TransferOrderDto } from '../../../services/logistics/logistics.models';
 import { FacilityService } from '../../../services/facility/facility.service';
-import { FacilityDto } from '../../../services/facility/facility.models';
+import { FacilityDto, StorageZoneDto } from '../../../services/facility/facility.models';
 import { InventoryService } from '../../../services/inventory/inventory.service';
 import { ItemResponse } from '../../../services/inventory/inventory.models';
 
@@ -30,6 +30,8 @@ export class TransferOrdersComponent implements OnInit {
   itemsForFacility: ItemResponse[] = [];          // filtered to source facility stock
   facilityStockMap = new Map<number, number>();   // itemId → total available qty
   facilityItemsLoading = false;
+  destinationZones: StorageZoneDto[] = [];        // zones for selected destination facility
+  destZonesLoading = false;
 
   showModal = false;
   isSaving = false;
@@ -60,8 +62,9 @@ export class TransferOrdersComponent implements OnInit {
 
   newItemRow(): FormGroup {
     return this.fb.group({
-      itemId:   ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
+      itemId:          ['', Validators.required],
+      quantity:        [1, [Validators.required, Validators.min(1)]],
+      toStorageZoneId: ['', Validators.required],
     });
   }
 
@@ -76,6 +79,21 @@ export class TransferOrdersComponent implements OnInit {
 
     this.form.get('fromFacilityId')!.valueChanges.subscribe(facilityId => {
       this.onSourceFacilityChange(facilityId);
+    });
+
+    this.form.get('toFacilityId')!.valueChanges.subscribe(facilityId => {
+      this.onDestFacilityChange(facilityId);
+    });
+  }
+
+  onDestFacilityChange(facilityId: any) {
+    this.itemsArray.controls.forEach(row => row.get('toStorageZoneId')!.setValue('', { emitEvent: false }));
+    this.destinationZones = [];
+    if (!facilityId) return;
+    this.destZonesLoading = true;
+    this.facilitySvc.getZonesByFacility(+facilityId).subscribe({
+      next: (zones) => { this.destinationZones = zones; this.destZonesLoading = false; },
+      error: () => { this.destinationZones = []; this.destZonesLoading = false; },
     });
   }
 
@@ -97,8 +115,17 @@ export class TransferOrdersComponent implements OnInit {
     });
   }
 
-  getAvailableQty(itemId: any): number {
-    return itemId ? (this.facilityStockMap.get(+itemId) ?? 0) : 0;
+  getAvailableQty(itemId: any, excludeIndex = -1): number {
+    if (!itemId) return 0;
+    const total = this.facilityStockMap.get(+itemId) ?? 0;
+    const allocatedElsewhere = this.itemsArray.controls
+      .reduce((sum, row, i) => {
+        if (i === excludeIndex) return sum;
+        return +row.get('itemId')?.value === +itemId
+          ? sum + (+row.get('quantity')?.value || 0)
+          : sum;
+      }, 0);
+    return Math.max(0, total - allocatedElsewhere);
   }
 
   isQtyExceeded(index: number): boolean {
@@ -106,7 +133,7 @@ export class TransferOrdersComponent implements OnInit {
     const itemId = row.get('itemId')?.value;
     const qty = row.get('quantity')?.value;
     if (!itemId || !qty) return false;
-    return qty > this.getAvailableQty(itemId);
+    return qty > this.getAvailableQty(itemId, index);
   }
 
   get displayItems(): ItemResponse[] {
@@ -135,6 +162,7 @@ export class TransferOrdersComponent implements OnInit {
     this.itemsArray.at(0).reset({ quantity: 1 });
     this.itemsForFacility = [];
     this.facilityStockMap = new Map();
+    this.destinationZones = [];
     this.showModal = true;
   }
   closeModal() { this.showModal = false; this.errorMessage = ''; }
@@ -158,9 +186,10 @@ export class TransferOrdersComponent implements OnInit {
       toFacilityName:   this.getFacilityName(v.toFacilityId),
       requestedBy:      v.requestedBy,
       items: v.items.map((i: any) => ({
-        itemId:   +i.itemId,
-        itemName: this.getItemName(i.itemId),
-        quantity: +i.quantity,
+        itemId:          +i.itemId,
+        itemName:        this.getItemName(i.itemId),
+        quantity:        +i.quantity,
+        toStorageZoneId: +i.toStorageZoneId,
       })),
     }).subscribe({
       next: () => { this.isSaving = false; this.closeModal(); this.showSuccess('Transfer order created.'); this.load(); },
