@@ -38,7 +38,7 @@ export class ItemsComponent implements OnInit {
       itemCode:           ['', [Validators.required, Validators.maxLength(50)]],
       name:               ['', [Validators.required, Validators.maxLength(150)]],
       category:           ['Drug', Validators.required],
-      unit:               ['', [Validators.required, Validators.maxLength(20)]],
+      unit:               ['', [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z/ ]+$/)]],
       storageRequirement: ['Ambient', Validators.required],
       safetyStock:        [0, Validators.min(0)],
     });
@@ -112,6 +112,15 @@ export class ItemsComponent implements OnInit {
 
   storageBadge(s: string) {
     return { Ambient: 'bg-secondary', Refrigerated: 'bg-info', Freezer: 'bg-primary' }[s] ?? 'bg-secondary';
+  }
+
+  onUnitInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const cleaned = input.value.replace(/[^a-zA-Z/ ]/g, '');
+    if (input.value !== cleaned) {
+      input.value = cleaned;
+      this.form.get('unit')!.setValue(cleaned, { emitEvent: false });
+    }
   }
 
   private showSuccess(msg: string) { this.successMessage = msg; this.errorMessage = ''; setTimeout(() => this.successMessage = '', 3500); }

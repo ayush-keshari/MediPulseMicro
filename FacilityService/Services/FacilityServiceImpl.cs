@@ -29,6 +29,13 @@ public class FacilityServiceImpl : IFacilityService
 
     public async Task<bool> CreateFacilityAsync(CreateFacilityRequest request)
     {
+        if (await _db.Facilities.AnyAsync(f =>
+                f.Name.ToLower() == request.Name.ToLower() &&
+                f.Type           == request.Type &&
+                f.Region         == request.Region))
+            throw new InvalidOperationException(
+                $"A facility named '{request.Name}' of type '{request.Type}' in region '{request.Region}' already exists.");
+
         var facility = new Facility
         {
             Name   = request.Name,
@@ -45,6 +52,14 @@ public class FacilityServiceImpl : IFacilityService
     {
         var facility = await _db.Facilities.FindAsync(id);
         if (facility == null) return false;
+
+        if (await _db.Facilities.AnyAsync(f =>
+                f.FacilityId     != id &&
+                f.Name.ToLower() == request.Name.ToLower() &&
+                f.Type           == request.Type &&
+                f.Region         == request.Region))
+            throw new InvalidOperationException(
+                $"A facility named '{request.Name}' of type '{request.Type}' in region '{request.Region}' already exists.");
 
         facility.Name   = request.Name;
         facility.Type   = request.Type;
@@ -108,6 +123,12 @@ public class FacilityServiceImpl : IFacilityService
             throw new InvalidOperationException(
                 $"Facility with ID {request.FacilityId} does not exist.");
 
+        if (await _db.StorageZones.AnyAsync(z =>
+                z.FacilityId     == request.FacilityId &&
+                z.Name.ToLower() == request.Name.ToLower()))
+            throw new InvalidOperationException(
+                $"A zone named '{request.Name}' already exists in this facility.");
+
         var zone = new StorageZone
         {
             FacilityId         = request.FacilityId,
@@ -125,6 +146,13 @@ public class FacilityServiceImpl : IFacilityService
     {
         var zone = await _db.StorageZones.FindAsync(id);
         if (zone == null) return false;
+
+        if (await _db.StorageZones.AnyAsync(z =>
+                z.ZoneId         != id &&
+                z.FacilityId     == zone.FacilityId &&
+                z.Name.ToLower() == request.Name.ToLower()))
+            throw new InvalidOperationException(
+                $"A zone named '{request.Name}' already exists in this facility.");
 
         zone.Name               = request.Name;
         zone.TemperatureProfile = request.TemperatureProfile;

@@ -49,6 +49,33 @@ public class InventoryController : ControllerBase
         return Ok(positions);
     }
 
+    // GET api/inventory/item/3/facilities
+    // Returns distinct facility IDs that have stock (quantity > 0) for the given item
+    [HttpGet("item/{itemId:int}/facilities")]
+    public async Task<IActionResult> GetFacilitiesByItem(int itemId)
+    {
+        var facilityIds = await _service.GetFacilityIdsByItemAsync(itemId);
+        return Ok(facilityIds);
+    }
+
+    // GET api/inventory/facility/2/items
+    // Returns distinct item IDs that have stock (quantity > 0) at the given facility
+    [HttpGet("facility/{facilityId:int}/items")]
+    public async Task<IActionResult> GetItemsByFacility(int facilityId)
+    {
+        var itemIds = await _service.GetItemIdsByFacilityAsync(facilityId);
+        return Ok(itemIds);
+    }
+
+    // GET api/inventory/facility/2/stock
+    // Returns total available qty per item at the given facility (for transfer qty validation)
+    [HttpGet("facility/{facilityId:int}/stock")]
+    public async Task<IActionResult> GetFacilityStock(int facilityId)
+    {
+        var stock = await _service.GetFacilityStockAsync(facilityId);
+        return Ok(stock);
+    }
+
     // POST api/inventory
     // Records a new stock batch arriving (e.g. a shipment received)
     // Only ProcurementOfficer, SupplyManager or Admin can receive stock

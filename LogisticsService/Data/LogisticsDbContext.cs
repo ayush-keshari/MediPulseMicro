@@ -58,6 +58,11 @@ public class LogisticsDbContext : DbContext
         {
             entity.ToTable("InventoryPositions", t => t.ExcludeFromMigrations());
             entity.HasKey(e => e.PositionId);
+            // Explicit mapping so EF always includes these NOT NULL columns in
+            // INSERT statements — without this, convention treats string as nullable
+            // and may omit the column, causing a SQL Server NOT NULL violation.
+            entity.Property(e => e.LotId).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.StorageZoneId).IsRequired();
         });
     }
 }

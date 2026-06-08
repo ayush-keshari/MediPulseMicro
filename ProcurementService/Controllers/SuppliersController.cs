@@ -43,8 +43,15 @@ public class SuppliersController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.ProcurementOfficer)]
     public async Task<IActionResult> Create([FromBody] CreateSupplierRequest request)
     {
-        await _service.CreateSupplierAsync(request);
-        return NoContent();
+        try
+        {
+            await _service.CreateSupplierAsync(request);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // PUT /api/suppliers/{id}
@@ -52,9 +59,16 @@ public class SuppliersController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.ProcurementOfficer)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateSupplierRequest request)
     {
-        var updated = await _service.UpdateSupplierAsync(id, request);
-        if (!updated) return NotFound(new { message = $"Supplier {id} not found." });
-        return NoContent();
+        try
+        {
+            var updated = await _service.UpdateSupplierAsync(id, request);
+            if (!updated) return NotFound(new { message = $"Supplier {id} not found." });
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // DELETE /api/suppliers/{id}

@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import {
   ItemResponse, CreateItemRequest, UpdateItemRequest,
+  FacilityStockDto,
   PositionResponse, CreatePositionRequest, UpdatePositionRequest,
   ExceptionEventDto, CreateExceptionRequest, UpdateExceptionStatusRequest, DetectExceptionsResult,
   RecallActionDto, CreateRecallActionRequest, UpdateRecallActionRequest,
@@ -25,6 +26,10 @@ export class InventoryService {
   deleteItem(id: number): Observable<void> { return this.http.delete<void>(`${BASE}/items/${id}`).pipe(timeout(T)); }
 
   // ── Stock Positions ──────────────────────────────────────────────────────
+  getFacilitiesByItem(itemId: number): Observable<number[]> { return this.http.get<number[]>(`${BASE}/inventory/item/${itemId}/facilities`).pipe(timeout(T)); }
+  getItemsByFacility(facilityId: number): Observable<number[]> { return this.http.get<number[]>(`${BASE}/inventory/facility/${facilityId}/items`).pipe(timeout(T)); }
+  getFacilityStock(facilityId: number): Observable<FacilityStockDto[]> { return this.http.get<FacilityStockDto[]>(`${BASE}/inventory/facility/${facilityId}/stock`).pipe(timeout(T)); }
+
   getPositions(facilityId?: number, itemId?: number): Observable<PositionResponse[]> {
     if (facilityId) return this.http.get<PositionResponse[]>(`${BASE}/inventory`).pipe(timeout(T));
     if (itemId)     return this.http.get<PositionResponse[]>(`${BASE}/inventory/item/${itemId}`).pipe(timeout(T));

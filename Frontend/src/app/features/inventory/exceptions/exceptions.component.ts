@@ -26,6 +26,8 @@ export class ExceptionsComponent implements OnInit {
   typeFilter = '';
 
   facilities: FacilityDto[] = [];
+  facilitiesForItem: FacilityDto[] = [];   // filtered when an item is selected
+  itemFacilitiesLoading = false;
   items: ItemResponse[] = [];
 
   // Exception form
@@ -85,6 +87,31 @@ export class ExceptionsComponent implements OnInit {
     this.load();
     this.facilitySvc.getFacilities().subscribe({ next: (d) => this.facilities = d });
     this.svc.getItems().subscribe({ next: (d) => this.items = d });
+
+    this.excForm.get('itemId')!.valueChanges.subscribe(itemId => {
+      this.onItemChange(itemId);
+    });
+  }
+
+  onItemChange(itemId: any) {
+    this.excForm.get('facilityId')!.setValue('', { emitEvent: false });
+    if (!itemId) {
+      this.facilitiesForItem = [];
+      return;
+    }
+    this.itemFacilitiesLoading = true;
+    this.svc.getFacilitiesByItem(+itemId).subscribe({
+      next: (ids) => {
+        this.facilitiesForItem = this.facilities.filter(f => ids.includes(f.facilityId));
+        this.itemFacilitiesLoading = false;
+      },
+      error: () => { this.facilitiesForItem = []; this.itemFacilitiesLoading = false; },
+    });
+  }
+
+  get displayFacilities(): FacilityDto[] {
+    const itemId = this.excForm.get('itemId')?.value;
+    return itemId ? this.facilitiesForItem : this.facilities;
   }
 
   load() {
@@ -109,7 +136,7 @@ export class ExceptionsComponent implements OnInit {
   }
 
   // ── Exception CRUD ──────────────────────────────────────────────────────
-  openAddExc() { this.excForm.reset({ type: 'Stockout', referenceType: 'Item', severity: 'Medium', referenceId: 0 }); this.showExcModal = true; }
+  openAddExc() { this.excForm.reset({ type: 'Stockout', referenceType: 'Item', severity: 'Medium', referenceId: 0 }); this.facilitiesForItem = []; this.showExcModal = true; }
   closeExcModal() { this.showExcModal = false; this.errorMessage = ''; }
 
   saveExc() {

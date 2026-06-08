@@ -103,6 +103,37 @@ public class InventoryServiceImpl : IInventoryService
         return positions.Select(MapPositionToResponse);
     }
 
+    public async Task<IEnumerable<int>> GetFacilityIdsByItemAsync(int itemId)
+    {
+        return await _context.InventoryPositions
+            .Where(p => p.ItemId == itemId && p.Quantity > 0)
+            .Select(p => p.FacilityId)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetItemIdsByFacilityAsync(int facilityId)
+    {
+        return await _context.InventoryPositions
+            .Where(p => p.FacilityId == facilityId && p.Quantity > 0)
+            .Select(p => p.ItemId)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<FacilityStockDto>> GetFacilityStockAsync(int facilityId)
+    {
+        return await _context.InventoryPositions
+            .Where(p => p.FacilityId == facilityId && p.Quantity > 0)
+            .GroupBy(p => p.ItemId)
+            .Select(g => new FacilityStockDto
+            {
+                ItemId       = g.Key,
+                AvailableQty = g.Sum(p => p.Quantity)
+            })
+            .ToListAsync();
+    }
+
     public async Task<PositionResponse?> GetPositionByIdAsync(int id)
     {
         var position = await _context.InventoryPositions

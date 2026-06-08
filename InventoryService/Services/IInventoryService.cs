@@ -14,6 +14,9 @@ public interface IInventoryService
     // Inventory Positions
     Task<IEnumerable<PositionResponse>> GetAllPositionsAsync();
     Task<IEnumerable<PositionResponse>> GetPositionsByItemAsync(int itemId);
+    Task<IEnumerable<int>> GetFacilityIdsByItemAsync(int itemId);
+    Task<IEnumerable<int>> GetItemIdsByFacilityAsync(int facilityId);
+    Task<IEnumerable<FacilityStockDto>> GetFacilityStockAsync(int facilityId);
     Task<PositionResponse?> GetPositionByIdAsync(int id);
     Task<bool> CreatePositionAsync(CreatePositionRequest request);
     Task<bool> UpdatePositionAsync(int id, UpdatePositionRequest request);

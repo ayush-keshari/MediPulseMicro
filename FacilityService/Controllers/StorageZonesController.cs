@@ -46,7 +46,7 @@ public class StorageZonesController : ControllerBase
         }
         catch (InvalidOperationException ex)
         {
-            return UnprocessableEntity(new { message = ex.Message });
+            return Conflict(new { message = ex.Message });
         }
     }
 
@@ -55,9 +55,16 @@ public class StorageZonesController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ColdChainOperator, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateStorageZoneRequest request)
     {
-        var updated = await _service.UpdateZoneAsync(id, request);
-        if (!updated) return NotFound(new { message = $"StorageZone {id} not found." });
-        return NoContent();
+        try
+        {
+            var updated = await _service.UpdateZoneAsync(id, request);
+            if (!updated) return NotFound(new { message = $"StorageZone {id} not found." });
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // DELETE /api/storagezones/{id}  — Nurse cannot delete zones

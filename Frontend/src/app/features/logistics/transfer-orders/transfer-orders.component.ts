@@ -27,6 +27,9 @@ export class TransferOrdersComponent implements OnInit {
 
   facilities: FacilityDto[] = [];
   items: ItemResponse[] = [];
+  itemsForFacility: ItemResponse[] = [];          // filtered to source facility stock
+  facilityStockMap = new Map<number, number>();   // itemId → total available qty
+  facilityItemsLoading = false;
 
   showModal = false;
   isSaving = false;
@@ -70,6 +73,44 @@ export class TransferOrdersComponent implements OnInit {
     this.load();
     this.facilitySvc.getFacilities().subscribe({ next: (d) => this.facilities = d });
     this.inventorySvc.getItems().subscribe({ next: (d) => this.items = d });
+
+    this.form.get('fromFacilityId')!.valueChanges.subscribe(facilityId => {
+      this.onSourceFacilityChange(facilityId);
+    });
+  }
+
+  onSourceFacilityChange(facilityId: any) {
+    // Reset all item selections when source facility changes
+    this.itemsArray.controls.forEach(row => row.get('itemId')!.setValue('', { emitEvent: false }));
+    this.itemsForFacility = [];
+    this.facilityStockMap = new Map();
+    if (!facilityId) return;
+    this.facilityItemsLoading = true;
+    this.inventorySvc.getFacilityStock(+facilityId).subscribe({
+      next: (stock) => {
+        const ids = stock.map(s => s.itemId);
+        this.itemsForFacility = this.items.filter(i => ids.includes(i.itemId));
+        this.facilityStockMap = new Map(stock.map(s => [s.itemId, s.availableQty]));
+        this.facilityItemsLoading = false;
+      },
+      error: () => { this.itemsForFacility = []; this.facilityItemsLoading = false; },
+    });
+  }
+
+  getAvailableQty(itemId: any): number {
+    return itemId ? (this.facilityStockMap.get(+itemId) ?? 0) : 0;
+  }
+
+  isQtyExceeded(index: number): boolean {
+    const row = this.itemsArray.at(index);
+    const itemId = row.get('itemId')?.value;
+    const qty = row.get('quantity')?.value;
+    if (!itemId || !qty) return false;
+    return qty > this.getAvailableQty(itemId);
+  }
+
+  get displayItems(): ItemResponse[] {
+    return this.form.get('fromFacilityId')?.value ? this.itemsForFacility : this.items;
   }
 
   load() {
@@ -92,6 +133,8 @@ export class TransferOrdersComponent implements OnInit {
     this.form.reset();
     while (this.itemsArray.length > 1) this.itemsArray.removeAt(1);
     this.itemsArray.at(0).reset({ quantity: 1 });
+    this.itemsForFacility = [];
+    this.facilityStockMap = new Map();
     this.showModal = true;
   }
   closeModal() { this.showModal = false; this.errorMessage = ''; }

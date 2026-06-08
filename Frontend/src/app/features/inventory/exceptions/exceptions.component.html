@@ -170,8 +170,13 @@
               <div class="col-6">
                 <label class="form-label">Facility</label>
                 <select class="form-select" formControlName="facilityId">
-                  <option value="">— Select facility —</option>
-                  @for (f of facilities; track f.facilityId) { <option [value]="f.facilityId">{{ f.name }}</option> }
+                  <option value="">
+                    @if (itemFacilitiesLoading) { Loading… }
+                    @else if (excForm.get('itemId')?.value && displayFacilities.length === 0) { No stock found }
+                    @else if (excForm.get('itemId')?.value) { — Select facility — }
+                    @else { — Select item first — }
+                  </option>
+                  @for (f of displayFacilities; track f.facilityId) { <option [value]="f.facilityId">{{ f.name }}</option> }
                 </select>
               </div>
               <div class="col-6"><label class="form-label">Lot ID</label>

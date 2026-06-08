@@ -27,6 +27,12 @@ public class ProcurementServiceImpl : IProcurementService
 
     public async Task<bool> CreateSupplierAsync(CreateSupplierRequest request)
     {
+        if (await _db.Suppliers.AnyAsync(s =>
+                s.Name.ToLower() == request.Name.ToLower() &&
+                s.SupplierType   == request.SupplierType))
+            throw new InvalidOperationException(
+                $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
+
         var supplier = new Supplier
         {
             Name         = request.Name,
@@ -42,6 +48,13 @@ public class ProcurementServiceImpl : IProcurementService
     {
         var supplier = await _db.Suppliers.FindAsync(id);
         if (supplier == null) return false;
+
+        if (await _db.Suppliers.AnyAsync(s =>
+                s.SupplierId     != id &&
+                s.Name.ToLower() == request.Name.ToLower() &&
+                s.SupplierType   == request.SupplierType))
+            throw new InvalidOperationException(
+                $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
 
         supplier.Name         = request.Name;
         supplier.SupplierType = request.SupplierType;

@@ -42,6 +42,19 @@ public class LogisticsServiceImpl : ILogisticsService
             throw new InvalidOperationException(
                 "Source and destination facility cannot be the same.");
 
+        // Validate each item has enough stock at the source facility
+        foreach (var item in request.Items)
+        {
+            var available = await _db.InventoryPositions
+                .Where(p => p.ItemId == item.ItemId && p.FacilityId == request.FromFacilityId && p.Quantity > 0)
+                .SumAsync(p => (int?)p.Quantity) ?? 0;
+
+            if (item.Quantity > available)
+                throw new InvalidOperationException(
+                    $"Insufficient stock for '{item.ItemName}' at the source facility. " +
+                    $"Requested: {item.Quantity}, Available: {available}.");
+        }
+
         var order = new TransferOrder
         {
             FromFacilityId   = request.FromFacilityId,
@@ -92,7 +105,9 @@ public class LogisticsServiceImpl : ILogisticsService
 
     public async Task<bool> UpdateTransferStatusAsync(int id, UpdateTransferStatusRequest request)
     {
-        var order = await _db.TransferOrders.FindAsync(id);
+        var order = await _db.TransferOrders
+            .Include(t => t.Items)
+            .FirstOrDefaultAsync(t => t.TransferOrderId == id);
         if (order == null) return false;
 
         if (!IsValidStatusTransition(order.Status, request.Status))
@@ -102,6 +117,13 @@ public class LogisticsServiceImpl : ILogisticsService
 
         order.Status = request.Status;
         await _db.SaveChangesAsync();
+
+        if (request.Status == "Completed")
+        {
+            foreach (var item in order.Items)
+                await MoveStockAsync(item.ItemId, order.FromFacilityId, order.ToFacilityId, item.Quantity, order.TransferOrderId);
+        }
+
         return true;
     }
 
@@ -213,6 +235,61 @@ public class LogisticsServiceImpl : ILogisticsService
             var take    = Math.Min(pos.Quantity, remaining);
             pos.Quantity -= take;
             remaining    -= take;
+        }
+
+        await _db.SaveChangesAsync();
+    }
+
+    // ── Stock movement on transfer completion (FEFO) ─────────────────────
+    // Deducts from source facility (FEFO) and credits destination facility.
+    // At destination: adds to an existing position for that item, or creates
+    // a new one using the source lot's metadata as a template.
+    private async Task MoveStockAsync(int itemId, int fromFacilityId, int toFacilityId, int quantity, int transferOrderId)
+    {
+        // ── 1. Deduct from source (FEFO) ──────────────────────────────────
+        var sourcePositions = await _db.InventoryPositions
+            .Where(p => p.ItemId == itemId && p.FacilityId == fromFacilityId && p.Quantity > 0)
+            .OrderBy(p => p.ExpiryDate)
+            .ToListAsync();
+
+        // Keep a reference to the first source position deducted — used as
+        // template for the destination if no position exists there yet.
+        InventoryPosition? sourceTemplate = sourcePositions.FirstOrDefault();
+
+        var remaining = quantity;
+        foreach (var pos in sourcePositions)
+        {
+            if (remaining <= 0) break;
+            var take = Math.Min(pos.Quantity, remaining);
+            pos.Quantity -= take;
+            remaining    -= take;
+        }
+
+        // ── 2. Credit destination ─────────────────────────────────────────
+        var destPosition = await _db.InventoryPositions
+            .Where(p => p.ItemId == itemId && p.FacilityId == toFacilityId)
+            .OrderBy(p => p.PositionId)
+            .FirstOrDefaultAsync();
+
+        if (destPosition != null)
+        {
+            // Item already exists at destination — just add to that position.
+            destPosition.Quantity += quantity;
+        }
+        else
+        {
+            // Item has never been stocked at destination — create a new position
+            // using the source lot's zone and expiry as a template.
+            _db.InventoryPositions.Add(new InventoryPosition
+            {
+                ItemId        = itemId,
+                LotId         = $"XFER-{transferOrderId}",
+                FacilityId    = toFacilityId,
+                StorageZoneId = sourceTemplate?.StorageZoneId ?? 0,
+                Quantity      = quantity,
+                SafetyStock   = sourceTemplate?.SafetyStock   ?? 0,
+                ExpiryDate    = sourceTemplate?.ExpiryDate    ?? DateTime.UtcNow.AddYears(2),
+            });
         }
 
         await _db.SaveChangesAsync();

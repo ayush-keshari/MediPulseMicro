@@ -143,9 +143,12 @@
               </div>
               <div class="col-md-4">
                 <label class="form-label">Unit *</label>
-                <input class="form-control" formControlName="unit" placeholder="e.g. tablet, vial, box" />
+                <input class="form-control" formControlName="unit" placeholder="e.g. tablet, vial, box" (input)="onUnitInput($event)" />
                 @if (form.get('unit')?.touched && form.get('unit')?.hasError('required')) {
                   <div class="text-danger small mt-1">Required.</div>
+                }
+                @if (form.get('unit')?.touched && form.get('unit')?.hasError('pattern')) {
+                  <div class="text-danger small mt-1">Only letters, spaces and / are allowed (e.g. tablet, mg/ml).</div>
                 }
               </div>
               <div class="col-md-4">
