@@ -1,6 +1,7 @@
 using InventoryService.DTOs;
 using InventoryService.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shared.Constants;
 using Shared.Filters;
 
@@ -46,8 +47,22 @@ public class ItemsController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateItemRequest request)
     {
         // ModelState validation is handled globally by ValidationFilter in Shared
-        await _service.CreateItemAsync(request);
-        return NoContent();
+        try
+        {
+            await _service.CreateItemAsync(request);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Service-level pre-check (duplicate ItemCode) — clean 409 with message
+            return Conflict(new { message = ex.Message });
+        }
+        catch (DbUpdateException)
+        {
+            // Safety net: race condition where two requests pass the pre-check
+            // and one trips the IX_Items_ItemCode unique index at SaveChanges time.
+            return Conflict(new { message = $"An item with code '{request.ItemCode}' already exists." });
+        }
     }
 
     // PUT api/items/5

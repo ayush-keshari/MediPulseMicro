@@ -30,6 +30,16 @@ export interface UpdateRoleRequest {
   role: string;
 }
 
+// Admin "Edit Profile" — every field editable. password is optional;
+// omit (or send empty) to keep the existing hash on the backend.
+export interface UpdateUserRequest {
+  name: string;
+  email: string;
+  role: string;
+  phone?: string;
+  password?: string;
+}
+
 export interface CurrentUser {
   name: string;
   email: string;

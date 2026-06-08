@@ -70,7 +70,7 @@
                   <th>Email</th>
                   <th>Role</th>
                   <th>Phone</th>
-                  <th class="text-center" style="width:110px">Actions</th>
+                  <th class="text-center" style="width:150px">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -91,6 +91,9 @@
                     <td class="text-muted">{{ user.phone || '—' }}</td>
                     <td class="text-center">
                       <div class="d-flex justify-content-center gap-1">
+                        <button class="btn btn-sm btn-outline-secondary" title="Edit profile" (click)="openEditModal(user)">
+                          <i class="bi bi-person-lines-fill"></i>
+                        </button>
                         <button class="btn btn-sm btn-outline-primary" title="Change role" (click)="openRoleModal(user)">
                           <i class="bi bi-pencil-fill"></i>
                         </button>
@@ -206,6 +209,79 @@
           <button class="btn btn-primary px-4" [disabled]="isAdding" (click)="addUser()">
             @if (isAdding) { <span class="spinner-border spinner-border-sm me-2"></span>Creating… }
             @else { <i class="bi bi-person-plus-fill me-2"></i>Create user }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Edit Profile Modal -->
+@if (showEditModal && userToEdit) {
+  <div class="modal d-block" style="background:rgba(20,32,44,0.55)" (click)="closeEditModal()">
+    <div class="modal-dialog" (click)="$event.stopPropagation()">
+      <div class="modal-content">
+        <div class="modal-header gradient-header-edit">
+          <h5 class="modal-title"><i class="bi bi-person-lines-fill me-2"></i>Edit profile</h5>
+          <button type="button" class="btn-close btn-close-white" (click)="closeEditModal()"></button>
+        </div>
+        <div class="modal-body">
+          <p style="font-size:13px;color:#6B6A66;margin-bottom:14px">
+            Editing <strong style="color:#14202C">{{ userToEdit.name }}</strong>
+          </p>
+          @if (errorMessage) {
+            <div class="mp-toast mp-toast-danger mb-3">
+              <i class="bi bi-exclamation-triangle-fill"></i>{{ errorMessage }}
+            </div>
+          }
+          <form [formGroup]="editForm">
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">Full name *</label>
+                <input class="form-control" type="text" formControlName="name" />
+                @if (editForm.get('name')?.touched && editForm.get('name')?.invalid) {
+                  <div class="text-danger small mt-1">Full name is required (max 100 chars).</div>
+                }
+              </div>
+              <div class="col-6">
+                <label class="form-label">Email address *</label>
+                <input class="form-control" type="email" formControlName="email" />
+                @if (editForm.get('email')?.touched && editForm.get('email')?.invalid) {
+                  <div class="text-danger small mt-1">A valid email is required.</div>
+                }
+              </div>
+            </div>
+            <div class="row g-3 mb-3">
+              <div class="col-6">
+                <label class="form-label">Phone <span style="color:#9A9892;font-weight:400">(optional)</span></label>
+                <input class="form-control" type="text" formControlName="phone" placeholder="10-digit number" />
+                @if (editForm.get('phone')?.touched && editForm.get('phone')?.invalid) {
+                  <div class="text-danger small mt-1">Phone must be exactly 10 digits.</div>
+                }
+              </div>
+              <div class="col-6">
+                <label class="form-label">Role *</label>
+                <select class="form-select" formControlName="role">
+                  @for (role of allRoles; track role) {
+                    <option [value]="role">{{ getRoleDisplayName(role) }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+            <div class="mb-1">
+              <label class="form-label">New password <span style="color:#9A9892;font-weight:400">(leave blank to keep current)</span></label>
+              <input class="form-control" type="password" formControlName="password" placeholder="Min 8 chars with upper, lower, digit & symbol" />
+              @if (editForm.get('password')?.touched && editForm.get('password')?.invalid) {
+                <div class="text-danger small mt-1">Min 8 chars with upper, lower, digit &amp; symbol.</div>
+              }
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-secondary" (click)="closeEditModal()">Cancel</button>
+          <button class="btn btn-primary px-4" [disabled]="isEditing" (click)="saveEdit()">
+            @if (isEditing) { <span class="spinner-border spinner-border-sm me-2"></span>Saving… }
+            @else { <i class="bi bi-save me-2"></i>Save changes }
           </button>
         </div>
       </div>

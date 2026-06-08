@@ -36,6 +36,13 @@ public class InventoryServiceImpl : IInventoryService
 
     public async Task<bool> CreateItemAsync(CreateItemRequest request)
     {
+        // Pre-check duplicate ItemCode (case-insensitive) so the UI gets a clean 409
+        // instead of a raw 500 from the SQL unique-index violation on IX_Items_ItemCode.
+        // The DB constraint remains the source of truth — controller also catches
+        // DbUpdateException as a safety net in case of a race condition.
+        if (await _context.Items.AnyAsync(i => i.ItemCode.ToLower() == request.ItemCode.ToLower()))
+            throw new InvalidOperationException($"An item with code '{request.ItemCode}' already exists.");
+
         var item = new Item
         {
             ItemCode           = request.ItemCode,

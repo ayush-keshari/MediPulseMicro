@@ -2,6 +2,7 @@ using System.Security.Claims;
 using AuthService.DTOs;
 using AuthService.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Shared.Constants;
 using Shared.Filters;
 
@@ -45,6 +46,32 @@ public class UsersController : ControllerBase
         var updated = await _authService.UpdateRoleAsync(id, request);
         if (!updated) return NotFound(new { message = $"User {id} not found." });
         return NoContent();
+    }
+
+    // PUT /api/users/{id} — Admin edits every field of a user (full profile edit).
+    // Used by the "Edit Profile" modal in user-management. Password is optional;
+    // when omitted the existing hash stays. Mirrors AuthController.Register's
+    // error pattern: 409 on duplicate email, 404 on missing user.
+    [HttpPut("{id:int}")]
+    [RoleAuthorize(Roles.Admin)]
+    public async Task<IActionResult> Update(int id, [FromBody] UpdateUserRequest request)
+    {
+        try
+        {
+            var updated = await _authService.UpdateUserAsync(id, request);
+            if (updated == null) return NotFound(new { message = $"User {id} not found." });
+            return Ok(updated);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+        catch (DbUpdateException)
+        {
+            // Safety net: race condition past the pre-check that still trips
+            // the IX_User_Email unique constraint at SaveChanges time.
+            return Conflict(new { message = "A user with this email already exists." });
+        }
     }
 
     // DELETE /api/users/{id} — hard delete, matches monolith Admin.Delete logic
