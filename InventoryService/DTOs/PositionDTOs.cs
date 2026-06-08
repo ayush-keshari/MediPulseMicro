@@ -40,6 +40,13 @@ public class UpdatePositionRequest
     public DateTime? ExpiryDate { get; set; }
 }
 
+// Lightweight summary: total available qty per item at a given facility
+public class FacilityStockDto
+{
+    public int ItemId       { get; set; }
+    public int AvailableQty { get; set; }
+}
+
 public class PositionResponse
 {
     public int      PositionId    { get; set; }

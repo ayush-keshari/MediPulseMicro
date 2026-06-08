@@ -34,8 +34,8 @@ public class RecallActionsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateRecallActionRequest request)
     {
-        var created = await _service.CreateActionAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = created.RecallActionId }, created);
+        await _service.CreateActionAsync(request);
+        return NoContent();
     }
 
     // PUT /api/recallactions/{id}
@@ -43,8 +43,8 @@ public class RecallActionsController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateRecallActionRequest request)
     {
         var updated = await _service.UpdateActionAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Recall action {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Recall action {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/recallactions/{id}

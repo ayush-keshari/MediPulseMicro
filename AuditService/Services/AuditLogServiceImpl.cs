@@ -11,7 +11,7 @@ public class AuditLogServiceImpl : IAuditLogService
 
     public AuditLogServiceImpl(AuditDbContext db) => _db = db;
 
-    public async Task<AuditLogDto> CreateAsync(CreateAuditLogRequest request)
+    public async Task<bool> CreateAsync(CreateAuditLogRequest request)
     {
         var log = new AuditLog
         {
@@ -30,7 +30,7 @@ public class AuditLogServiceImpl : IAuditLogService
 
         _db.AuditLogs.Add(log);
         await _db.SaveChangesAsync();
-        return ToDto(log);
+        return true;
     }
 
     public async Task<PagedResult<AuditLogDto>> QueryAsync(AuditQueryParams q)

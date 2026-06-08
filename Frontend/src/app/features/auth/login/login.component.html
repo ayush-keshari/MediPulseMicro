@@ -81,8 +81,11 @@
             <label class="form-label">Password</label>
             <div class="input-group">
               <span class="input-group-text auth-input-icon"><i class="bi bi-lock-fill"></i></span>
-              <input type="password" class="form-control auth-input" formControlName="password"
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control auth-input" formControlName="password"
                      placeholder="••••••••" />
+              <button type="button" class="input-group-text auth-input-icon" style="cursor:pointer;border-left:none" (click)="togglePassword()">
+                <i class="bi" [ngClass]="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+              </button>
             </div>
             @if (passwordCtrl.touched && passwordCtrl.hasError('required')) {
               <div class="text-danger small mt-1">Password is required.</div>

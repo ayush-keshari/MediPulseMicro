@@ -53,15 +53,14 @@ public class ReplenishmentServiceImpl : IReplenishmentService
         return p == null ? null : ToPlanDto(p);
     }
 
-    public async Task<ReplenishmentPlanDto?> UpdatePlanStatusAsync(int id, UpdatePlanStatusRequest request)
+    public async Task<bool> UpdatePlanStatusAsync(int id, UpdatePlanStatusRequest request)
     {
         var plan = await _db.ReplenishmentPlans.FindAsync(id);
-        if (plan == null) return null;
+        if (plan == null) return false;
 
         plan.Status = request.Status;
-
         await _db.SaveChangesAsync();
-        return ToPlanDto(plan);
+        return true;
     }
 
     public async Task<bool> DeletePlanAsync(int id)

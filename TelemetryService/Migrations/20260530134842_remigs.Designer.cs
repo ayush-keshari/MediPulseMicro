@@ -12,8 +12,8 @@ using TelemetryService.Data;
 namespace TelemetryService.Migrations
 {
     [DbContext(typeof(TelemetryDbContext))]
-    [Migration("20260528061737_CleanupSchema")]
-    partial class CleanupSchema
+    [Migration("20260530134842_remigs")]
+    partial class remigs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -63,9 +63,9 @@ public class ReceiptsController : ControllerBase
                 userId:   CallerId,
                 category: "Receipt",
                 title:    "Goods Receipt Recorded",
-                message:  $"Receipt #{created.ReceiptId} recorded for PO #{created.PoId} ({created.QuantityReceived} units, status: {created.QualityStatus})");
+                message:  $"Goods receipt recorded for PO #{request.PoId} ({request.QuantityReceived} units, status: {request.QualityStatus})");
 
-            return CreatedAtAction(nameof(GetById), new { id = created.ReceiptId }, created);
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
@@ -80,8 +80,8 @@ public class ReceiptsController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateReceiptRequest request)
     {
         var updated = await _service.UpdateReceiptAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Receipt {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Receipt {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/receipts/{id} — Admin only; prefer quality-status correction over deletion

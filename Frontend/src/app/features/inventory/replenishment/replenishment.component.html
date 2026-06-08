@@ -78,10 +78,10 @@
                   @for (p of filteredPlans; track p.planId) {
                     <tr>
                       <td>
-                        <div class="fw-semibold">Item #{{ p.itemId }}</div>
+                        <div class="fw-semibold">{{ getItemName(p.itemId) }}</div>
                         <div class="text-muted" style="font-size:11px">ID: {{ p.itemId }}</div>
                       </td>
-                      <td class="text-muted">{{ p.facilityId }}</td>
+                      <td class="text-muted">{{ getFacilityName(p.facilityId) }}</td>
                       <td class="text-end fw-semibold text-primary">{{ p.suggestedOrderQty }}</td>
                       <td><span class="badge-status" [ngClass]="priorityClass(p.priority)">{{ p.priority }}</span></td>
                       <td>
@@ -113,8 +113,8 @@
                 <tbody>
                   @for (f of forecasts; track f.forecastId) {
                     <tr>
-                      <td class="fw-semibold">Item #{{ f.itemId }}</td>
-                      <td class="text-muted">{{ f.facilityId }}</td>
+                      <td class="fw-semibold">{{ getItemName(f.itemId) }}</td>
+                      <td class="text-muted">{{ getFacilityName(f.facilityId) }}</td>
                       <td><span class="badge-status bg-primary">{{ f.period }}</span></td>
                       <td class="text-end fw-semibold text-primary">{{ f.forecastQuantity }}</td>
                       <td class="text-muted" style="font-size:12px">{{ f.generatedDate | date:'dd MMM yyyy' }}</td>

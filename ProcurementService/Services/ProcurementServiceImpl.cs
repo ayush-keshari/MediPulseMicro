@@ -25,8 +25,14 @@ public class ProcurementServiceImpl : IProcurementService
         return s == null ? null : ToSupplierDto(s);
     }
 
-    public async Task<SupplierDto> CreateSupplierAsync(CreateSupplierRequest request)
+    public async Task<bool> CreateSupplierAsync(CreateSupplierRequest request)
     {
+        if (await _db.Suppliers.AnyAsync(s =>
+                s.Name.ToLower() == request.Name.ToLower() &&
+                s.SupplierType   == request.SupplierType))
+            throw new InvalidOperationException(
+                $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
+
         var supplier = new Supplier
         {
             Name         = request.Name,
@@ -35,20 +41,27 @@ public class ProcurementServiceImpl : IProcurementService
         };
         _db.Suppliers.Add(supplier);
         await _db.SaveChangesAsync();
-        return ToSupplierDto(supplier);
+        return true;
     }
 
-    public async Task<SupplierDto?> UpdateSupplierAsync(int id, UpdateSupplierRequest request)
+    public async Task<bool> UpdateSupplierAsync(int id, UpdateSupplierRequest request)
     {
         var supplier = await _db.Suppliers.FindAsync(id);
-        if (supplier == null) return null;
+        if (supplier == null) return false;
+
+        if (await _db.Suppliers.AnyAsync(s =>
+                s.SupplierId     != id &&
+                s.Name.ToLower() == request.Name.ToLower() &&
+                s.SupplierType   == request.SupplierType))
+            throw new InvalidOperationException(
+                $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
 
         supplier.Name         = request.Name;
         supplier.SupplierType = request.SupplierType;
         supplier.Status       = request.Status;
 
         await _db.SaveChangesAsync();
-        return ToSupplierDto(supplier);
+        return true;
     }
 
     public async Task<bool> DeleteSupplierAsync(int id)
@@ -97,9 +110,8 @@ public class ProcurementServiceImpl : IProcurementService
         return po == null ? null : ToPurchaseOrderDto(po);
     }
 
-    public async Task<PurchaseOrderDto> CreatePurchaseOrderAsync(CreatePurchaseOrderRequest request)
+    public async Task<bool> CreatePurchaseOrderAsync(CreatePurchaseOrderRequest request)
     {
-        // Validate supplier exists in the same DB
         var supplierExists = await _db.Suppliers.AnyAsync(s => s.SupplierId == request.SupplierId);
         if (!supplierExists)
             throw new InvalidOperationException(
@@ -116,19 +128,13 @@ public class ProcurementServiceImpl : IProcurementService
 
         _db.PurchaseOrders.Add(po);
         await _db.SaveChangesAsync();
-
-        await _db.Entry(po).Reference(p => p.Supplier).LoadAsync();
-        return ToPurchaseOrderDto(po);
+        return true;
     }
 
-    public async Task<PurchaseOrderDto?> UpdatePurchaseOrderAsync(int id, UpdatePurchaseOrderRequest request)
+    public async Task<bool> UpdatePurchaseOrderAsync(int id, UpdatePurchaseOrderRequest request)
     {
-        var po = await _db.PurchaseOrders
-            .Include(p => p.Supplier)
-            .Include(p => p.Receipts)
-            .FirstOrDefaultAsync(p => p.PoId == id);
-
-        if (po == null) return null;
+        var po = await _db.PurchaseOrders.FindAsync(id);
+        if (po == null) return false;
 
         if (po.Status != "Draft")
             throw new InvalidOperationException(
@@ -141,7 +147,6 @@ public class ProcurementServiceImpl : IProcurementService
                 throw new InvalidOperationException(
                     $"Supplier with ID {request.SupplierId} does not exist.");
             po.SupplierId = request.SupplierId;
-            await _db.Entry(po).Reference(p => p.Supplier).LoadAsync();
         }
 
         po.OrderDate            = request.OrderDate;
@@ -149,17 +154,13 @@ public class ProcurementServiceImpl : IProcurementService
         po.Notes                = request.Notes;
 
         await _db.SaveChangesAsync();
-        return ToPurchaseOrderDto(po);
+        return true;
     }
 
-    public async Task<PurchaseOrderDto?> UpdatePoStatusAsync(int id, UpdatePoStatusRequest request)
+    public async Task<bool> UpdatePoStatusAsync(int id, UpdatePoStatusRequest request)
     {
-        var po = await _db.PurchaseOrders
-            .Include(p => p.Supplier)
-            .Include(p => p.Receipts)
-            .FirstOrDefaultAsync(p => p.PoId == id);
-
-        if (po == null) return null;
+        var po = await _db.PurchaseOrders.FindAsync(id);
+        if (po == null) return false;
 
         if (!IsValidStatusTransition(po.Status, request.Status))
             throw new InvalidOperationException(
@@ -168,7 +169,7 @@ public class ProcurementServiceImpl : IProcurementService
 
         po.Status = request.Status;
         await _db.SaveChangesAsync();
-        return ToPurchaseOrderDto(po);
+        return true;
     }
 
     public async Task<bool> DeletePurchaseOrderAsync(int id)
@@ -210,11 +211,9 @@ public class ProcurementServiceImpl : IProcurementService
         return r == null ? null : ToReceiptDto(r);
     }
 
-    public async Task<ReceiptDto> CreateReceiptAsync(CreateReceiptRequest request)
+    public async Task<bool> CreateReceiptAsync(CreateReceiptRequest request)
     {
-        var po = await _db.PurchaseOrders
-            .Include(p => p.Supplier)
-            .FirstOrDefaultAsync(p => p.PoId == request.PoId);
+        var po = await _db.PurchaseOrders.FindAsync(request.PoId);
 
         if (po == null)
             throw new InvalidOperationException($"Purchase order {request.PoId} does not exist.");
@@ -240,17 +239,13 @@ public class ProcurementServiceImpl : IProcurementService
             po.Status = "PartiallyReceived";
 
         await _db.SaveChangesAsync();
-        receipt.PurchaseOrder = po;
-        return ToReceiptDto(receipt);
+        return true;
     }
 
-    public async Task<ReceiptDto?> UpdateReceiptAsync(int id, UpdateReceiptRequest request)
+    public async Task<bool> UpdateReceiptAsync(int id, UpdateReceiptRequest request)
     {
-        var receipt = await _db.Receipts
-            .Include(r => r.PurchaseOrder).ThenInclude(po => po!.Supplier)
-            .FirstOrDefaultAsync(r => r.ReceiptId == id);
-
-        if (receipt == null) return null;
+        var receipt = await _db.Receipts.FindAsync(id);
+        if (receipt == null) return false;
 
         receipt.SupplierLot      = request.SupplierLot;
         receipt.ReceivedDate     = request.ReceivedDate;
@@ -259,7 +254,7 @@ public class ProcurementServiceImpl : IProcurementService
         receipt.QuantityReceived = request.QuantityReceived;
 
         await _db.SaveChangesAsync();
-        return ToReceiptDto(receipt);
+        return true;
     }
 
     public async Task<bool> DeleteReceiptAsync(int id)

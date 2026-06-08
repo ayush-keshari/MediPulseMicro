@@ -9,8 +9,8 @@ public interface ITelemetryService
     // ── SensorDevices ─────────────────────────────────────────────────────
     Task<IEnumerable<SensorDeviceDto>> GetAllSensorsAsync();
     Task<SensorDeviceDto?> GetSensorByIdAsync(int id);
-    Task<SensorDeviceDto> CreateSensorAsync(CreateSensorDeviceRequest request);
-    Task<SensorDeviceDto?> UpdateSensorAsync(int id, UpdateSensorDeviceRequest request);
+    Task<bool> CreateSensorAsync(CreateSensorDeviceRequest request);
+    Task<bool> UpdateSensorAsync(int id, UpdateSensorDeviceRequest request);
 
     // Delete blocked if sensor has associated TelemetryRecords (throws InvalidOperationException).
     Task<bool> DeleteSensorAsync(int id);
@@ -26,7 +26,7 @@ public interface ITelemetryService
     Task<IEnumerable<TelemetryRecordDto>> GetExcursionsAsync();
 
     // Excursion detection runs automatically on ingest.
-    Task<TelemetryRecordDto> CreateTelemetryAsync(CreateTelemetryRecordRequest request);
-    Task<TelemetryRecordDto?> UpdateTelemetryAsync(int id, UpdateTelemetryRecordRequest request);
+    Task<bool> CreateTelemetryAsync(CreateTelemetryRecordRequest request);
+    Task<bool> UpdateTelemetryAsync(int id, UpdateTelemetryRecordRequest request);
     Task<bool> DeleteTelemetryAsync(int id);
 }

@@ -42,8 +42,8 @@ public class TelemetryRecordsController : ControllerBase
     {
         try
         {
-            var created = await _service.CreateTelemetryAsync(request);
-            return CreatedAtAction(nameof(GetById), new { id = created.TelemetryId }, created);
+            await _service.CreateTelemetryAsync(request);
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
@@ -57,8 +57,8 @@ public class TelemetryRecordsController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateTelemetryRecordRequest request)
     {
         var updated = await _service.UpdateTelemetryAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Telemetry record {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Telemetry record {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/telemetry/{id}

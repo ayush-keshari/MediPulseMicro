@@ -40,7 +40,7 @@ public class NotificationServiceImpl : INotificationService
             .Where(n => n.UserId == userId && !n.IsRead)
             .CountAsync();
 
-    public async Task<NotificationDto> CreateAsync(CreateNotificationRequest request)
+    public async Task<bool> CreateAsync(CreateNotificationRequest request)
     {
         var notification = new Notification
         {
@@ -54,15 +54,15 @@ public class NotificationServiceImpl : INotificationService
 
         _db.Notifications.Add(notification);
         await _db.SaveChangesAsync();
-        return ToDto(notification);
+        return true;
     }
 
-    public async Task<NotificationDto?> MarkReadAsync(int id, string callerUserId, bool isAdmin)
+    public async Task<bool> MarkReadAsync(int id, string callerUserId, bool isAdmin)
     {
         var notification = await _db.Notifications.FindAsync(id);
-        if (notification == null) return null;
+        if (notification == null) return false;
 
-        if (!isAdmin && notification.UserId != callerUserId) return null;
+        if (!isAdmin && notification.UserId != callerUserId) return false;
 
         if (!notification.IsRead)
         {
@@ -70,7 +70,7 @@ public class NotificationServiceImpl : INotificationService
             await _db.SaveChangesAsync();
         }
 
-        return ToDto(notification);
+        return true;
     }
 
     public async Task MarkAllReadAsync(string userId)
@@ -105,6 +105,6 @@ public class NotificationServiceImpl : INotificationService
         Title          = n.Title,
         Message        = n.Message,
         IsRead         = n.IsRead,
-        CreatedAt      = n.CreatedAt
+        CreatedAt      = DateTime.SpecifyKind(n.CreatedAt, DateTimeKind.Utc)
     };
 }

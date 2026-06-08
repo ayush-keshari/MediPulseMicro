@@ -45,8 +45,8 @@ public class NotificationsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateNotificationRequest request)
     {
-        var created = await _service.CreateAsync(request);
-        return Created($"/api/notifications/{created.NotificationId}", created);
+        await _service.CreateAsync(request);
+        return NoContent();
     }
 
     // ── PATCH /api/notifications/{id}/read ────────────────────────────────
@@ -55,8 +55,8 @@ public class NotificationsController : ControllerBase
     public async Task<IActionResult> MarkRead(int id)
     {
         var result = await _service.MarkReadAsync(id, CallerId, IsAdmin);
-        if (result == null) return NotFound(new { message = $"Notification {id} not found or not accessible." });
-        return Ok(result);
+        if (!result) return NotFound(new { message = $"Notification {id} not found or not accessible." });
+        return NoContent();
     }
 
     // ── PATCH /api/notifications/read-all ─────────────────────────────────

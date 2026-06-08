@@ -123,6 +123,9 @@ namespace LogisticsService.Migrations
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<int>("ToStorageZoneId")
+                        .HasColumnType("int");
+
                     b.Property<int>("TransferOrderId")
                         .HasColumnType("int");
 

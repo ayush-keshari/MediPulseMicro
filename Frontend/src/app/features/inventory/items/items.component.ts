@@ -38,9 +38,9 @@ export class ItemsComponent implements OnInit {
       itemCode:           ['', [Validators.required, Validators.maxLength(50)]],
       name:               ['', [Validators.required, Validators.maxLength(150)]],
       category:           ['Drug', Validators.required],
-      unit:               ['', [Validators.required, Validators.maxLength(20)]],
+      unit:               ['', [Validators.required, Validators.maxLength(20), Validators.pattern(/^[a-zA-Z/ ]+$/)]],
       storageRequirement: ['Ambient', Validators.required],
-      safetyStock:        [0, [Validators.required, Validators.min(0)]],
+      safetyStock:        [0, Validators.min(0)],
     });
   }
 
@@ -89,9 +89,10 @@ export class ItemsComponent implements OnInit {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.isSaving = true;
     const val = this.form.getRawValue();
+    const safetyStock = val.safetyStock ?? 0;
     const obs = this.editId
-      ? this.svc.updateItem(this.editId, { name: val.name, category: val.category, unit: val.unit, storageRequirement: val.storageRequirement, safetyStock: val.safetyStock })
-      : this.svc.createItem(val);
+      ? this.svc.updateItem(this.editId, { name: val.name, category: val.category, unit: val.unit, storageRequirement: val.storageRequirement, safetyStock })
+      : this.svc.createItem({ ...val, safetyStock });
     obs.subscribe({
       next: () => { this.isSaving = false; this.closeModal(); this.showSuccess(this.editId ? 'Item updated.' : 'Item created.'); this.load(); },
       error: (e: HttpErrorResponse) => { this.isSaving = false; this.errorMessage = e.error?.message ?? 'Save failed.'; },
@@ -111,6 +112,15 @@ export class ItemsComponent implements OnInit {
 
   storageBadge(s: string) {
     return { Ambient: 'bg-secondary', Refrigerated: 'bg-info', Freezer: 'bg-primary' }[s] ?? 'bg-secondary';
+  }
+
+  onUnitInput(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const cleaned = input.value.replace(/[^a-zA-Z/ ]/g, '');
+    if (input.value !== cleaned) {
+      input.value = cleaned;
+      this.form.get('unit')!.setValue(cleaned, { emitEvent: false });
+    }
   }
 
   private showSuccess(msg: string) { this.successMessage = msg; this.errorMessage = ''; setTimeout(() => this.successMessage = '', 3500); }

@@ -34,8 +34,11 @@ public class InventoryServiceImpl : IInventoryService
         return item is null ? null : MapItemToResponse(item);
     }
 
-    public async Task<ItemResponse> CreateItemAsync(CreateItemRequest request)
+    public async Task<(ItemResponse? Item, string? Error)> CreateItemAsync(CreateItemRequest request)
     {
+        if (await _context.Items.AnyAsync(i => i.ItemCode.ToLower() == request.ItemCode.ToLower()))
+            return (null, $"An item with code '{request.ItemCode}' already exists.");
+
         var item = new Item
         {
             ItemCode           = request.ItemCode,
@@ -48,17 +51,13 @@ public class InventoryServiceImpl : IInventoryService
 
         _context.Items.Add(item);
         await _context.SaveChangesAsync();
-
-        return MapItemToResponse(item);
+        return (MapItemToResponse(item), null);
     }
 
-    public async Task<ItemResponse?> UpdateItemAsync(int id, UpdateItemRequest request)
+    public async Task<bool> UpdateItemAsync(int id, UpdateItemRequest request)
     {
-        var item = await _context.Items
-            .Include(i => i.Positions)
-            .FirstOrDefaultAsync(i => i.ItemId == id);
-
-        if (item is null) return null;
+        var item = await _context.Items.FindAsync(id);
+        if (item is null) return false;
 
         if (request.Name               is not null) item.Name               = request.Name;
         if (request.Category           is not null) item.Category           = request.Category;
@@ -67,7 +66,7 @@ public class InventoryServiceImpl : IInventoryService
         if (request.SafetyStock        is not null) item.SafetyStock        = request.SafetyStock.Value;
 
         await _context.SaveChangesAsync();
-        return MapItemToResponse(item);
+        return true;
     }
 
     public async Task<bool> DeleteItemAsync(int id)
@@ -104,6 +103,37 @@ public class InventoryServiceImpl : IInventoryService
         return positions.Select(MapPositionToResponse);
     }
 
+    public async Task<IEnumerable<int>> GetFacilityIdsByItemAsync(int itemId)
+    {
+        return await _context.InventoryPositions
+            .Where(p => p.ItemId == itemId && p.Quantity > 0)
+            .Select(p => p.FacilityId)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<int>> GetItemIdsByFacilityAsync(int facilityId)
+    {
+        return await _context.InventoryPositions
+            .Where(p => p.FacilityId == facilityId && p.Quantity > 0)
+            .Select(p => p.ItemId)
+            .Distinct()
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<FacilityStockDto>> GetFacilityStockAsync(int facilityId)
+    {
+        return await _context.InventoryPositions
+            .Where(p => p.FacilityId == facilityId && p.Quantity > 0)
+            .GroupBy(p => p.ItemId)
+            .Select(g => new FacilityStockDto
+            {
+                ItemId       = g.Key,
+                AvailableQty = g.Sum(p => p.Quantity)
+            })
+            .ToListAsync();
+    }
+
     public async Task<PositionResponse?> GetPositionByIdAsync(int id)
     {
         var position = await _context.InventoryPositions
@@ -113,7 +143,7 @@ public class InventoryServiceImpl : IInventoryService
         return position is null ? null : MapPositionToResponse(position);
     }
 
-    public async Task<PositionResponse> CreatePositionAsync(CreatePositionRequest request)
+    public async Task<bool> CreatePositionAsync(CreatePositionRequest request)
     {
         var position = new InventoryPosition
         {
@@ -128,19 +158,13 @@ public class InventoryServiceImpl : IInventoryService
 
         _context.InventoryPositions.Add(position);
         await _context.SaveChangesAsync();
-
-        await _context.Entry(position).Reference(p => p.Item).LoadAsync();
-
-        return MapPositionToResponse(position);
+        return true;
     }
 
-    public async Task<PositionResponse?> UpdatePositionAsync(int id, UpdatePositionRequest request)
+    public async Task<bool> UpdatePositionAsync(int id, UpdatePositionRequest request)
     {
-        var position = await _context.InventoryPositions
-            .Include(p => p.Item)
-            .FirstOrDefaultAsync(p => p.PositionId == id);
-
-        if (position is null) return null;
+        var position = await _context.InventoryPositions.FindAsync(id);
+        if (position is null) return false;
 
         if (request.Quantity      is not null) position.Quantity      = request.Quantity.Value;
         if (request.FacilityId    is not null) position.FacilityId    = request.FacilityId.Value;
@@ -149,7 +173,7 @@ public class InventoryServiceImpl : IInventoryService
         if (request.ExpiryDate    is not null) position.ExpiryDate    = request.ExpiryDate.Value;
 
         await _context.SaveChangesAsync();
-        return MapPositionToResponse(position);
+        return true;
     }
 
     public async Task<bool> DeletePositionAsync(int id)

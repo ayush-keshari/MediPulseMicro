@@ -43,8 +43,8 @@ public class ConsumptionController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateConsumptionRequest request)
     {
-        var created = await _service.CreateConsumptionAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = created.ConsumptionId }, created);
+        await _service.CreateConsumptionAsync(request);
+        return NoContent();
     }
 
     // PUT /api/consumption/{id}
@@ -52,8 +52,8 @@ public class ConsumptionController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateConsumptionRequest request)
     {
         var updated = await _service.UpdateConsumptionAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Consumption record {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Consumption record {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/consumption/{id}

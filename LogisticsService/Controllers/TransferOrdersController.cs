@@ -64,9 +64,9 @@ public class TransferOrdersController : ControllerBase
                 userId:   CallerId,
                 category: "SystemAlert",
                 title:    "Transfer Order Created",
-                message:  $"Transfer order #{created.TransferOrderId} created: {created.FromFacilityName} → {created.ToFacilityName}");
+                message:  $"Transfer order created: {request.FromFacilityName} → {request.ToFacilityName}");
 
-            return CreatedAtAction(nameof(GetById), new { id = created.TransferOrderId }, created);
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
@@ -81,8 +81,8 @@ public class TransferOrdersController : ControllerBase
         try
         {
             var updated = await _service.UpdateTransferOrderAsync(id, request);
-            if (updated == null) return NotFound(new { message = $"Transfer order {id} not found." });
-            return Ok(updated);
+            if (!updated) return NotFound(new { message = $"Transfer order {id} not found." });
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
@@ -97,8 +97,8 @@ public class TransferOrdersController : ControllerBase
         try
         {
             var updated = await _service.UpdateTransferStatusAsync(id, request);
-            if (updated == null) return NotFound(new { message = $"Transfer order {id} not found." });
-            return Ok(updated);
+            if (!updated) return NotFound(new { message = $"Transfer order {id} not found." });
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {

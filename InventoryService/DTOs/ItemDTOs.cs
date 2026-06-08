@@ -14,6 +14,7 @@ public class CreateItemRequest
     public string Category { get; set; } = string.Empty;
 
     [Required, MaxLength(20)]
+    [RegularExpression(@"^[a-zA-Z/ ]+$", ErrorMessage = "Unit must contain only letters, spaces and /.")]
     public string Unit { get; set; } = string.Empty;
 
     [MaxLength(50)]
@@ -32,6 +33,7 @@ public class UpdateItemRequest
     public string? Category { get; set; }
 
     [MaxLength(20)]
+    [RegularExpression(@"^[a-zA-Z/ ]+$", ErrorMessage = "Unit must contain only letters, spaces and /.")]
     public string? Unit { get; set; }
 
     [MaxLength(50)]

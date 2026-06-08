@@ -9,6 +9,7 @@ import {
   LoginRequest,
   RegisterRequest,
   UpdateRoleRequest,
+  UpdateUserRequest,
   UserDto,
 } from './auth.models';
 import { getRoleDashboardRoute } from '../../shared/extensions/app.extensions';
@@ -87,6 +88,12 @@ export class AuthService {
 
   updateUserRole(id: number, request: UpdateRoleRequest): Observable<void> {
     return this.http.put<void>(`${API_BASE}/users/${id}/role`, request).pipe(timeout(REQUEST_TIMEOUT_MS));
+  }
+
+  // Admin full-profile edit — PUT /api/users/{id} returns the updated UserDto
+  // so the caller can refresh its row without re-fetching the whole list.
+  updateUser(id: number, request: UpdateUserRequest): Observable<UserDto> {
+    return this.http.put<UserDto>(`${API_BASE}/users/${id}`, request).pipe(timeout(REQUEST_TIMEOUT_MS));
   }
 
   deleteUser(id: number): Observable<void> {

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LogisticsService.Migrations
 {
     [DbContext(typeof(LogisticsDbContext))]
-    [Migration("20260518000002_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260608000000_AddToStorageZoneToTransferOrderItem")]
+    partial class AddToStorageZoneToTransferOrderItem
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -124,6 +124,9 @@ namespace LogisticsService.Migrations
                         .HasColumnType("nvarchar(150)");
 
                     b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ToStorageZoneId")
                         .HasColumnType("int");
 
                     b.Property<int>("TransferOrderId")

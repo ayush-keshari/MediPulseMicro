@@ -51,8 +51,15 @@ public class FacilitiesController : ControllerBase
                    Roles.DeviceManager, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Create([FromBody] CreateFacilityRequest request)
     {
-        var created = await _service.CreateFacilityAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = created.FacilityId }, created);
+        try
+        {
+            await _service.CreateFacilityAsync(request);
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // PUT /api/facilities/{id}  — Nurse cannot edit facilities
@@ -62,9 +69,16 @@ public class FacilitiesController : ControllerBase
                    Roles.DeviceManager, Roles.ComplianceOfficer)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateFacilityRequest request)
     {
-        var updated = await _service.UpdateFacilityAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Facility {id} not found." });
-        return Ok(updated);
+        try
+        {
+            var updated = await _service.UpdateFacilityAsync(id, request);
+            if (!updated) return NotFound(new { message = $"Facility {id} not found." });
+            return NoContent();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // DELETE /api/facilities/{id}  — Nurse cannot delete facilities

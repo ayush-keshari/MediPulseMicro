@@ -36,7 +36,7 @@ public class ExceptionServiceImpl : IExceptionService
         return e == null ? null : ToEventDto(e);
     }
 
-    public async Task<ExceptionEventDto> CreateAsync(CreateExceptionRequest request)
+    public async Task<bool> CreateAsync(CreateExceptionRequest request)
     {
         var ev = new ExceptionEvent
         {
@@ -53,20 +53,17 @@ public class ExceptionServiceImpl : IExceptionService
         };
         _db.ExceptionEvents.Add(ev);
         await _db.SaveChangesAsync();
-        return ToEventDto(ev);
+        return true;
     }
 
-    public async Task<ExceptionEventDto?> UpdateStatusAsync(int id, UpdateExceptionStatusRequest request)
+    public async Task<bool> UpdateStatusAsync(int id, UpdateExceptionStatusRequest request)
     {
-        var ev = await _db.ExceptionEvents
-            .Include(e => e.Actions)
-            .FirstOrDefaultAsync(e => e.ExceptionId == id);
-        if (ev == null) return null;
+        var ev = await _db.ExceptionEvents.FindAsync(id);
+        if (ev == null) return false;
 
         ev.Status = request.Status;
-
         await _db.SaveChangesAsync();
-        return ToEventDto(ev);
+        return true;
     }
 
     public async Task<bool> DeleteAsync(int id)
@@ -174,7 +171,7 @@ public class ExceptionServiceImpl : IExceptionService
         return a == null ? null : ToActionDto(a);
     }
 
-    public async Task<RecallActionDto> CreateActionAsync(CreateRecallActionRequest request)
+    public async Task<bool> CreateActionAsync(CreateRecallActionRequest request)
     {
         var ev = await _db.ExceptionEvents.FindAsync(request.ExceptionId);
         if (ev != null && ev.Status == "Open")
@@ -190,20 +187,20 @@ public class ExceptionServiceImpl : IExceptionService
         };
         _db.RecallActions.Add(action);
         await _db.SaveChangesAsync();
-        return ToActionDto(action);
+        return true;
     }
 
-    public async Task<RecallActionDto?> UpdateActionAsync(int id, UpdateRecallActionRequest request)
+    public async Task<bool> UpdateActionAsync(int id, UpdateRecallActionRequest request)
     {
         var action = await _db.RecallActions.FindAsync(id);
-        if (action == null) return null;
+        if (action == null) return false;
 
         if (request.ActionDescription != null) action.ActionDescription = request.ActionDescription;
         if (request.DueDate           != null) action.DueDate           = request.DueDate.Value;
         if (request.Status            != null) action.Status            = request.Status;
 
         await _db.SaveChangesAsync();
-        return ToActionDto(action);
+        return true;
     }
 
     public async Task<bool> DeleteActionAsync(int id)

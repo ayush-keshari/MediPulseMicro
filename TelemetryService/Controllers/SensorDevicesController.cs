@@ -43,8 +43,8 @@ public class SensorDevicesController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.ColdChainOperator)]
     public async Task<IActionResult> Create([FromBody] CreateSensorDeviceRequest request)
     {
-        var created = await _service.CreateSensorAsync(request);
-        return CreatedAtAction(nameof(GetById), new { id = created.SensorId }, created);
+        await _service.CreateSensorAsync(request);
+        return NoContent();
     }
 
     // PUT /api/sensordevices/{id}
@@ -53,8 +53,8 @@ public class SensorDevicesController : ControllerBase
     public async Task<IActionResult> Update(int id, [FromBody] UpdateSensorDeviceRequest request)
     {
         var updated = await _service.UpdateSensorAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Sensor {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Sensor {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/sensordevices/{id}

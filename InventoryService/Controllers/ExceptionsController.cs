@@ -61,9 +61,9 @@ public class ExceptionsController : ControllerBase
             userId:   CallerId,
             category: "Exception",
             title:    "Exception Reported",
-            message:  $"{created.Type} exception logged for {created.ItemName ?? "item"} (Severity: {created.Severity})");
+            message:  $"Exception logged (Severity: {request.Severity})");
 
-        return CreatedAtAction(nameof(GetById), new { id = created.ExceptionId }, created);
+        return NoContent();
     }
 
     // PATCH /api/exceptions/{id}/status
@@ -71,8 +71,8 @@ public class ExceptionsController : ControllerBase
     public async Task<IActionResult> UpdateStatus(int id, [FromBody] UpdateExceptionStatusRequest request)
     {
         var updated = await _service.UpdateStatusAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Exception {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Exception {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/exceptions/{id}

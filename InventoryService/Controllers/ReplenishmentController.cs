@@ -74,8 +74,8 @@ public class ReplenishmentController : ControllerBase
     public async Task<IActionResult> UpdatePlanStatus(int id, [FromBody] UpdatePlanStatusRequest request)
     {
         var updated = await _service.UpdatePlanStatusAsync(id, request);
-        if (updated == null) return NotFound(new { message = $"Plan {id} not found." });
-        return Ok(updated);
+        if (!updated) return NotFound(new { message = $"Plan {id} not found." });
+        return NoContent();
     }
 
     // DELETE /api/replenishment/plans/{id}

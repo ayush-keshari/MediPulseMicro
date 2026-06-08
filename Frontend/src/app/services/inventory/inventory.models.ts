@@ -27,6 +27,12 @@ export interface UpdateItemRequest {
   safetyStock?: number;
 }
 
+// ── Facility stock summary (itemId → available qty) ──────────────────────
+export interface FacilityStockDto {
+  itemId: number;
+  availableQty: number;
+}
+
 // ── Stock Positions ───────────────────────────────────────────────────────
 export interface PositionResponse {
   positionId: number;

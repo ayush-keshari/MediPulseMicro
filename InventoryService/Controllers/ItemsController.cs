@@ -45,11 +45,12 @@ public class ItemsController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.SupplyManager)]
     public async Task<IActionResult> Create([FromBody] CreateItemRequest request)
     {
-        // ModelState validation is handled globally by ValidationFilter in Shared
-        var item = await _service.CreateItemAsync(request);
+        var (item, error) = await _service.CreateItemAsync(request);
 
-        // 201 Created — points to the GET endpoint for the new item
-        return CreatedAtAction(nameof(GetById), new { id = item.ItemId }, item);
+        if (error is not null)
+            return Conflict(new { message = error });
+
+        return CreatedAtAction(nameof(GetById), new { id = item!.ItemId }, item);
     }
 
     // PUT api/items/5
@@ -58,11 +59,11 @@ public class ItemsController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.SupplyManager)]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateItemRequest request)
     {
-        var item = await _service.UpdateItemAsync(id, request);
-        if (item is null)
+        var updated = await _service.UpdateItemAsync(id, request);
+        if (!updated)
             return NotFound(new { message = $"Item with ID {id} not found." });
 
-        return Ok(item);
+        return NoContent();
     }
 
     // DELETE api/items/5

@@ -5,7 +5,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { LogisticsService } from '../../../services/logistics/logistics.service';
 import { TransferOrderDto } from '../../../services/logistics/logistics.models';
 import { FacilityService } from '../../../services/facility/facility.service';
-import { FacilityDto } from '../../../services/facility/facility.models';
+import { FacilityDto, StorageZoneDto } from '../../../services/facility/facility.models';
 import { InventoryService } from '../../../services/inventory/inventory.service';
 import { ItemResponse } from '../../../services/inventory/inventory.models';
 
@@ -27,6 +27,11 @@ export class TransferOrdersComponent implements OnInit {
 
   facilities: FacilityDto[] = [];
   items: ItemResponse[] = [];
+  itemsForFacility: ItemResponse[] = [];          // filtered to source facility stock
+  facilityStockMap = new Map<number, number>();   // itemId → total available qty
+  facilityItemsLoading = false;
+  destinationZones: StorageZoneDto[] = [];        // zones for selected destination facility
+  destZonesLoading = false;
 
   showModal = false;
   isSaving = false;
@@ -57,8 +62,9 @@ export class TransferOrdersComponent implements OnInit {
 
   newItemRow(): FormGroup {
     return this.fb.group({
-      itemId:   ['', Validators.required],
-      quantity: [1, [Validators.required, Validators.min(1)]],
+      itemId:          ['', Validators.required],
+      quantity:        [1, [Validators.required, Validators.min(1)]],
+      toStorageZoneId: ['', Validators.required],
     });
   }
 
@@ -70,6 +76,68 @@ export class TransferOrdersComponent implements OnInit {
     this.load();
     this.facilitySvc.getFacilities().subscribe({ next: (d) => this.facilities = d });
     this.inventorySvc.getItems().subscribe({ next: (d) => this.items = d });
+
+    this.form.get('fromFacilityId')!.valueChanges.subscribe(facilityId => {
+      this.onSourceFacilityChange(facilityId);
+    });
+
+    this.form.get('toFacilityId')!.valueChanges.subscribe(facilityId => {
+      this.onDestFacilityChange(facilityId);
+    });
+  }
+
+  onDestFacilityChange(facilityId: any) {
+    this.itemsArray.controls.forEach(row => row.get('toStorageZoneId')!.setValue('', { emitEvent: false }));
+    this.destinationZones = [];
+    if (!facilityId) return;
+    this.destZonesLoading = true;
+    this.facilitySvc.getZonesByFacility(+facilityId).subscribe({
+      next: (zones) => { this.destinationZones = zones; this.destZonesLoading = false; },
+      error: () => { this.destinationZones = []; this.destZonesLoading = false; },
+    });
+  }
+
+  onSourceFacilityChange(facilityId: any) {
+    // Reset all item selections when source facility changes
+    this.itemsArray.controls.forEach(row => row.get('itemId')!.setValue('', { emitEvent: false }));
+    this.itemsForFacility = [];
+    this.facilityStockMap = new Map();
+    if (!facilityId) return;
+    this.facilityItemsLoading = true;
+    this.inventorySvc.getFacilityStock(+facilityId).subscribe({
+      next: (stock) => {
+        const ids = stock.map(s => s.itemId);
+        this.itemsForFacility = this.items.filter(i => ids.includes(i.itemId));
+        this.facilityStockMap = new Map(stock.map(s => [s.itemId, s.availableQty]));
+        this.facilityItemsLoading = false;
+      },
+      error: () => { this.itemsForFacility = []; this.facilityItemsLoading = false; },
+    });
+  }
+
+  getAvailableQty(itemId: any, excludeIndex = -1): number {
+    if (!itemId) return 0;
+    const total = this.facilityStockMap.get(+itemId) ?? 0;
+    const allocatedElsewhere = this.itemsArray.controls
+      .reduce((sum, row, i) => {
+        if (i === excludeIndex) return sum;
+        return +row.get('itemId')?.value === +itemId
+          ? sum + (+row.get('quantity')?.value || 0)
+          : sum;
+      }, 0);
+    return Math.max(0, total - allocatedElsewhere);
+  }
+
+  isQtyExceeded(index: number): boolean {
+    const row = this.itemsArray.at(index);
+    const itemId = row.get('itemId')?.value;
+    const qty = row.get('quantity')?.value;
+    if (!itemId || !qty) return false;
+    return qty > this.getAvailableQty(itemId, index);
+  }
+
+  get displayItems(): ItemResponse[] {
+    return this.form.get('fromFacilityId')?.value ? this.itemsForFacility : this.items;
   }
 
   load() {
@@ -92,6 +160,9 @@ export class TransferOrdersComponent implements OnInit {
     this.form.reset();
     while (this.itemsArray.length > 1) this.itemsArray.removeAt(1);
     this.itemsArray.at(0).reset({ quantity: 1 });
+    this.itemsForFacility = [];
+    this.facilityStockMap = new Map();
+    this.destinationZones = [];
     this.showModal = true;
   }
   closeModal() { this.showModal = false; this.errorMessage = ''; }
@@ -115,9 +186,10 @@ export class TransferOrdersComponent implements OnInit {
       toFacilityName:   this.getFacilityName(v.toFacilityId),
       requestedBy:      v.requestedBy,
       items: v.items.map((i: any) => ({
-        itemId:   +i.itemId,
-        itemName: this.getItemName(i.itemId),
-        quantity: +i.quantity,
+        itemId:          +i.itemId,
+        itemName:        this.getItemName(i.itemId),
+        quantity:        +i.quantity,
+        toStorageZoneId: +i.toStorageZoneId,
       })),
     }).subscribe({
       next: () => { this.isSaving = false; this.closeModal(); this.showSuccess('Transfer order created.'); this.load(); },

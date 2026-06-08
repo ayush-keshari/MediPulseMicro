@@ -45,8 +45,8 @@ public class PurchaseOrdersController : ControllerBase
     {
         try
         {
-            var created = await _service.CreatePurchaseOrderAsync(request);
-            return CreatedAtAction(nameof(GetById), new { id = created.PoId }, created);
+            await _service.CreatePurchaseOrderAsync(request);
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
@@ -62,8 +62,8 @@ public class PurchaseOrdersController : ControllerBase
         try
         {
             var updated = await _service.UpdatePurchaseOrderAsync(id, request);
-            if (updated == null) return NotFound(new { message = $"Purchase order {id} not found." });
-            return Ok(updated);
+            if (!updated) return NotFound(new { message = $"Purchase order {id} not found." });
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {
@@ -80,8 +80,8 @@ public class PurchaseOrdersController : ControllerBase
         try
         {
             var updated = await _service.UpdatePoStatusAsync(id, request);
-            if (updated == null) return NotFound(new { message = $"Purchase order {id} not found." });
-            return Ok(updated);
+            if (!updated) return NotFound(new { message = $"Purchase order {id} not found." });
+            return NoContent();
         }
         catch (InvalidOperationException ex)
         {

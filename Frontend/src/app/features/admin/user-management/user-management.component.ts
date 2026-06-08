@@ -35,6 +35,12 @@ export class UserManagementComponent implements OnInit {
   showAddModal = false;
   addForm: FormGroup;
 
+  // Edit Profile modal — admin can change every field of a user.
+  showEditModal = false;
+  editForm: FormGroup;
+  isEditing = false;
+  userToEdit: UserDto | null = null;
+
   showDeleteConfirm  = false;
   userToDelete: UserDto | null = null;
 
@@ -48,6 +54,15 @@ export class UserManagementComponent implements OnInit {
       password: ['', [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$/)]],
       phone:    ['', [Validators.pattern(/^\d{10}$/)]],
       role:     ['Nurse', Validators.required],
+    });
+    // Same validators as Add, except password is OPTIONAL (admin leaves it blank
+    // to keep the existing password). When non-blank, the pattern must match.
+    this.editForm = this.fb.group({
+      name:     ['', [Validators.required, Validators.maxLength(100)]],
+      email:    ['', [Validators.required, Validators.email]],
+      phone:    ['', [Validators.pattern(/^\d{10}$/)]],
+      role:     ['', Validators.required],
+      password: ['', [Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,}$/)]],
     });
   }
 
@@ -112,6 +127,54 @@ export class UserManagementComponent implements OnInit {
         this.isAdding = false;
         if (err.status === 409) this.errorMessage = 'A user with this email already exists.';
         else this.errorMessage = err.error?.message ?? 'Failed to create user.';
+      },
+    });
+  }
+
+  openEditModal(user: UserDto): void {
+    this.userToEdit = user;
+    this.editForm.reset({
+      name:     user.name,
+      email:    user.email,
+      phone:    user.phone ?? '',
+      role:     user.role,
+      password: '',
+    });
+    // Admin cannot change their own role via edit modal
+    if (this.isSelf(user)) {
+      this.editForm.get('role')?.disable();
+    } else {
+      this.editForm.get('role')?.enable();
+    }
+    this.errorMessage = '';
+    this.showEditModal = true;
+  }
+  closeEditModal(): void { this.showEditModal = false; this.userToEdit = null; }
+
+  saveEdit(): void {
+    const user = this.userToEdit;
+    if (!user) return;
+    if (this.editForm.invalid) { this.editForm.markAllAsTouched(); return; }
+    this.isEditing = true;
+    const v = this.editForm.getRawValue();
+    // Only send password when admin actually typed one; blank means "keep the current hash".
+    this.authService.updateUser(user.userId, {
+      name:     v.name,
+      email:    v.email,
+      role:     v.role,
+      phone:    v.phone || undefined,
+      password: v.password ? v.password : undefined,
+    }).subscribe({
+      next: () => {
+        this.isEditing = false;
+        this.showSuccess('User profile updated successfully.');
+        this.closeEditModal();
+        this.loadUsers();
+      },
+      error: (err: HttpErrorResponse) => {
+        this.isEditing = false;
+        if (err.status === 409) this.errorMessage = err.error?.message ?? 'A user with this email already exists.';
+        else this.errorMessage = err.error?.message ?? 'Failed to update user.';
       },
     });
   }

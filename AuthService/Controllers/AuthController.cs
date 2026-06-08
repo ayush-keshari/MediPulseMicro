@@ -35,8 +35,10 @@ public class AuthController : ControllerBase
     {
         try
         {
-            var result = await _authService.RegisterAsync(request);
-            return StatusCode(StatusCodes.Status201Created, result);
+            var newUser = await _authService.RegisterAsync(request);
+            // Return the created user (including UserId) so the admin "Add User" flow
+            // can immediately chain a role-assignment call. Self-registrants ignore the body.
+            return StatusCode(StatusCodes.Status201Created, newUser);
         }
         catch (InvalidOperationException ex)
         {

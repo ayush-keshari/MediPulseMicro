@@ -66,6 +66,9 @@ public class AuthServiceImpl : IAuthService
         if (await _db.Users.AnyAsync(u => u.Email.ToLower() == request.Email.ToLower()))
             throw new InvalidOperationException("A user with this email already exists.");
 
+        // Role is intentionally hardcoded to "Unassigned" on this public endpoint —
+        // never trust a client-sent role here. Admins assign the real role via
+        // PUT /api/users/{id}/role immediately after creation in the admin UI.
         var user = new User
         {
             Name     = request.Name,
@@ -78,6 +81,9 @@ public class AuthServiceImpl : IAuthService
         _db.Users.Add(user);
         await _db.SaveChangesAsync();
 
+        // Return the created user (with the EF-generated UserId) so the admin UI
+        // can chain the role-assignment call. The frontend's add-user flow depends
+        // on this UserId to call updateUserRole(id, role) right after register.
         return MapToDto(user);
     }
 
@@ -95,12 +101,44 @@ public class AuthServiceImpl : IAuthService
         return user == null ? null : MapToDto(user);
     }
 
-    public async Task<UserDto?> UpdateRoleAsync(int id, UpdateRoleRequest request)
+    public async Task<bool> UpdateRoleAsync(int id, UpdateRoleRequest request)
+    {
+        var user = await _db.Users.FindAsync(id);
+        if (user == null) return false;
+
+        user.Role = request.Role;
+        await _db.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<UserDto?> UpdateUserAsync(int id, UpdateUserRequest request)
     {
         var user = await _db.Users.FindAsync(id);
         if (user == null) return null;
 
-        user.Role = request.Role;
+        // Pre-check duplicate email (case-insensitive, excluding this user).
+        // Mirrors RegisterAsync so the UI gets a clean 409 instead of a raw DB
+        // unique-index error from IX_User_Email. Controller also catches
+        // DbUpdateException as a safety net.
+        if (!string.Equals(user.Email, request.Email, StringComparison.OrdinalIgnoreCase) &&
+            await _db.Users.AnyAsync(u => u.UserId != id &&
+                                          u.Email.ToLower() == request.Email.ToLower()))
+        {
+            throw new InvalidOperationException("A user with this email already exists.");
+        }
+
+        user.Name  = request.Name;
+        user.Email = request.Email;
+        user.Phone = request.Phone;
+        user.Role  = request.Role;
+
+        // Password is optional on edit — only re-hash when the admin actually
+        // typed a new one. Empty/whitespace/null means "keep the existing hash".
+        if (!string.IsNullOrWhiteSpace(request.Password))
+        {
+            user.Password = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        }
+
         await _db.SaveChangesAsync();
         return MapToDto(user);
     }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { InventoryService } from '../../../services/inventory/inventory.service';
-import { ForecastDto, ReplenishmentPlanDto } from '../../../services/inventory/inventory.models';
+import { ForecastDto, ReplenishmentPlanDto, ItemResponse } from '../../../services/inventory/inventory.models';
 import { FacilityService } from '../../../services/facility/facility.service';
 import { FacilityDto } from '../../../services/facility/facility.models';
 
@@ -23,6 +23,7 @@ export class ReplenishmentComponent implements OnInit {
   errorMessage = '';
 
   facilities: FacilityDto[] = [];
+  items: ItemResponse[] = [];
 
   activeTab: 'plans' | 'forecasts' = 'plans';
   planStatusFilter = '';
@@ -41,6 +42,15 @@ export class ReplenishmentComponent implements OnInit {
   ngOnInit() {
     this.loadAll();
     this.facilitySvc.getFacilities().subscribe({ next: (d) => this.facilities = d });
+    this.svc.getItems().subscribe({ next: (d) => this.items = d });
+  }
+
+  getItemName(id: number): string {
+    return this.items.find(i => i.itemId === id)?.name ?? `Item #${id}`;
+  }
+
+  getFacilityName(id: number): string {
+    return this.facilities.find(f => f.facilityId === id)?.name ?? `Facility #${id}`;
   }
 
   loadAll() {

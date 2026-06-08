@@ -12,8 +12,8 @@ using ProcurementService.Data;
 namespace ProcurementService.Migrations
 {
     [DbContext(typeof(ProcurementDbContext))]
-    [Migration("20260528061808_CleanupSchema")]
-    partial class CleanupSchema
+    [Migration("20260530134730_CleanUp")]
+    partial class CleanUp
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

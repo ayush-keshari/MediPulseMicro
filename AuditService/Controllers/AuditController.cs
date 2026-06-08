@@ -21,8 +21,8 @@ public class AuditController : ControllerBase
     [HttpPost("log")]
     public async Task<IActionResult> Log([FromBody] CreateAuditLogRequest request)
     {
-        var created = await _service.CreateAsync(request);
-        return Created($"/api/audit/{created.AuditLogId}", created);
+        await _service.CreateAsync(request);
+        return NoContent();
     }
 
     // GET /api/audit

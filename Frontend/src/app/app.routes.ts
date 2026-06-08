@@ -14,7 +14,7 @@ export const routes: Routes = [
     loadComponent: () => import('./features/auth/pending-approval/pending-approval.component').then(m => m.PendingApprovalComponent),
   },
 
-  // Admin
+  // Admin only
   {
     path: 'admin',
     canActivate: [authGuard, roleGuard],
@@ -27,79 +27,148 @@ export const routes: Routes = [
     ],
   },
 
-  // Shared role dashboard
+  // Shared role dashboard — all authenticated non-Unassigned users
   {
     path: 'dashboard',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'DeviceManager', 'ProcurementOfficer', 'ColdChainOperator', 'ComplianceOfficer', 'Nurse'] },
     loadComponent: () => import('./features/dashboard/role-dashboard/role-dashboard.component').then(m => m.RoleDashboardComponent),
   },
 
-  // Facility
+  // Facility — FacilitiesController: all 8 roles | StorageZonesController: Admin, Supply, ColdChain, Compliance, Nurse
   {
     path: 'facility',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'DeviceManager', 'ProcurementOfficer', 'ColdChainOperator', 'ComplianceOfficer', 'Nurse'] },
     children: [
-      { path: 'facilities',    loadComponent: () => import('./features/facility/facilities/facilities.component').then(m => m.FacilitiesComponent) },
-      { path: 'storage-zones', loadComponent: () => import('./features/facility/storage-zones/storage-zones.component').then(m => m.StorageZonesComponent) },
-      { path: '',              redirectTo: 'facilities', pathMatch: 'full' },
+      {
+        path: 'facilities',
+        loadComponent: () => import('./features/facility/facilities/facilities.component').then(m => m.FacilitiesComponent),
+      },
+      {
+        path: 'storage-zones',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'ColdChainOperator', 'ComplianceOfficer', 'Nurse'] },
+        loadComponent: () => import('./features/facility/storage-zones/storage-zones.component').then(m => m.StorageZonesComponent),
+      },
+      { path: '', redirectTo: 'facilities', pathMatch: 'full' },
     ],
   },
 
-  // Procurement
+  // Procurement — SuppliersController & PurchaseOrdersController: Admin, Supply, Procurement, Compliance
+  //              ReceiptsController: Admin, Supply, Pharmacy, Procurement, Compliance
   {
     path: 'procurement',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'ProcurementOfficer', 'ComplianceOfficer'] },
     children: [
-      { path: 'suppliers',       loadComponent: () => import('./features/procurement/suppliers/suppliers.component').then(m => m.SuppliersComponent) },
-      { path: 'purchase-orders', loadComponent: () => import('./features/procurement/purchase-orders/purchase-orders.component').then(m => m.PurchaseOrdersComponent) },
-      { path: 'receipts',        loadComponent: () => import('./features/procurement/receipts/receipts.component').then(m => m.ReceiptsComponent) },
-      { path: '',                redirectTo: 'suppliers', pathMatch: 'full' },
+      {
+        path: 'suppliers',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'ProcurementOfficer', 'ComplianceOfficer'] },
+        loadComponent: () => import('./features/procurement/suppliers/suppliers.component').then(m => m.SuppliersComponent),
+      },
+      {
+        path: 'purchase-orders',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'ProcurementOfficer', 'ComplianceOfficer'] },
+        loadComponent: () => import('./features/procurement/purchase-orders/purchase-orders.component').then(m => m.PurchaseOrdersComponent),
+      },
+      {
+        path: 'receipts',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'ProcurementOfficer', 'ComplianceOfficer'] },
+        loadComponent: () => import('./features/procurement/receipts/receipts.component').then(m => m.ReceiptsComponent),
+      },
+      { path: '', redirectTo: 'suppliers', pathMatch: 'full' },
     ],
   },
 
-  // Telemetry
+  // Telemetry — SensorDevicesController: Admin, Supply, ColdChain
+  //             TelemetryRecordsController: Admin, Supply, ColdChain, Compliance
   {
     path: 'telemetry',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SupplyManager', 'ColdChainOperator', 'ComplianceOfficer'] },
     children: [
-      { path: 'sensors', loadComponent: () => import('./features/telemetry/sensor-devices/sensor-devices.component').then(m => m.SensorDevicesComponent) },
-      { path: 'records', loadComponent: () => import('./features/telemetry/telemetry-records/telemetry-records.component').then(m => m.TelemetryRecordsComponent) },
-      { path: '',        redirectTo: 'sensors', pathMatch: 'full' },
+      {
+        path: 'sensors',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'ColdChainOperator'] },
+        loadComponent: () => import('./features/telemetry/sensor-devices/sensor-devices.component').then(m => m.SensorDevicesComponent),
+      },
+      {
+        path: 'records',
+        loadComponent: () => import('./features/telemetry/telemetry-records/telemetry-records.component').then(m => m.TelemetryRecordsComponent),
+      },
+      { path: '', redirectTo: 'sensors', pathMatch: 'full' },
     ],
   },
 
-  // Inventory
+  // Inventory — Items/StockPositions: JwtAuth (all roles)
+  //             ExceptionsController: Admin, Supply, Pharmacy, Device, Compliance
+  //             ReplenishmentController: Admin, Supply, Pharmacy, Procurement
   {
     path: 'inventory',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'DeviceManager', 'ProcurementOfficer', 'ColdChainOperator', 'ComplianceOfficer', 'Nurse'] },
     children: [
-      { path: 'items',          loadComponent: () => import('./features/inventory/items/items.component').then(m => m.ItemsComponent) },
-      { path: 'stock-positions',loadComponent: () => import('./features/inventory/stock-positions/stock-positions.component').then(m => m.StockPositionsComponent) },
-      { path: 'exceptions',     loadComponent: () => import('./features/inventory/exceptions/exceptions.component').then(m => m.ExceptionsComponent) },
-      { path: 'replenishment',  loadComponent: () => import('./features/inventory/replenishment/replenishment.component').then(m => m.ReplenishmentComponent) },
-      { path: '',               redirectTo: 'items', pathMatch: 'full' },
+      {
+        path: 'items',
+        loadComponent: () => import('./features/inventory/items/items.component').then(m => m.ItemsComponent),
+      },
+      {
+        path: 'stock-positions',
+        loadComponent: () => import('./features/inventory/stock-positions/stock-positions.component').then(m => m.StockPositionsComponent),
+      },
+      {
+        path: 'exceptions',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'DeviceManager', 'ComplianceOfficer'] },
+        loadComponent: () => import('./features/inventory/exceptions/exceptions.component').then(m => m.ExceptionsComponent),
+      },
+      {
+        path: 'replenishment',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'ProcurementOfficer'] },
+        loadComponent: () => import('./features/inventory/replenishment/replenishment.component').then(m => m.ReplenishmentComponent),
+      },
+      { path: '', redirectTo: 'items', pathMatch: 'full' },
     ],
   },
 
-  // Logistics / Distribution
+  // Distribution — TransferOrdersController: Admin, Supply, Procurement, Device
+  //                ConsumptionController: Admin, Supply, Pharmacy, Nurse
   {
     path: 'distribution',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'DeviceManager', 'ProcurementOfficer', 'Nurse'] },
     children: [
-      { path: 'transfer-orders', loadComponent: () => import('./features/logistics/transfer-orders/transfer-orders.component').then(m => m.TransferOrdersComponent) },
-      { path: 'consumption',     loadComponent: () => import('./features/logistics/consumption/consumption.component').then(m => m.ConsumptionComponent) },
-      { path: '',                redirectTo: 'transfer-orders', pathMatch: 'full' },
+      {
+        path: 'transfer-orders',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'ProcurementOfficer', 'DeviceManager'] },
+        loadComponent: () => import('./features/logistics/transfer-orders/transfer-orders.component').then(m => m.TransferOrdersComponent),
+      },
+      {
+        path: 'consumption',
+        canActivate: [roleGuard],
+        data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'Nurse'] },
+        loadComponent: () => import('./features/logistics/consumption/consumption.component').then(m => m.ConsumptionComponent),
+      },
+      { path: '', redirectTo: 'transfer-orders', pathMatch: 'full' },
     ],
   },
 
-  // Notifications
+  // Notifications — all authenticated non-Unassigned users
   {
     path: 'notifications',
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['Admin', 'SupplyManager', 'PharmacyManager', 'DeviceManager', 'ProcurementOfficer', 'ColdChainOperator', 'ComplianceOfficer', 'Nurse'] },
     loadComponent: () => import('./features/notifications/notifications-page/notifications-page.component').then(m => m.NotificationsPageComponent),
   },
 
-  // Audit log — Admin + ComplianceOfficer
+  // Audit log — Admin, ComplianceOfficer
   {
     path: 'audit',
     canActivate: [authGuard, roleGuard],
