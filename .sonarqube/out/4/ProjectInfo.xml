@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ProjectInfo xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://www.sonarsource.com/msbuild/integration/2015/1">
+  <ProjectName>AuthService</ProjectName>
+  <ProjectLanguage>C#</ProjectLanguage>
+  <ProjectType>Product</ProjectType>
+  <ProjectGuid>3a3db6eb-78f6-4a71-9b84-db79fd949f77</ProjectGuid>
+  <FullPath>/workspaces/MediPulseMicro/AuthService/AuthService.csproj</FullPath>
+  <IsExcluded>false</IsExcluded>
+  <AnalysisResultFiles>
+    <AnalysisResultFile Id="FilesToAnalyze" Location="/workspaces/MediPulseMicro/.sonarqube/conf/4/FilesToAnalyze.txt" />
+  </AnalysisResultFiles>
+  <AnalysisSettings>
+    <Property Name="sonar.cs.roslyn.reportFilePaths">/workspaces/MediPulseMicro/.sonarqube/out/4/Issues.json</Property>
+    <Property Name="sonar.cs.analyzer.projectOutPaths">/workspaces/MediPulseMicro/.sonarqube/out/4</Property>
+    <Property Name="sonar.cs.scanner.telemetry">/workspaces/MediPulseMicro/.sonarqube/out/4/Telemetry.json</Property>
+  </AnalysisSettings>
+  <Configuration>Debug</Configuration>
+  <Platform>AnyCPU</Platform>
+  <TargetFramework>net10.0</TargetFramework>
+</ProjectInfo>

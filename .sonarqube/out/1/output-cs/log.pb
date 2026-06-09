@@ -1,0 +1,1 @@
+Roslyn version: 5.3.0.0Language version: CSharp14!Concurrent execution: enabledsoFile '/workspaces/MediPulseMicro/Shared/obj/Debug/net10.0/Shared.GlobalUsings.g.cs' was recognized as generated‹†File '/workspaces/MediPulseMicro/Shared/obj/Debug/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs' was recognized as generated

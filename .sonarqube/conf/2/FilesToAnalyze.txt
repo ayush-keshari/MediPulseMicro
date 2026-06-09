@@ -1,0 +1,11 @@
+﻿/workspaces/MediPulseMicro/Gateway/Program.cs
+/workspaces/MediPulseMicro/Gateway/obj/Debug/net10.0/Gateway.GlobalUsings.g.cs
+/workspaces/MediPulseMicro/Gateway/obj/Debug/net10.0/.NETCoreApp,Version=v10.0.AssemblyAttributes.cs
+/workspaces/MediPulseMicro/Gateway/obj/Debug/net10.0/Gateway.AssemblyInfo.cs
+/workspaces/MediPulseMicro/Gateway/obj/Debug/net10.0/Gateway.MvcApplicationPartsAssemblyInfo.cs
+/workspaces/MediPulseMicro/Gateway/appsettings.Development.json
+/workspaces/MediPulseMicro/Gateway/appsettings.json
+/workspaces/MediPulseMicro/Gateway/ocelot.docker.json
+/workspaces/MediPulseMicro/Gateway/ocelot.json
+/workspaces/MediPulseMicro/Gateway/Dockerfile
+/workspaces/MediPulseMicro/Gateway/Properties/launchSettings.json

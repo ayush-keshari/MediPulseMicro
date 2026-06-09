@@ -1,0 +1,1 @@
+/workspaces/MediPulseMicro/.sonarqube/out/1

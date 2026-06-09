@@ -1,0 +1,14 @@
+﻿/workspaces/MediPulseMicro/Shared/Class1.cs
+/workspaces/MediPulseMicro/Shared/Constants/Roles.cs
+/workspaces/MediPulseMicro/Shared/Enums/FacilityType.cs
+/workspaces/MediPulseMicro/Shared/Enums/TemperatureProfile.cs
+/workspaces/MediPulseMicro/Shared/Enums/UserRole.cs
+/workspaces/MediPulseMicro/Shared/Extensions/ServiceCollectionExtensions.cs
+/workspaces/MediPulseMicro/Shared/Extensions/WebApplicationExtensions.cs
+/workspaces/MediPulseMicro/Shared/Filters/ActivityLogFilter.cs
+/workspaces/MediPulseMicro/Shared/Filters/GlobalExceptionFilter.cs
+/workspaces/MediPulseMicro/Shared/Filters/JwtAuthFilter.cs
+/workspaces/MediPulseMicro/Shared/Filters/RoleAuthorizeFilter.cs
+/workspaces/MediPulseMicro/Shared/Filters/ValidationFilter.cs
+/workspaces/MediPulseMicro/Shared/Helpers/NotificationClient.cs
+/workspaces/MediPulseMicro/Shared/Properties/AssemblyInfo.cs
