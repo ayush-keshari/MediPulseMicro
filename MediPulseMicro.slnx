@@ -9,10 +9,17 @@
     <Project Path="ProcurementService/ProcurementService.csproj" />
     <Project Path="TelemetryService/TelemetryService.csproj" />
   </Folder>
+  <Project Path="AuthService.Tests/AuthService.Tests.csproj" />
+  <Project Path="FacilityService.Tests/FacilityService.Tests.csproj" />
   <Project Path="Frontend/Frontend.esproj">
     <Build />
     <Deploy />
   </Project>
   <Project Path="Gateway/Gateway.csproj" />
+  <Project Path="InventoryService.Tests/InventoryService.Tests.csproj" />
+  <Project Path="LogisticsService.Tests/LogisticsService.Tests.csproj" />
+  <Project Path="NotificationService.Tests/NotificationService.Tests.csproj" />
+  <Project Path="ProcurementService.Tests/ProcurementService.Tests.csproj" />
   <Project Path="Shared/Shared.csproj" Id="e4ebc8f9-5c87-4db6-9917-fd26a89d9984" />
+  <Project Path="TelemetryService.Tests/TelemetryService.Tests.csproj" />
 </Solution>
