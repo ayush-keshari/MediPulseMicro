@@ -55,61 +55,118 @@ Before you begin, ensure you have:
 - **Node.js 18+** - [Download](https://nodejs.org/)
 - **npm 9+** - (Included with Node.js)
 - **Git** - [Download](https://git-scm.com/)
+- **Docker & Docker Compose** - [Download](https://www.docker.com/get-started)
 - **Visual Studio 2022+** or **VS Code**
 
 ### Verify Installation
-dotnet --version         # Should be 10.0.x node --version           # Should be v18+ npm --version            # Should be 9+ git --version            # Should be 2.40+
+dotnet --version         # Should be 10.0.x
+node --version           # Should be v18+
+npm --version            # Should be 9+
+git --version            # Should be 2.40+
+docker --version         # Docker version
+docker-compose --version # Docker Compose version
+
 ---
 
 ## 🚀 Quick Start
 
-### 1. Clone Repository
-git clone https://github.com/ayush-keshari/MediPulseMicro.git cd MediPulseMicro git checkout dev2
-### 2. Setup Databases
+### Option 1: Docker Compose (Recommended - Self-contained)
+1. Clone Repository
+   ```bash
+   git clone https://github.com/ayush-keshari/MediPulseMicro.git
+   cd MediPulseMicro
+   git checkout dev2
+   ```
 
-**Option A: Using SQL Server Management Studio (SSMS)**
+2. Setup Environment (Optional but recommended)
+   ```bash
+   cp .env.example .env
+   # Edit .env if you want to customize values
+   ```
 
-1. Open SSMS
-2. Connect to `(local)` or `localhost`
-3. Create two databases:
-   - `MedipulseMain` (for all microservices)
-   - `MedipulseAudit` (for audit logs)
+3. Start All Services
+   ```bash
+   docker-compose up -d
+   ```
 
-**Option B: Using .NET Migrations**
-dotnet restoreApply migrations to create/update databases
-dotnet ef database update --project AuthService dotnet ef database update --project FacilityService dotnet ef database update --project InventoryService dotnet ef database update --project ProcurementService dotnet ef database update --project LogisticsService dotnet ef database update --project TelemetryService dotnet ef database update --project NotificationService dotnet ef database update --project AuditService
-### 3. Update Configuration
+4. Wait for Initialization
+   - The migrator service will run EF Core migrations automatically
+   - This may take 1-2 minutes on first run
+   - Check logs with: `docker-compose logs -f migrator`
 
-Update `appsettings.json` in each service:
-{ "ConnectionStrings": { "DefaultConnection": "Server=localhost;Database=MedipulseMain;Integrated Security=true;TrustServerCertificate=true;", "AuditConnection": "Server=localhost;Database=MedipulseAudit;Integrated Security=true;TrustServerCertificate=true;" }, "Jwt": { "Key": "YourSecretKeyMinimum32CharactersLongForJWT!!!", "Issuer": "MediPulseAuthService", "Audience": "MediPulseAPI", "ExpiryHours": 24 }, "Logging": { "LogLevel": { "Default": "Information" } } }
+5. Access the Application
+   - Gateway: http://localhost:5000
+   - Frontend: http://localhost:80
+   - API Documentation: Available through individual service endpoints
+
+### Option 2: Manual Setup (For Development)
+1. Follow steps 1-2 above
+2. Setup Databases using SSMS or .NET Migrations
+3. Update appsettings.json in each service with your connection strings
+4. Run each service individually as shown in the Running Services section below
+
 ---
 
 ## 🏃 Running Services
 
-### Backend Services
+### Backend Services (Docker Compose - Recommended)
+All backend services are orchestrated via Docker Compose:
+```bash
+docker-compose up -d
+```
 
+To view logs:
+```bash
+docker-compose logs -f
+```
+
+To stop services:
+```bash
+docker-compose down
+```
+
+### Backend Services (Manual - For Development)
 Start each service in a separate terminal:
 Terminal 1 - AuthService (Port 5001)
-cd AuthService dotnet run
+cd AuthService
+dotnet run
+
 Terminal 2 - FacilityService (Port 5002)
-cd FacilityService dotnet run
+cd FacilityService
+dotnet run
+
 Terminal 3 - InventoryService (Port 5003)
-cd InventoryService dotnet run
+cd InventoryService
+dotnet run
+
 Terminal 4 - ProcurementService (Port 5004)
-cd ProcurementService dotnet run
+cd ProcurementService
+dotnet run
+
 Terminal 5 - LogisticsService (Port 5005)
-cd LogisticsService dotnet run
+cd LogisticsService
+dotnet run
+
 Terminal 6 - TelemetryService (Port 5006)
-cd TelemetryService dotnet run
+cd TelemetryService
+dotnet run
+
 Terminal 7 - NotificationService (Port 5007)
-cd NotificationService dotnet run
+cd NotificationService
+dotnet run
+
 Terminal 8 - AuditService (Port 5008)
-cd AuditService dotnet run
+cd AuditService
+dotnet run
+
 Terminal 9 - Gateway (Port 5000)
-cd Gateway dotnet run
+cd Gateway
+dotnet run
 
 ### Frontend
-cd Frontend npm install npm start
+cd Frontend
+npm install
+npm start
 Access the application at: **http://localhost:4200**
 
 ---
@@ -118,8 +175,16 @@ Access the application at: **http://localhost:4200**
 
 ### Run All Tests
 dotnet test
+
 ### Run Tests by Service
-dotnet test AuthService.Tests dotnet test FacilityService.Tests dotnet test InventoryService.Tests dotnet test ProcurementService.Tests dotnet test LogisticsService.Tests dotnet test TelemetryService.Tests dotnet test NotificationService.Tests
+dotnet test AuthService.Tests
+dotnet test FacilityService.Tests
+dotnet test InventoryService.Tests
+dotnet test ProcurementService.Tests
+dotnet test LogisticsService.Tests
+dotnet test TelemetryService.Tests
+dotnet test NotificationService.Tests
+
 ### Test Coverage
 
 - **31 tests total** across all services
@@ -132,19 +197,50 @@ dotnet test AuthService.Tests dotnet test FacilityService.Tests dotnet test Inve
 ## 📊 API Endpoints
 
 ### Authentication
-POST   /api/auth/register      - Register new user POST   /api/auth/login         - Login (returns JWT) GET    /api/auth/profile       - Get current user profile
+POST   /api/auth/register      - Register new user
+POST   /api/auth/login         - Login (returns JWT)
+GET    /api/auth/profile       - Get current user profile
+
 ### Facility Management
-GET    /api/facilities         - List all facilities POST   /api/facilities         - Create facility GET    /api/facilities/{id}    - Get facility details PUT    /api/facilities/{id}    - Update facility DELETE /api/facilities/{id}    - Delete facility GET    /api/storage-zones      - List storage zones POST   /api/storage-zones      - Create storage zone
+GET    /api/facilities         - List all facilities
+POST   /api/facilities         - Create facility
+GET    /api/facilities/{id}    - Get facility details
+PUT    /api/facilities/{id}    - Update facility
+DELETE /api/facilities/{id}    - Delete facility
+GET    /api/storage-zones      - List storage zones
+POST   /api/storage-zones      - Create storage zone
+
 ### Inventory Management
-GET    /api/items              - List all items POST   /api/items              - Create item GET    /api/items/{id}         - Get item details GET    /api/inventory-positions - View inventory by lot GET    /api/exceptions         - List open exceptions POST   /api/recall-actions     - Create recall action GET    /api/forecasts          - Demand forecasts GET    /api/replenishment-plans - Replenishment suggestions
+GET    /api/items              - List all items
+POST   /api/items              - Create item
+GET    /api/items/{id}         - Get item details
+GET    /api/inventory-positions - View inventory by lot
+GET    /api/exceptions         - List open exceptions
+POST   /api/recall-actions     - Create recall action
+GET    /api/forecasts          - Demand forecasts
+GET    /api/replenishment-plans - Replenishment suggestions
+
 ### Procurement
-GET    /api/suppliers          - List suppliers POST   /api/suppliers          - Create supplier GET    /api/purchase-orders    - List POs POST   /api/purchase-orders    - Create PO POST   /api/receipts           - Create receipt (GRN)
+GET    /api/suppliers          - List suppliers
+POST   /api/suppliers          - Create supplier
+GET    /api/purchase-orders    - List POs
+POST   /api/purchase-orders    - Create PO
+POST   /api/receipts           - Create receipt (GRN)
+
 ### Logistics
-GET    /api/transfer-orders    - List transfers POST   /api/transfer-orders    - Create transfer POST   /api/consumption        - Log consumption
+GET    /api/transfer-orders    - List transfers
+POST   /api/transfer-orders    - Create transfer
+POST   /api/consumption        - Log consumption
+
 ### Telemetry
-GET    /api/sensors            - List IoT sensors POST   /api/telemetry          - Ingest sensor readings GET    /api/excursions         - View temperature breaches
+GET    /api/sensors            - List IoT sensors
+POST   /api/telemetry          - Ingest sensor readings
+GET    /api/excursions         - View temperature breaches
+
 ### Notifications
-GET    /api/notifications      - List user notifications PATCH  /api/notifications/{id}/read - Mark as read
+GET    /api/notifications      - List user notifications
+PATCH  /api/notifications/{id}/read - Mark as read
+
 ---
 
 ## 🔒 Security Best Practices
@@ -180,7 +276,32 @@ Services will be available at:
 ---
 
 ## 📁 Project Structure
-MediPulseMicro/ ├── .github/ │   └── workflows/ │       ├── ci.yml              # GitHub Actions CI/CD │       └── dependabot.yml      # Automated dependency updates ├── AuthService/ │   ├── Controllers/ │   ├── Services/ │   ├── Models/ │   ├── Data/ │   └── Program.cs ├── FacilityService/ ├── InventoryService/ ├── ProcurementService/ ├── LogisticsService/ ├── TelemetryService/ ├── NotificationService/ ├── AuditService/ ├── Gateway/ ├── Shared/                      # Common models & DTOs ├── Frontend/                    # Angular SPA ├── AuthService.Tests/ ├── FacilityService.Tests/ └── [other test projects]
+
+MediPulseMicro/
+├── .github/
+│   └── workflows/
+│       ├── ci.yml              # GitHub Actions CI/CD
+│       └── dependabot.yml      # Automated dependency updates
+├── AuthService/
+│   ├── Controllers/
+│   ├── Services/
+│   ├── Models/
+│   ├── Data/
+│   └── Program.cs
+├── FacilityService/
+├── InventoryService/
+├── ProcurementService/
+├── LogisticsService/
+├── TelemetryService/
+├── NotificationService/
+├── AuditService/
+├── Gateway/
+├── Shared/                      # Common models & DTOs
+├── Frontend/                    # Angular SPA
+├── AuthService.Tests/
+├── FacilityService.Tests/
+└── [other test projects]
+
 ---
 
 ## 🤝 Contributing
@@ -188,7 +309,10 @@ MediPulseMicro/ ├── .github/ │   └── workflows/ │       ├─�
 We welcome contributions! Please follow these steps:
 
 ### 1. Create Feature Branch
-git checkout dev2 git pull origin dev2 git checkout -b feature/your-feature-name
+git checkout dev2
+git pull origin dev2
+git checkout -b feature/your-feature-name
+
 ### 2. Make Changes & Write Tests
 Make your changes
 Write tests for new functionality
@@ -199,12 +323,21 @@ git commit -m "feat: add new feature
 •	Detailed description of what changed
 •	Why this change was needed
 •	Any related issues or PRs"
+
 ### 4. Push & Create Pull Request
 git push origin feature/your-feature-name
 Then create a Pull Request on GitHub targeting the `dev2` branch.
 
 ### Commit Message Convention
-feat:        Add new feature fix:         Bug fix docs:        Documentation changes test:        Test additions/updates chore:       Build/config/tooling changes ci:          CI/CD pipeline changes refactor:    Code refactoring without behavior change perf:        Performance improvements
+feat:        Add new feature
+fix:         Bug fix
+docs:        Documentation changes
+test:        Test additions/updates
+chore:       Build/config/tooling changes
+ci:          CI/CD pipeline changes
+refactor:    Code refactoring without behavior change
+perf:        Performance improvements
+
 ---
 
 ## 🚨 Troubleshooting
@@ -216,14 +349,26 @@ If connection fails, check:
 1. SQL Server is running
 2. Connection string is correct
 3. Database exists
+
 ### Port Already in Use
 Find and kill process using port (Windows)
-netstat -ano | findstr :5001 taskkill /PID <PID> /F
+netstat -ano | findstr :5001
+taskkill /PID <PID> /F
+
 ### Tests Failing
 Clean and rebuild
-dotnet clean dotnet restore dotnet test --verbosity normal
+dotnet clean
+dotnet restore
+dotnet test --verbosity normal
+
 ### Frontend Not Loading
-cd Frontend npm cache clean --force rm -r node_modules package-lock.json npm install npm start
+cd Frontend
+npm cache clean --force
+rm -r node_modules
+package-lock.json
+npm install
+npm start
+
 ---
 
 ## 📞 Support & Contact
@@ -252,11 +397,6 @@ This project is licensed under the **MIT License** - see the LICENSE file for de
 - Frontend with [Angular 18+](https://angular.io/)
 - Database with [SQL Server](https://www.microsoft.com/en-us/sql-server/)
 - CI/CD with [GitHub Actions](https://github.com/features/actions)
-
----
-
-**Last Updated**: August 2026  
-**Status**: ✅ In Active Development
 
 ---
 

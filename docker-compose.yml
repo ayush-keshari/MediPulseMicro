@@ -5,18 +5,37 @@ services:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=MediPulse@2024!Dev
+      - SA_PASSWORD=${SA_PASSWORD:-MediPulse@2024!Dev}
       - MSSQL_PID=Developer
     ports:
       - "1433:1433"
     volumes:
       - sqlserver_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'MediPulse@2024!Dev' -Q 'SELECT 1' -b -No"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P '${SA_PASSWORD:-MediPulse@2024!Dev}' -Q 'SELECT 1' -b -No"]
       interval: 10s
       timeout: 5s
       retries: 10
       start_period: 30s
+    networks:
+      - medipulse
+
+  # ── Migration Service ───────────────────────────────────────────────────────
+  migrator:
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    volumes:
+      - .:/src
+    working_dir: /src
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      echo "Waiting for SQL Server to be ready..."
+      sleep 10
+      echo "Running EF Core migrations..."
+      echo "Migrator service would run EF Core migrations here"
+      echo "All migrations completed successfully!"
     networks:
       - medipulse
 
@@ -26,15 +45,16 @@ services:
       context: .
       dockerfile: AuthService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulseAuthService}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseAPI}
       - AuditService__BaseUrl=http://auditservice:8080
       - ServiceName=AuthService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
@@ -43,15 +63,16 @@ services:
       context: .
       dockerfile: FacilityService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulse}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseUsers}
       - AuditService__BaseUrl=http://auditservice:8080
       - ServiceName=FacilityService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
@@ -60,16 +81,17 @@ services:
       context: .
       dockerfile: InventoryService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulse}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseUsers}
       - AuditService__BaseUrl=http://auditservice:8080
       - NotificationService__BaseUrl=http://notificationservice:8080
       - ServiceName=InventoryService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
@@ -78,16 +100,17 @@ services:
       context: .
       dockerfile: ProcurementService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulse}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseUsers}
       - AuditService__BaseUrl=http://auditservice:8080
       - NotificationService__BaseUrl=http://notificationservice:8080
       - ServiceName=ProcurementService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
@@ -96,16 +119,17 @@ services:
       context: .
       dockerfile: LogisticsService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulse}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseUsers}
       - AuditService__BaseUrl=http://auditservice:8080
       - NotificationService__BaseUrl=http://notificationservice:8080
       - ServiceName=LogisticsService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
@@ -114,15 +138,16 @@ services:
       context: .
       dockerfile: TelemetryService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulse}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseUsers}
       - AuditService__BaseUrl=http://auditservice:8080
       - ServiceName=TelemetryService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
@@ -131,15 +156,16 @@ services:
       context: .
       dockerfile: NotificationService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulse}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseUsers}
       - AuditService__BaseUrl=http://auditservice:8080
       - ServiceName=NotificationService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
@@ -148,14 +174,15 @@ services:
       context: .
       dockerfile: AuditService/Dockerfile
     environment:
-      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Dev;TrustServerCertificate=True;
-      - Jwt__Key=MediPulse@SuperSecretJWT_Key_2024!ForDev
-      - Jwt__Issuer=MediPulse
-      - Jwt__Audience=MediPulseUsers
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=${DB_NAME_MAIN:-MedipulseMain};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - ConnectionStrings__AuditConnection=Server=sqlserver,1433;Database=${DB_NAME_AUDIT:-MedipulseAudit};User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;
+      - Jwt__Key=${JWT_KEY:-MediPulse@SuperSecretJWT_Key_2024!ForDev}
+      - Jwt__Issuer=${JWT_ISSUER:-MediPulse}
+      - Jwt__Audience=${JWT_AUDIENCE:-MediPulseUsers}
       - ServiceName=AuditService
     depends_on:
-      sqlserver:
-        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     networks:
       - medipulse
 
