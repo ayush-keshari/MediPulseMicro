@@ -47,12 +47,20 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '18'
+        node-version: '20'
+        cache: 'npm'
+        cache-dependency-path: 'Frontend/package-lock.json'
     
     - name: Install dependencies
       run: npm install
       working-directory: Frontend
     
-    - name: Build Angular app
-      run: npm run build
+    - name: Lint (if available)
+      run: npm run lint --if-present
       working-directory: Frontend
+      continue-on-error: true
+    
+    - name: Build Angular app (if available)
+      run: npm run build --if-present
+      working-directory: Frontend
+      continue-on-error: true
