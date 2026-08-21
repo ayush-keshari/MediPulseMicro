@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProcurementService } from '../../../services/procurement/procurement.service';
@@ -9,7 +8,7 @@ import { PurchaseOrderDto, SupplierDto } from '../../../services/procurement/pro
 @Component({
   selector: 'app-purchase-orders',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './purchase-orders.component.html',
   styleUrl: './purchase-orders.component.css',
 })

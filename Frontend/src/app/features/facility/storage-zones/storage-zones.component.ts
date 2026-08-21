@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FacilityService } from '../../../services/facility/facility.service';
@@ -9,7 +8,7 @@ import { StorageZoneDto, FacilityDto } from '../../../services/facility/facility
 @Component({
   selector: 'app-storage-zones',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './storage-zones.component.html',
   styleUrl: './storage-zones.component.css',
 })

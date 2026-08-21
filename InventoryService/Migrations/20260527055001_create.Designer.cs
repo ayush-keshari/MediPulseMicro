@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
+#pragma warning disable CS8981
 
 namespace InventoryService.Migrations
 {
@@ -142,3 +143,5 @@ namespace InventoryService.Migrations
         }
     }
 }
+
+#pragma warning restore CS8981

@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ProcurementService } from '../../../services/procurement/procurement.service';
@@ -9,7 +8,7 @@ import { SupplierDto } from '../../../services/procurement/procurement.models';
 @Component({
   selector: 'app-suppliers',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './suppliers.component.html',
   styleUrl: './suppliers.component.css',
 })

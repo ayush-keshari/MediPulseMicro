@@ -123,9 +123,11 @@ public class FacilityServiceImpl : IFacilityService
             throw new InvalidOperationException(
                 $"Facility with ID {request.FacilityId} does not exist.");
 
+        var normalizedName = request.Name.ToLower();
         if (await _db.StorageZones.AnyAsync(z =>
                 z.FacilityId     == request.FacilityId &&
-                z.Name.ToLower() == request.Name.ToLower()))
+                z.Name           != null &&
+                z.Name.ToLower() == normalizedName))
             throw new InvalidOperationException(
                 $"A zone named '{request.Name}' already exists in this facility.");
 
@@ -147,10 +149,12 @@ public class FacilityServiceImpl : IFacilityService
         var zone = await _db.StorageZones.FindAsync(id);
         if (zone == null) return false;
 
+        var normalizedName = request.Name.ToLower();
         if (await _db.StorageZones.AnyAsync(z =>
                 z.ZoneId         != id &&
                 z.FacilityId     == zone.FacilityId &&
-                z.Name.ToLower() == request.Name.ToLower()))
+                z.Name           != null &&
+                z.Name.ToLower() == normalizedName))
             throw new InvalidOperationException(
                 $"A zone named '{request.Name}' already exists in this facility.");
 

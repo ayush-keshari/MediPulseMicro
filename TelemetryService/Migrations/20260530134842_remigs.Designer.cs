@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using TelemetryService.Data;
 
 #nullable disable
+#pragma warning disable CS8981
 
 namespace TelemetryService.Migrations
 {
@@ -117,3 +118,5 @@ namespace TelemetryService.Migrations
         }
     }
 }
+
+#pragma warning restore CS8981

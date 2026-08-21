@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { TelemetryService } from '../../../services/telemetry/telemetry.service';
@@ -11,7 +10,7 @@ import { StorageZoneDto } from '../../../services/facility/facility.models';
 @Component({
   selector: 'app-sensor-devices',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './sensor-devices.component.html',
   styleUrl: './sensor-devices.component.css',
 })

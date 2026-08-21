@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
+#pragma warning disable CS8981
 
 namespace InventoryService.Migrations
 {
@@ -82,3 +83,5 @@ namespace InventoryService.Migrations
         }
     }
 }
+
+#pragma warning restore CS8981

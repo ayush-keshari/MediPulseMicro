@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../../services/auth/auth.service';
@@ -10,7 +9,7 @@ import { getAllRoles, getRoleDisplayName } from '../../../shared/extensions/app.
 @Component({
   selector: 'app-user-management',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './user-management.component.html',
   styleUrl: './user-management.component.css',
 })

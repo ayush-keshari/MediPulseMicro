@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpErrorResponse } from '@angular/common/http';
 import { FacilityService } from '../../../services/facility/facility.service';
@@ -9,7 +8,7 @@ import { FacilityDto } from '../../../services/facility/facility.models';
 @Component({
   selector: 'app-facilities',
   standalone: true,
-  imports: [CommonModule, RouterLink, ReactiveFormsModule, FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './facilities.component.html',
   styleUrl: './facilities.component.css',
 })
