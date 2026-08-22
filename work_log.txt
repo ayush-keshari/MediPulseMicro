@@ -1,0 +1,10 @@
+2026-08-22: Work session focused on replacing trivial unit tests with behavior tests
+- AuthService.Tests: Created behavior tests for user registration and login
+- TelemetryService.Tests: Created behavior tests for telemetry ingestion and retrieval
+- FacilityService.Tests: Removed trivial tests, preserved behavior tests
+- InventoryService.Tests: Removed trivial tests, preserved behavior tests
+- NotificationService.Tests: Removed trivial tests, preserved behavior test
+- Verified LogisticsService.Tests and ProcurementService.Tests already had behavior tests
+- Updated README.md to remove outdated test count
+- Confirmed CI workflow properly uses GitHub Secrets for SQL Server credentials
+- Confirmed data validation script returns error count for CI consumption

@@ -2,6 +2,14 @@ using Microsoft.EntityFrameworkCore;
 using TelemetryService.Data;
 using TelemetryService.Services;
 using Shared.Extensions;
+using Serilog;
+using Serilog.Formatting.Json;
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new JsonFormatter())
+    .MinimumLevel.Information()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +24,9 @@ builder.Services.AddDbContext<TelemetryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ITelemetryService, TelemetryServiceImpl>();
+
+// ── SERILOG SETUP ────────────────────────────────────────────────
+builder.Host.UseSerilog();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();

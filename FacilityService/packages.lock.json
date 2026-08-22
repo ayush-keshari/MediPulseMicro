@@ -21,6 +21,12 @@
           "Microsoft.EntityFrameworkCore.Design": "9.0.4"
         }
       },
+      "Serilog": {
+        "type": "Direct",
+        "requested": "[4.0.2, )",
+        "resolved": "4.0.2",
+        "contentHash": "Vehq4uNYtURe/OnHEpWGvMgrvr5Vou7oZLdn3BuEH5FSCeHXDpNJtpzWoqywXsSvCTuiv0I65mZDRnJSeUvisA=="
+      },
       "Azure.Core": {
         "type": "Transitive",
         "resolved": "1.38.0",

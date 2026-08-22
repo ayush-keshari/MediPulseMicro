@@ -1,5 +1,25 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
+using System
+using System.IO
+using System.IO
+using System.IO
+using System.IO
+using System.IO
+using System.IO
+using System.IO
+using System.IO
+using System.IO;
+using System;
+
+using Serilog;
+using Serilog.Formatting.Json;
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new JsonFormatter())
+    .MinimumLevel.Information()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +43,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddOcelot();
 
 var app = builder.Build();
+
+// ── SERILOG SETUP ────────────────────────────────────────────────
+builder.Host.UseSerilog();
 
 app.UseCors("AllowAngular");
 

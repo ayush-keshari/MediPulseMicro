@@ -1,35 +1,97 @@
 using Xunit;
 using InventoryService.Models;
+using InventoryService.Services;
+using InventoryService.DTOs;
+using InventoryService.Data;
+using Microsoft.EntityFrameworkCore;
 
-namespace InventoryService.Tests;
-
-public class InventoryServiceTests
+namespace InventoryService.Tests
 {
-    [Fact]
-    public void Item_HasItemCode()
+    public class InventoryServiceTests
     {
-        var item = new Item { ItemCode = "MED-001" };
-        Assert.Equal("MED-001", item.ItemCode);
-    }
+        private InventoryDbContext CreateInMemoryDbContext()
+        {
+            var options = new DbContextOptionsBuilder<InventoryDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
 
-    [Fact]
-    public void Item_HasCategory()
-    {
-        var item = new Item { Category = "Pharma" };
-        Assert.Equal("Pharma", item.Category);
-    }
+            var context = new InventoryDbContext(options);
+            context.Database.EnsureCreated();
+            return context;
+        }
 
-    [Fact]
-    public void InventoryPosition_HasLotId()
-    {
-        var position = new InventoryPosition { LotId = "LOT-001" };
-        Assert.Equal("LOT-001", position.LotId);
-    }
+        [Fact]
+        public async Task CreateItemAsync_ReturnsError_WhenItemCodeAlreadyExists()
+        {
+            // Arrange
+            await using var context = CreateInMemoryDbContext();
+            var service = new InventoryServiceImpl(context);
 
-    [Fact]
-    public void ExceptionEvent_HasType()
-    {
-        var exception = new ExceptionEvent { Type = "Stockout" };
-        Assert.Equal("Stockout", exception.Type);
+            // Create first item
+            var firstRequest = new CreateItemRequest
+            {
+                ItemCode = "MED-001",
+                Name = "Test Item",
+                Category = "Pharma",
+                Unit = "mg",
+                SafetyStock = 10
+            };
+
+            await service.CreateItemAsync(firstRequest);
+
+            // Try to create duplicate
+            var duplicateRequest = new CreateItemRequest
+            {
+                ItemCode = "MED-001", // Same code
+                Name = "Another Item",
+                Category = "Pharma",
+                Unit = "ml",
+                SafetyStock = 20
+            };
+
+            // Act
+            var (item, error) = await service.CreateItemAsync(duplicateRequest);
+
+            // Assert
+            Assert.Null(item); // Should return null for item
+            Assert.NotNull(error); // Should have an error message
+            Assert.Contains("already exists", error);
+        }
+
+        [Fact]
+        public async Task CreateItemAsync_CreatesItemSuccessfully_WhenItemCodeIsUnique()
+        {
+            // Arrange
+            await using var context = CreateInMemoryDbContext();
+            var service = new InventoryServiceImpl(context);
+
+            var request = new CreateItemRequest
+            {
+                ItemCode = "MED-001",
+                Name = "Test Item",
+                Category = "Pharma",
+                Unit = "mg",
+                StorageRequirement = "Refrigerated",
+                SafetyStock = 10
+            };
+
+            // Act
+            var (item, error) = await service.CreateItemAsync(request);
+
+            // Assert
+            Assert.NotNull(item); // Should return the created item
+            Assert.Null(error); // Should have no error
+            Assert.Equal("MED-001", item.ItemCode);
+            Assert.Equal("Test Item", item.Name);
+            Assert.Equal("Pharma", item.Category);
+            Assert.Equal("mg", item.Unit);
+            Assert.Equal("Refrigerated", item.StorageRequirement);
+            Assert.Equal(10, item.SafetyStock);
+
+            // Verify item was actually saved in the database
+            var savedItem = await context.Items.FirstOrDefaultAsync(i => i.ItemCode == "MED-001");
+            Assert.NotNull(savedItem);
+            Assert.Equal("Test Item", savedItem.Name);
+        }
     }
 }

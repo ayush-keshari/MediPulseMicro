@@ -449,6 +449,11 @@
         "resolved": "13.0.3",
         "contentHash": "HrC5BXdl00IP9zeV+0Z848QWPAoCr9P3bDEZguI+gkLcBKAOxix/tLEAAHC+UvDNPv4a2d18lOReHMOagPa+zQ=="
       },
+      "Serilog": {
+        "type": "Transitive",
+        "resolved": "4.0.2",
+        "contentHash": "Vehq4uNYtURe/OnHEpWGvMgrvr5Vou7oZLdn3BuEH5FSCeHXDpNJtpzWoqywXsSvCTuiv0I65mZDRnJSeUvisA=="
+      },
       "Swashbuckle.AspNetCore": {
         "type": "Transitive",
         "resolved": "7.3.1",
@@ -652,6 +657,8 @@
         "dependencies": {
           "Microsoft.EntityFrameworkCore.SqlServer": "[9.0.4, )",
           "Microsoft.EntityFrameworkCore.Tools": "[9.0.4, )",
+          "Serilog": "[4.0.2, )",
+          "Serilog.Formatting.Json": "[4.0.0, )",
           "Shared": "[1.0.0, )"
         }
       },

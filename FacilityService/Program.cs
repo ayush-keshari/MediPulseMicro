@@ -2,6 +2,14 @@ using FacilityService.Data;
 using FacilityService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
+using Serilog;
+using Serilog.Formatting.Json;
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new JsonFormatter())
+    .MinimumLevel.Information()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +24,9 @@ builder.Services.AddDbContext<FacilityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IFacilityService, FacilityServiceImpl>();
+
+// ── SERILOG SETUP ────────────────────────────────────────────────
+builder.Host.UseSerilog();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();

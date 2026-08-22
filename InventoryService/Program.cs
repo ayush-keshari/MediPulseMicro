@@ -2,7 +2,15 @@ using InventoryService.Data;
 using InventoryService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
+using Serilog;
+using Serilog.Formatting.Json;
 // Services registered: IInventoryService, IExceptionService, IReplenishmentService
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new JsonFormatter())
+    .MinimumLevel.Information()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +26,9 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 builder.Services.AddScoped<IInventoryService, InventoryServiceImpl>();
 builder.Services.AddScoped<IExceptionService, ExceptionServiceImpl>();
 builder.Services.AddScoped<IReplenishmentService, ReplenishmentServiceImpl>();
+
+// ── SERILOG SETUP ────────────────────────────────────────────────
+builder.Host.UseSerilog();
 
 // ── BUILD & PIPELINE ──────────────────────────────────────────────────────
 var app = builder.Build();

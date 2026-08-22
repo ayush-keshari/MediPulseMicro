@@ -2,6 +2,14 @@ using AuditService.Data;
 using AuditService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
+using Serilog;
+using Serilog.Formatting.Json;
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new JsonFormatter())
+    .MinimumLevel.Information()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +25,9 @@ builder.Services.AddDbContext<AuditDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IAuditLogService, AuditLogServiceImpl>();
+
+// ── SERILOG SETUP ────────────────────────────────────────────────
+builder.Host.UseSerilog();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();

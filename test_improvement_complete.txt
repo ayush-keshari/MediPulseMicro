@@ -1,0 +1,10 @@
+Test improvement work completed:
+- AuthService.Tests: Behavior tests for registration/login
+- TelemetryService.Tests: Behavior tests for telemetry operations
+- FacilityService.Tests: Removed trivial tests, kept behavior tests
+- InventoryService.Tests: Removed trivial tests, kept behavior tests
+- NotificationService.Tests: Removed trivial tests, kept behavior tests
+- Verified LogisticsService.Tests and ProcurementService.Tests already had behavior tests
+- Updated README.md to remove outdated test count
+- Confirmed CI workflow properly uses GitHub Secrets for SQL Server credentials
+- Confirmed validation script returns error count for CI consumption
