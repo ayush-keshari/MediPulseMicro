@@ -56,27 +56,13 @@ jobs:
         fi
         echo "Coverage gate passed: $COVERAGE_PERCENT% >= 40%"
 
-    - name: Setup SQL Server for validation
+    - name: Start dependent services
       if: always()
       run: |
-        # Install SQL Server tools
-        wget -qO- https://packages.microsoft.com/keys/microsoft.asc | sudo apt-key add -
-        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/22.04/mssql-server-2022.list)"
-        sudo add-apt-repository "$(wget -qO- https://packages.microsoft.com/config/ubuntu/22.04/prod.list)"
-        sudo apt-get update
-        sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
-        echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc
-        source ~/.bashrc
-
-    - name: Start SQL Server
-      if: always()
-      run: |
-        sudo /opt/mssql/bin/mssql-conf setup accept-eula
-        sudo /opt/mssql/bin/mssql-conf set tcpport 1433
-        sudo systemctl start mssql-server
-        # Wait for SQL Server to start
+        docker compose -f docker-compose.yml up -d sqlserver
+        # Wait for SQL Server to be ready
         for i in {1..30}; do
-          if /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" 2>/dev/null; then
+          if docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" 2>/dev/null; then
             echo "SQL Server is ready"
             break
           fi
@@ -87,23 +73,19 @@ jobs:
     - name: Apply migrations and load mock data
       if: always()
       run: |
-        # Run EF Core migrations
-        dotnet ef database update --project AuthService/AuthService.csproj
-        dotnet ef database update --project FacilityService/FacilityService.csproj
-        dotnet ef database update --project InventoryService/InventoryService.csproj
-        dotnet ef database update --project ProcurementService/ProcurementService.csproj
-        dotnet ef database update --project LogisticsService/LogisticsService.csproj
-        dotnet ef database update --project TelemetryService/TelemetryService.csproj
-        dotnet ef database update --project NotificationService/NotificationService.csproj
-        dotnet ef database update --project AuditService/AuditService.csproj
-
-        # Load mock data
-        /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i MockData_InsertOnly.sql -d MedipulseMain
+        # Run EF Core migrations using the migrator service
+        docker compose -f docker-compose.yml up migrator --abort-on-container-exit --exit-code-from migrator
+        migrator_exit_code=$?
+        if [ $migrator_exit_code -ne 0 ]; then
+          echo "Migrations failed with exit code: $migrator_exit_code"
+          exit $migrator_exit_code
+        fi
+        echo "Migrations completed successfully"
 
     - name: Validate mock data integrity
       if: always()
       run: |
-        RESULT=$(/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/validate_mock_data.sql -d MedipulseMain -h -1 | tail -n 1)
+        RESULT=$(docker compose exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/validate_mock_data.sql -d MedipulseMain -h -1 | tail -n 1)
         if [ "$RESULT" -gt 0 ]; then
           echo "Mock data validation failed with $RESULT errors"
           exit 1

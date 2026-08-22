@@ -132,8 +132,8 @@ PRINT 'Checking Logistics Service referential integrity...';
 -- Check TransferOrder references valid FromFacility
 IF EXISTS (
     SELECT 1
-    FROM [TransferOrder] to
-    LEFT JOIN [Facility] f ON to.[FromFacilityId] = f.[FacilityID]
+    FROM [TransferOrder] transferOrder
+    LEFT JOIN [Facility] f ON transferOrder.[FromFacilityId] = f.[FacilityID]
     WHERE f.[FacilityID] IS NULL
 )
 BEGIN
@@ -148,8 +148,8 @@ END
 -- Check TransferOrder references valid ToFacility
 IF EXISTS (
     SELECT 1
-    FROM [TransferOrder] to
-    LEFT JOIN [Facility] f ON to.[ToFacilityId] = f.[FacilityID]
+    FROM [TransferOrder] transferOrder
+    LEFT JOIN [Facility] f ON transferOrder.[ToFacilityId] = f.[FacilityID]
     WHERE f.[FacilityID] IS NULL
 )
 BEGIN
@@ -165,8 +165,8 @@ END
 IF EXISTS (
     SELECT 1
     FROM [TransferOrderItem] toi
-    LEFT JOIN [TransferOrder] to ON toi.[TransferOrderId] = to.[TransferOrderId]
-    WHERE to.[TransferOrderId] IS NULL
+    LEFT JOIN [TransferOrder] transferOrder ON toi.[TransferOrderId] = transferOrder.[TransferOrderId]
+    WHERE transferOrder.[TransferOrderId] IS NULL
 )
 BEGIN
     PRINT 'ERROR: TransferOrderItem references non-existent TransferOrder';
