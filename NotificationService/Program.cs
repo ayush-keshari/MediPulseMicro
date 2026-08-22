@@ -7,7 +7,7 @@ using Serilog.Formatting.Json;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
-    .WriteTo.Console(new JsonFormatter())
+    .WriteTo.Console()
     .MinimumLevel.Information()
     .CreateLogger();
 

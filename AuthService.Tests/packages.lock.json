@@ -779,7 +779,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "[9.0.4, )",
           "Microsoft.EntityFrameworkCore.Tools": "[9.0.4, )",
           "Serilog.AspNetCore": "[8.0.3, )",
-          "Serilog.Formatting.Json": "[6.0.0, )",
+          "Serilog.Formatting.Json": "[1.0.0, )",
           "Shared": "[1.0.0, )"
         }
       },

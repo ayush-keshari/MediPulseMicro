@@ -16,7 +16,7 @@
 
     <!-- Serilog for structured logging -->
     <PackageReference Include="Serilog" Version="4.0.2" />
-    <PackageReference Include="Serilog.Formatting.Json" Version="4.0.0" />
+    <PackageReference Include="Serilog.Formatting.Json" Version="6.0.0" />
 
     <!-- JWT Bearer and Swashbuckle are in Shared — pulled in transitively -->
   </ItemGroup>

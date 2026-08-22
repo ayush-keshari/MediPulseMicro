@@ -658,7 +658,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "[9.0.4, )",
           "Microsoft.EntityFrameworkCore.Tools": "[9.0.4, )",
           "Serilog": "[4.0.2, )",
-          "Serilog.Formatting.Json": "[4.0.0, )",
+          "Serilog.Formatting.Json": "[6.0.0, )",
           "Shared": "[1.0.0, )"
         }
       },

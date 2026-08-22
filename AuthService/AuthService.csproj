@@ -4,6 +4,7 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,9 +17,8 @@
     <!-- BCrypt for secure password hashing (never store plain-text passwords) -->
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
 
-    <!-- Serilog for structured JSON logging -->
+    <!-- Serilog for structured logging -->
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-    <PackageReference Include="Serilog.Formatting.Json" Version="6.0.0" />
 
     <!-- JWT Bearer and Swashbuckle are now in Shared — pulled in transitively -->
   </ItemGroup>
