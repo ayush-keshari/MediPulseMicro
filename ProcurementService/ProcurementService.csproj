@@ -9,16 +9,15 @@
 
   <ItemGroup>
     <!-- Entity Framework Core with SQL Server provider -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0" />
 
     <!-- EF Core CLI tools for running migrations (dotnet ef migrations add ...) -->
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
 
     <!-- Serilog for structured logging -->
-    <PackageReference Include="Serilog" Version="4.0.2" />
-    <PackageReference Include="Serilog.Formatting.Json" Version="6.0.0" />
 
-    <!-- JWT Bearer and Swashbuckle are in Shared — pulled in transitively -->
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+<!-- JWT Bearer and Swashbuckle are in Shared — pulled in transitively -->
   </ItemGroup>
 
   <ItemGroup>

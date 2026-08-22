@@ -1,16 +1,7 @@
 using Ocelot.DependencyInjection;
 using Ocelot.Middleware;
-using System
-using System.IO
-using System.IO
-using System.IO
-using System.IO
-using System.IO
-using System.IO
-using System.IO
-using System.IO
-using System.IO;
 using System;
+using System.IO;
 
 using Serilog;
 
@@ -34,8 +25,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(
                   "http://localhost:4200",
                   "http://127.0.0.1:4200")   // Angular dev server may bind to either
-              .AllowAnyHeader()
-              .AllowAnyMethod());
+          .AllowAnyHeader()
+          .AllowAnyMethod());
 });
 
 // Register Ocelot — reads ocelot.json and sets up the reverse proxy routing.
