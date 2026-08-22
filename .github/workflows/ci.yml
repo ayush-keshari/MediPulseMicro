@@ -37,8 +37,24 @@ jobs:
     - name: Verify .NET formatting
       run: dotnet format --verify-no-changes
 
-    - name: Run unit tests
-      run: dotnet test --no-build --verbosity normal --configuration Release
+    - name: Run unit tests with coverage
+      run: dotnet test --no-build --verbosity normal --configuration Release /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput=../TestResults/coverage.opencover.xml
+
+- name: Report test coverage
+      run: |
+        # Install reportgenerator to convert opencover to human-readable format
+        dotnet tool install --global dotnet-reportgenerator-globaltool
+        # Generate coverage report
+        reportgenerator "-reports:../TestResults/coverage.opencover.xml" "-targetdir:../TestResults/CoverageReport" "-reporttypes:HtmlSummary"
+        # Extract coverage percentage from summary
+        COVERAGE_PERCENT=$(grep -oP '(?<=Lines covered\: ).*(?=%)' ../TestResults/CoverageReport/Summary.txt | head -1)
+        echo "Coverage: $COVERAGE_PERCENT%"
+        # Check if coverage is below 40%
+        if (( $(echo "$COVERAGE_PERCENT < 40" | bc -l) )); then
+          echo "Error: Coverage is below 40%"
+          exit 1
+        fi
+        echo "Coverage gate passed: $COVERAGE_PERCENT% >= 40%"
 
     - name: Setup SQL Server for validation
       if: always()
@@ -60,7 +76,7 @@ jobs:
         sudo systemctl start mssql-server
         # Wait for SQL Server to start
         for i in {1..30}; do
-          if /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "MediPulse@2024!Dev" -Q "SELECT 1" 2>/dev/null; then
+          if /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" 2>/dev/null; then
             echo "SQL Server is ready"
             break
           fi
@@ -82,15 +98,14 @@ jobs:
         dotnet ef database update --project AuditService/AuditService.csproj
 
         # Load mock data
-        /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "MediPulse@2024!Dev" -i MockData_InsertOnly.sql -d MedipulseMain
+        /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i MockData_InsertOnly.sql -d MedipulseMain
 
     - name: Validate mock data integrity
       if: always()
       run: |
-        /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "MediPulse@2024!Dev" -i Scripts/validate_mock_data.sql -d MedipulseMain
-        ERRORLEVEL=$($?)
-        if [ $ERRORLEVEL -ne 0 ]; then
-          echo "Mock data validation failed"
+        RESULT=$(/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/validate_mock_data.sql -d MedipulseMain -h -1 | tail -n 1)
+        if [ "$RESULT" -gt 0 ]; then
+          echo "Mock data validation failed with $RESULT errors"
           exit 1
         fi
         echo "Mock data validation passed"

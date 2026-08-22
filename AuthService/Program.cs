@@ -2,8 +2,19 @@ using AuthService.Data;
 using AuthService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
+using Serilog;
+using Serilog.Formatting.Json;
+
+Log.Logger = new LoggerConfiguration()
+    .Enrich.FromLogContext()
+    .WriteTo.Console(new JsonFormatter())
+    .MinimumLevel.Information()
+    .CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Use Serilog as the logging provider
+builder.Host.UseSerilog();
 
 // ── SHARED INFRASTRUCTURE (one line each — logic lives in Shared) ──────────
 builder.Services.AddMediPulseControllers();                         // controllers + 3 global filters

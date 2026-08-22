@@ -261,10 +261,11 @@ END
 IF @ErrorCount = 0
 BEGIN
     PRINT 'SUCCESS: All referential integrity checks passed!';
-    RETURN 0; -- Success exit code
 END
 ELSE
 BEGIN
     PRINT 'FAILURE: Found ' + CAST(@ErrorCount AS VARCHAR) + ' referential integrity error(s)!';
-    RETURN 1; -- Failure exit code
 END
+
+-- Return error count as result set for CI to consume
+SELECT @ErrorCount AS ErrorCount;

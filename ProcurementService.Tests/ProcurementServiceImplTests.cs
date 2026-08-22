@@ -119,4 +119,65 @@ public class ProcurementServiceImplTests
         Assert.Equal("New Supplier", supplier.Name);
         Assert.Equal("Pharma", supplier.SupplierType);
     }
+
+    [Fact]
+    public async Task CreatePurchaseOrderAsync_ThrowsException_WhenSupplierDoesNotExist()
+    {
+        // Arrange
+        await using var context = CreateInMemoryDbContext();
+        var service = new ProcurementServiceImpl(context);
+
+        var request = new CreatePurchaseOrderRequest
+        {
+            SupplierId = 999, // Non-existent supplier ID
+            OrderDate = DateTime.UtcNow
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.CreatePurchaseOrderAsync(request));
+    }
+
+    [Fact]
+    public async Task CreatePurchaseOrderAsync_Succeeds_WhenSupplierExists()
+    {
+        // Arrange
+        await using var context = CreateInMemoryDbContext();
+        var service = new ProcurementServiceImpl(context);
+
+        // Create a supplier first
+        var supplierRequest = new CreateSupplierRequest
+        {
+            Name = "Test Supplier",
+            SupplierType = "Pharma",
+            Status = "Active"
+        };
+        await service.CreateSupplierAsync(supplierRequest);
+
+        // Get the created supplier to use its ID
+        var supplier = await context.Suppliers.FirstOrDefaultAsync(s => s.Name == "Test Supplier");
+        Assert.NotNull(supplier);
+
+        var request = new CreatePurchaseOrderRequest
+        {
+            SupplierId = supplier.SupplierId,
+            OrderDate = DateTime.UtcNow,
+            ExpectedDeliveryDate = DateTime.UtcNow.AddDays(7),
+            Notes = "Test purchase order"
+        };
+
+        // Act
+        var result = await service.CreatePurchaseOrderAsync(request);
+
+        // Assert
+        Assert.True(result);
+
+        // Verify purchase order was created
+        var purchaseOrder = await context.PurchaseOrders
+            .FirstOrDefaultAsync(po => po.SupplierId == supplier.SupplierId);
+        Assert.NotNull(purchaseOrder);
+        Assert.Equal(supplier.SupplierId, purchaseOrder.SupplierId);
+        Assert.Equal("Draft", purchaseOrder.Status); // Default status
+        Assert.Equal(request.Notes, purchaseOrder.Notes);
+    }
 }
