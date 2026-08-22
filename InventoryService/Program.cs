@@ -3,12 +3,11 @@ using InventoryService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
 using Serilog;
-using Serilog.Formatting.Json;
 // Services registered: IInventoryService, IExceptionService, IReplenishmentService
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
-    .WriteTo.Console(new JsonFormatter())
+    .WriteTo.Console()
     .MinimumLevel.Information()
     .CreateLogger();
 
