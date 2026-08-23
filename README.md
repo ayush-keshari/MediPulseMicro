@@ -169,6 +169,36 @@ The project uses GitHub Actions for continuous integration:
 - Validates mock data referential integrity
 - Checks .NET formatting consistency
 
+### Scheduled DBT Tests Orchestrator
+
+In addition to the CI pipeline, a lightweight orchestrator runs dbt tests on a regular schedule to ensure ongoing data quality:
+
+- **Scheduled Workflow**: `.github/workflows/scheduled-dbt-tests.yml`
+- **Schedule**: Runs daily at 2:00 AM UTC (configurable via cron syntax)
+- **Manual Trigger**: Can be triggered manually via the GitHub UI ("Run workflow")
+- **Process**:
+  1. Checks out code
+  2. Sets up SQL Server (using docker-compose)
+  3. Runs EF Core migrations and loads mock data
+  4. Validates mock data referential integrity
+  5. Installs dbt dependencies
+  6. Runs dbt tests against the migrated database
+  7. Publishes test results as an artifact
+
+#### Modifying the Schedule
+
+To change the schedule:
+1. Edit `.github/workflows/scheduled-dbt-tests.yml`
+2. Modify the `cron` value in the `on.schedule` section
+3. Use standard cron syntax: `minute hour day month day-of-week`
+4. Examples:
+   - `0 2 * * *` = Daily at 2:00 AM UTC (current)
+   - `0 */6 * * *` = Every 6 hours
+   - `0 0 * * 0` = Weekly on Sunday at midnight
+   - `0 0 1 * *` = Monthly on the 1st at midnight
+
+For testing, you can also manually trigger the workflow from the GitHub Actions tab.
+
 ## 📚 API Documentation
 
 Each service provides Swagger/OpenAPI documentation:

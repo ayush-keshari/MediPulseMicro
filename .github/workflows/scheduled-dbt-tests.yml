@@ -1,0 +1,107 @@
+name: Scheduled DBT Tests
+
+# Run the workflow on a schedule
+on:
+  schedule:
+    # Run daily at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  dbt-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+          ACCEPT_EULA: Y
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P $SA_PASSWORD -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v7
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Wait for SQL Server to be ready
+      run: |
+        for i in {1..30}; do
+          if docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" 2>/dev/null; then
+            echo "SQL Server is ready"
+            break
+          fi
+          echo "Waiting for SQL Server to start..."
+          sleep 2
+        done
+
+    - name: Apply migrations and load mock data
+      run: |
+        # Run EF Core migrations using the migrator service
+        docker compose -f docker-compose.yml up migrator --abort-on-container-exit --exit-code-from migrator
+        migrator_exit_code=$?
+        if [ $migrator_exit_code -ne 0 ]; then
+          echo "Migrations failed with exit code: $migrator_exit_code"
+          exit $migrator_exit_code
+        fi
+        echo "Migrations completed successfully"
+
+    - name: Validate mock data integrity
+      run: |
+        RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/validate_mock_data.sql -d MedipulseMain -h -1 | tail -n 1)
+        if [ "$RESULT" -gt 0 ]; then
+          echo "Mock data validation failed with $RESULT errors"
+          exit 1
+        fi
+        echo "Mock data validation passed"
+
+    - name: Install dbt dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install dbt-core dbt-sqlserver
+
+    - name: Write dbt profile
+      run: |
+        mkdir -p ~/.dbt
+        cat > ~/.dbt/profiles.yml <<EOF
+        mediapulse_dq:
+          target: ci
+          outputs:
+            ci:
+              type: sqlserver
+              driver: ODBC Driver 17 for SQL Server
+              server: sqlserver
+              database: MedipulseMain
+              schema: dbo
+              username: sa
+              password: ${{ secrets.SA_PASSWORD }}
+              port: 1433
+              encrypt: true
+              trust_server_certificate: true
+        EOF
+
+    - name: Install dbt project dependencies
+      working-directory: ./pipelines/dbt
+      run: dbt deps
+
+    - name: Run dbt tests
+      working-directory: ./pipelines/dbt
+      run: dbt test
+
+    - name: Publish Test Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: dbt-test-results
+        path: ./pipelines/dbt/target/
