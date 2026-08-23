@@ -3,6 +3,7 @@ using AuditService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
 using Serilog;
+using Serilog.Sinks.ApplicationInsights;
 
 Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
