@@ -59,5 +59,6 @@ if (app.Environment.IsDevelopment())
 
 app.UseMediPulseMiddleware();
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 app.Run();
