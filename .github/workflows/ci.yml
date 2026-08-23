@@ -198,3 +198,56 @@ jobs:
           exit 1
         fi
         echo "Data quality check on MedipulseAudit passed"
+  # Data quality job - runs dbt tests against the migrated database
+  data-quality:
+    runs-on: ubuntu-latest
+    needs: [integration-validation]  # runs after DB is seeded
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
+          ACCEPT_EULA: Y
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P $SA_PASSWORD -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Install dbt dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install dbt-core dbt-sqlserver
+
+      - name: Write dbt profile
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml <<EOF
+          mediapulse_dq:
+            target: ci
+            outputs:
+              ci:
+                type: sqlserver
+                driver: ODBC Driver 17 for SQL Server
+                server: sqlserver
+                database: MedipulseMain
+                schema: dbo
+                username: sa
+                password: ${{ secrets.SA_PASSWORD }}
+                port: 1433
+                encrypt: true
+                trust_server_certificate: true
+          EOF
+
+      - name: Install dbt project dependencies
+        working-directory: ./pipelines/dbt
+        run: dbt deps
+
+      - name: Run dbt tests
+        working-directory: ./pipelines/dbt
+        run: dbt test
