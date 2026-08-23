@@ -178,3 +178,21 @@ jobs:
           exit 1
         fi
         echo "Mock data validation passed"
+
+    - name: Run data quality check on MedipulseMain
+      run: |
+        RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/dq_checks.sql -d MedipulseMain -h -1 | tail -n 1)
+        if [ "$RESULT" -gt 0 ]; then
+          echo "Data quality check on MedipulseMain failed with $RESULT errors"
+          exit 1
+        fi
+        echo "Data quality check on MedipulseMain passed"
+
+    - name: Run data quality check on MedipulseAudit
+      run: |
+        RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/dq_checks.sql -d MedipulseAudit -h -1 | tail -n 1)
+        if [ "$RESULT" -gt 0 ]; then
+          echo "Data quality check on MedipulseAudit failed with $RESULT errors"
+          exit 1
+        fi
+        echo "Data quality check on MedipulseAudit passed"
