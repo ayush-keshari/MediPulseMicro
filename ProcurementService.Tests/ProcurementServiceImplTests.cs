@@ -180,4 +180,109 @@ public class ProcurementServiceImplTests
         Assert.Equal("Draft", purchaseOrder.Status); // Default status
         Assert.Equal(request.Notes, purchaseOrder.Notes);
     }
+
+    // NEW TESTS FOR UpdatePoStatusAsync method
+
+    [Fact]
+    public async Task UpdatePoStatusAsync_Succeeds_ValidStatusTransition()
+    {
+        // Arrange
+        await using var context = CreateInMemoryDbContext();
+        var service = new ProcurementServiceImpl(context);
+
+        // Create a purchase order first
+        var poRequest = new CreatePurchaseOrderRequest
+        {
+            SupplierId = 1,
+            OrderDate = DateTime.UtcNow,
+            ExpectedDeliveryDate = DateTime.UtcNow.AddDays(7),
+            Notes = "Test purchase order"
+        };
+
+        // We need a supplier to exist
+        var supplierRequest = new CreateSupplierRequest
+        {
+            Name = "Test Supplier",
+            SupplierType = "Manufacturer",
+            Status = "Active"
+        };
+
+        await service.CreateSupplierAsync(supplierRequest);
+        var supplier = await context.Suppliers.FirstOrDefaultAsync(s => s.Name == "Test Supplier");
+        Assert.NotNull(supplier);
+
+        poRequest.SupplierId = supplier.SupplierId;
+
+        await service.CreatePurchaseOrderAsync(poRequest);
+        var po = await context.PurchaseOrders.FirstOrDefaultAsync();
+        Assert.NotNull(po);
+        Assert.Equal("Draft", po.Status);
+
+        // Act - Transition from Draft to Submitted
+        var statusRequest = new UpdatePoStatusRequest { Status = "Submitted" };
+        var result = await service.UpdatePoStatusAsync(po.PoId, statusRequest);
+
+        // Assert
+        Assert.True(result);
+
+        // Verify status was updated
+        var updatedPo = await context.PurchaseOrders.FindAsync(po.PoId);
+        Assert.Equal("Submitted", updatedPo.Status);
+    }
+
+    [Fact]
+    public async Task UpdatePoStatusAsync_ThrowsException_InvalidStatusTransition()
+    {
+        // Arrange
+        await using var context = CreateInMemoryDbContext();
+        var service = new ProcurementServiceImpl(context);
+
+        // Create a purchase order first
+        var poRequest = new CreatePurchaseOrderRequest
+        {
+            SupplierId = 1,
+            OrderDate = DateTime.UtcNow,
+            ExpectedDeliveryDate = DateTime.UtcNow.AddDays(7),
+            Notes = "Test purchase order"
+        };
+
+        // We need a supplier to exist
+        var supplierRequest = new CreateSupplierRequest
+        {
+            Name = "Test Supplier",
+            SupplierType = "Manufacturer",
+            Status = "Active"
+        };
+
+        await service.CreateSupplierAsync(supplierRequest);
+        var supplier = await context.Suppliers.FirstOrDefaultAsync(s => s.Name == "Test Supplier");
+        Assert.NotNull(supplier);
+
+        poRequest.SupplierId = supplier.SupplierId;
+
+        await service.CreatePurchaseOrderAsync(poRequest);
+        var po = await context.PurchaseOrders.FirstOrDefaultAsync();
+        Assert.NotNull(po);
+        Assert.Equal("Draft", po.Status);
+
+        // Act & Assert - Trying to go from Draft directly to FullyReceived should fail
+        var invalidRequest = new UpdatePoStatusRequest { Status = "FullyReceived" };
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            service.UpdatePoStatusAsync(po.PoId, invalidRequest));
+    }
+
+    [Fact]
+    public async Task UpdatePoStatusAsync_ThrowsException_WhenPoNotFound()
+    {
+        // Arrange
+        await using var context = CreateInMemoryDbContext();
+        var service = new ProcurementServiceImpl(context);
+
+        // Act & Assert
+        var statusRequest = new UpdatePoStatusRequest { Status = "Submitted" };
+        var result = await service.UpdatePoStatusAsync(999, statusRequest); // Non-existent PO ID
+
+        // Assert
+        Assert.False(result); // Returns false when PO not found
+    }
 }
