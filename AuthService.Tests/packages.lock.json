@@ -91,6 +91,14 @@
         "resolved": "2.14.1",
         "contentHash": "lQKvtaTDOXnoVJ20ibTuSIOf2i0uO0MPbDhd1jm238I+U/2ZnRENj0cktKZhtchBMtCUSRQ5v4xBCUbKNmyVMw=="
       },
+      "Microsoft.ApplicationInsights": {
+        "type": "Transitive",
+        "resolved": "2.9.1",
+        "contentHash": "gAC+bFCr10ckAdM6VJ+aL0yfYfbYuklukYJoMjaSCOVHH/h4Xr9SiyPq+Befk/yUSdSv7Fa3nl0ynLATKIwKng==",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1"
+        }
+      },
       "Microsoft.AspNetCore.Authentication.JwtBearer": {
         "type": "Transitive",
         "resolved": "9.0.4",
@@ -414,6 +422,11 @@
           "Microsoft.IdentityModel.Logging": "8.0.1"
         }
       },
+      "Microsoft.NETCore.Platforms": {
+        "type": "Transitive",
+        "resolved": "1.1.0",
+        "contentHash": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A=="
+      },
       "Microsoft.OpenApi": {
         "type": "Transitive",
         "resolved": "1.6.22",
@@ -451,6 +464,14 @@
           "System.CodeDom": "4.4.0"
         }
       },
+      "NETStandard.Library": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "WcSp3+vP+yHNgS8EV5J7pZ9IRpeDuARBPN28by8zqff1wJQXm26PVU8L3/fYLBJVU7BtDyqNVWq2KlCVvSSR4A==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0"
+        }
+      },
       "Newtonsoft.Json": {
         "type": "Transitive",
         "resolved": "13.0.3",
@@ -458,8 +479,8 @@
       },
       "Serilog": {
         "type": "Transitive",
-        "resolved": "3.1.1",
-        "contentHash": "P6G4/4Kt9bT635bhuwdXlJ2SCqqn2nhh4gqFqQueCOr9bK/e7W9ll/IoX1Ter948cV2Z/5+5v8pAfJYUISY03A=="
+        "resolved": "4.0.0",
+        "contentHash": "2jDkUrSh5EofOp7Lx5Zgy0EB+7hXjjxE2ktTb1WVQmU00lDACR2TdROGKU0K1pDTBSJBN1PqgYpgOZF8mL7NJw=="
       },
       "Serilog.AspNetCore": {
         "type": "Transitive",
@@ -513,6 +534,16 @@
           "Microsoft.Extensions.Configuration.Binder": "8.0.0",
           "Microsoft.Extensions.DependencyModel": "8.0.2",
           "Serilog": "3.1.1"
+        }
+      },
+      "Serilog.Sinks.ApplicationInsights": {
+        "type": "Transitive",
+        "resolved": "3.0.0",
+        "contentHash": "+pBODh+Lafhcp0x23mZOmXIYMzZm9NV+nq8LV/XAQyZZxMeneK3umC2O4ZoJcKzlR629gf1mhHRS7uKu7J5/+Q==",
+        "dependencies": {
+          "Microsoft.ApplicationInsights": "2.9.1",
+          "NETStandard.Library": "1.6.1",
+          "Serilog": "2.8.0"
         }
       },
       "Serilog.Sinks.Console": {
@@ -736,6 +767,7 @@
           "Microsoft.EntityFrameworkCore.SqlServer": "[8.0.0, )",
           "Microsoft.EntityFrameworkCore.Tools": "[8.0.0, )",
           "Serilog.AspNetCore": "[8.0.3, )",
+          "Serilog.Sinks.ApplicationInsights": "[3.0.0, )",
           "Shared": "[1.0.0, )"
         }
       },
@@ -743,6 +775,11 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[9.0.4, )",
+          "Serilog": "[4.0.0, )",
+          "Serilog.AspNetCore": "[8.0.0, )",
+          "Serilog.Formatting.Json": "[3.0.0, )",
+          "Serilog.Settings.Configuration": "[3.4.0, )",
+          "Serilog.Sinks.SystemConsole": "[5.0.0, )",
           "Swashbuckle.AspNetCore": "[7.3.1, )"
         }
       }

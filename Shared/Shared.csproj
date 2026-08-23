@@ -16,17 +16,17 @@
 
   <ItemGroup>
     <!-- JWT Bearer — used by AddJwtAuthentication() extension method -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
 
     <!-- Swashbuckle — used by AddMediPulseSwagger() extension method -->
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
 
     <!-- Serilog for structured logging -->
-    <PackageReference Include="Serilog" Version="4.0.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.SystemConsole" Version="5.0.0" />
-    <PackageReference Include="Serilog.Formatting.Json" Version="3.0.0" />
-    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.SystemConsole" />
+    <PackageReference Include="Serilog.Formatting.Json" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
   </ItemGroup>
 
 </Project>
