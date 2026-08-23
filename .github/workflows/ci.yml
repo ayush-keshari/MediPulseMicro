@@ -57,12 +57,12 @@ jobs:
         # Extract coverage percentage from summary
         COVERAGE_PERCENT=$(awk '/Lines covered:/ {gsub(/%/, ""); print $NF}' ../TestResults/CoverageReport/Summary.txt)
         echo "Coverage: $COVERAGE_PERCENT%"
-        # Check if coverage is below 40% using awk
-        if [ "$(awk -v cov="$COVERAGE_PERCENT" 'BEGIN {print (cov < 40)}')" -eq 1 ]; then
-          echo "Error: Coverage is below 40%"
+        # Check if coverage is below 60% using awk
+        if [ "$(awk -v cov="$COVERAGE_PERCENT" 'BEGIN {print (cov < 60)}')" -eq 1 ]; then
+          echo "Error: Coverage is below 60%"
           exit 1
         fi
-        echo "Coverage gate passed: $COVERAGE_PERCENT% >= 40%"
+        echo "Coverage gate passed: $COVERAGE_PERCENT% >= 60%"
 
   # Frontend build job - runs without external dependencies
   frontend-build:
