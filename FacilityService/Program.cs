@@ -3,12 +3,13 @@ using FacilityService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
 using Serilog;
-using System;
+using Serilog.Formatting.Json;
 using Serilog.Sinks.ApplicationInsights;
+using Shared.Middleware;
 
 var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .WriteTo.Console(new JsonFormatter())
     .MinimumLevel.Information();
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
@@ -58,6 +59,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMediPulseMiddleware();   // CORS → Authentication → Authorization
+app.UseMediPulseExceptionHandling();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
