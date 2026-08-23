@@ -84,25 +84,24 @@ Copy `.env.example` to `.env` and adjust as needed:
 
 ## 🧪 Running Tests
 
-### Backend Tests
+You can run many tests offline without any external dependencies (no Docker or SQL Server required).
+
+### Backend Tests (Offline)
 ```bash
-# Run all backend tests
+# Run all backend tests (uses InMemoryDatabase, no SQL Server needed)
 dotnet test
 
 # Run tests for a specific service
 dotnet test AuthService/AuthService.csproj
-
-# Run tests with coverage report
-dotnet test --collect:"XPlat Code Coverage"
 ```
 
-### Frontend Tests
+### Frontend Tests (Offline)
 ```bash
 cd Frontend
 npm test
 ```
 
-### Linting
+### Linting and Formatting (Offline)
 ```bash
 # Backend formatting check
 dotnet format --verify-no-changes
@@ -110,6 +109,19 @@ dotnet format --verify-no-changes
 # Frontend linting
 cd Frontend
 npm run lint
+```
+
+### Integration Tests (Requires Docker)
+Integration tests require Docker and SQL Server. They are run in the CI pipeline but can be executed locally:
+```bash
+# Start dependencies (SQL Server)
+docker compose up -d sqlserver
+
+# Run migrations and load test data
+docker compose up migrator --abort-on-container-exit --exit-code-from migrator
+
+# Run integration tests (example: using a test project or script)
+# Note: Integration tests are primarily run in CI via the integration-validation job.
 ```
 
 ## 🐳 Docker Compose Services
@@ -122,6 +134,28 @@ The `docker-compose.yml` defines the following services:
 - **gateway** - Ocelot API Gateway
 - **frontend** - Angular application served via nginx
 - **sonarqube** - Code quality analysis (optional)
+
+### Common Docker Compose Commands
+
+```bash
+# Start all services in detached mode
+docker compose up -d
+
+# Stop and remove all containers, networks, and volumes
+docker compose down -v
+
+# View logs for all services
+docker compose logs -f
+
+# View logs for a specific service
+docker compose logs -f authservice
+
+# Rebuild and restart a service after code changes
+docker compose up -d --build <service-name>
+
+# Run a one-off command in a service (e.g., run migrations)
+docker compose run --rm migrator
+```
 
 ## 📊 CI/CD Pipeline
 
