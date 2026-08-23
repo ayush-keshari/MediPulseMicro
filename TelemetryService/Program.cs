@@ -4,8 +4,8 @@ using TelemetryService.Services;
 using Shared.Extensions;
 using Serilog;
 using Serilog.Sinks.ApplicationInsights;
-using System;
 using Serilog.Formatting.Json;
+using System;
 using Shared.Middleware;
 
 var loggerConfiguration = new LoggerConfiguration()
@@ -16,7 +16,8 @@ var loggerConfiguration = new LoggerConfiguration()
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
 {
     loggerConfiguration.WriteTo.ApplicationInsights(
-        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"));
+        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"),
+        null);
 }
 
 Log.Logger = loggerConfiguration.CreateLogger();

@@ -15,7 +15,8 @@ var loggerConfiguration = new LoggerConfiguration()
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
 {
     loggerConfiguration.WriteTo.ApplicationInsights(
-        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"));
+        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"),
+        null);
 }
 
 Log.Logger = loggerConfiguration.CreateLogger();

@@ -24,8 +24,7 @@
     <!-- Serilog for structured logging -->
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.AspNetCore" />
-    <PackageReference Include="Serilog.Sinks.SystemConsole" />
-    <PackageReference Include="Serilog.Formatting.Json" />
+    <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Settings.Configuration" />
   </ItemGroup>
 

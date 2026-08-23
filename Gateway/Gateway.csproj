@@ -9,11 +9,11 @@
 
   <ItemGroup>
     <!-- Ocelot: API Gateway / reverse proxy for .NET microservices -->
-    <PackageReference Include="Ocelot" Version="23.4.3" />
+    <PackageReference Include="Ocelot" />
     <!-- Serilog for structured JSON logging -->
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
-      <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" />
-    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" />
       </ItemGroup>
 
 </Project>

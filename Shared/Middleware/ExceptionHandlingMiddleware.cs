@@ -1,7 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using Serilog.Context;
 
 namespace Shared.Middleware
@@ -40,7 +42,7 @@ namespace Shared.Middleware
                 catch (Exception ex)
                 {
                     // Log the exception with correlation ID and request details
-                    _logger.Error(ex,
+                    _logger.LogError(ex,
                         "Unhandled exception occurred. CorrelationId: {CorrelationId}, Method: {Method}, Path: {Path}",
                         correlationId,
                         context.Request.Method,

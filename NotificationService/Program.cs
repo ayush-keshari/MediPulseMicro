@@ -16,7 +16,8 @@ var loggerConfiguration = new LoggerConfiguration()
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
 {
     loggerConfiguration.WriteTo.ApplicationInsights(
-        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"));
+        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"),
+        null);
 }
 
 Log.Logger = loggerConfiguration.CreateLogger();
@@ -61,7 +62,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseMediPulseMiddleware();
 app.UseMediPulseExceptionHandling();
-</parameterHandling();
+app.UseMediPulseExceptionHandling();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
