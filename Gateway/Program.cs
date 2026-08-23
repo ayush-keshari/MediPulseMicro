@@ -4,12 +4,20 @@ using System;
 using System.IO;
 
 using Serilog;
+using Serilog.Sinks.ApplicationInsights;
 
-Log.Logger = new LoggerConfiguration()
+var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .MinimumLevel.Information()
-    .CreateLogger();
+    .MinimumLevel.Information();
+
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
+{
+    loggerConfiguration.WriteTo.ApplicationInsights(
+        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"));
+}
+
+Log.Logger = loggerConfiguration.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +39,7 @@ builder.Services.AddCors(options =>
 
 // Register Ocelot — reads ocelot.json and sets up the reverse proxy routing.
 builder.Services.AddOcelot();
+builder.Services.AddHealthChecks();
 
 var app = builder.Build();
 
@@ -38,6 +47,7 @@ var app = builder.Build();
 builder.Host.UseSerilog();
 
 app.UseCors("AllowAngular");
+app.MapHealthChecks("/health");
 
 // UseOcelot() is the middleware that intercepts every incoming request,
 // matches it against ocelot.json routes, and forwards it to the correct service.

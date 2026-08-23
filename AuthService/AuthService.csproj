@@ -19,6 +19,8 @@
 
     <!-- Serilog for structured logging -->
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.ApplicationInsights" Version="3.0.0" />
 
     <!-- JWT Bearer and Swashbuckle are now in Shared - pulled in transitively -->
   </ItemGroup>

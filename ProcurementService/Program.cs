@@ -3,12 +3,21 @@ using ProcurementService.Data;
 using ProcurementService.Services;
 using Shared.Extensions;
 using Serilog;
+using Serilog.Sinks.ApplicationInsights;
+using System;
 
-Log.Logger = new LoggerConfiguration()
+var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .MinimumLevel.Information()
-    .CreateLogger();
+    .MinimumLevel.Information();
+
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
+{
+    loggerConfiguration.WriteTo.ApplicationInsights(
+        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"));
+}
+
+Log.Logger = loggerConfiguration.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +32,7 @@ builder.Services.AddDbContext<ProcurementDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IProcurementService, ProcurementServiceImpl>();
+builder.Services.AddHealthChecks();
 
 // ── SERILOG SETUP ────────────────────────────────────────────────
 builder.Host.UseSerilog();

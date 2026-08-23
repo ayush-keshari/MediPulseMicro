@@ -3,13 +3,22 @@ using InventoryService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
 using Serilog;
+using Serilog.Sinks.ApplicationInsights;
+using System;
 // Services registered: IInventoryService, IExceptionService, IReplenishmentService
 
-Log.Logger = new LoggerConfiguration()
+var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
-    .MinimumLevel.Information()
-    .CreateLogger();
+    .MinimumLevel.Information();
+
+if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
+{
+    loggerConfiguration.WriteTo.ApplicationInsights(
+        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"));
+}
+
+Log.Logger = loggerConfiguration.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +34,7 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 builder.Services.AddScoped<IInventoryService, InventoryServiceImpl>();
 builder.Services.AddScoped<IExceptionService, ExceptionServiceImpl>();
 builder.Services.AddScoped<IReplenishmentService, ReplenishmentServiceImpl>();
+builder.Services.AddHealthChecks();
 
 // ── SERILOG SETUP ────────────────────────────────────────────────
 builder.Host.UseSerilog();
@@ -51,4 +61,5 @@ if (app.Environment.IsDevelopment())
 
 app.UseMediPulseMiddleware();
 app.MapControllers();
+app.MapHealthChecks("/health");
 app.Run();
