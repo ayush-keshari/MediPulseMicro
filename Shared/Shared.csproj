@@ -20,6 +20,13 @@
 
     <!-- Swashbuckle — used by AddMediPulseSwagger() extension method -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
+
+    <!-- Serilog for structured logging -->
+    <PackageReference Include="Serilog" Version="4.0.0" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.SystemConsole" Version="5.0.0" />
+    <PackageReference Include="Serilog.Formatting.Json" Version="3.0.0" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="3.4.0" />
   </ItemGroup>
 
 </Project>
