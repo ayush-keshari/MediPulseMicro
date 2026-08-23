@@ -3,12 +3,14 @@ using ProcurementService.Data;
 using ProcurementService.Services;
 using Shared.Extensions;
 using Serilog;
+using Serilog.Formatting.Json;
 using Serilog.Sinks.ApplicationInsights;
 using System;
+using Shared.Middleware;
 
 var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .WriteTo.Console(new JsonFormatter())
     .MinimumLevel.Information();
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
@@ -58,6 +60,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMediPulseMiddleware();
+app.UseMediPulseExceptionHandling();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
