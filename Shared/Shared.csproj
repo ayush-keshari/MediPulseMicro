@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <!-- JWT Bearer — used by AddJwtAuthentication() extension method -->
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.11" />
 
     <!-- Swashbuckle — used by AddMediPulseSwagger() extension method -->
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.3.1" />
