@@ -5,10 +5,12 @@ using Shared.Extensions;
 using Serilog;
 using Serilog.Sinks.ApplicationInsights;
 using System;
+using Serilog.Formatting.Json;
+using Shared.Middleware;
 
 var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .WriteTo.Console(new JsonFormatter())
     .MinimumLevel.Information();
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
@@ -59,6 +61,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseMediPulseMiddleware();
+app.UseMediPulseExceptionHandling();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
