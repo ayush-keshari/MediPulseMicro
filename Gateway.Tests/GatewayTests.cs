@@ -1,20 +1,20 @@
 using Xunit;
-using Gateway;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using System.Net;
 using System.Net.Http.Json;
 
 namespace Gateway.Tests;
 
-public class GatewayTests : IClassFixture<WebApplicationFactory<Gateway.Program>>
+public class GatewayTests : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly WebApplicationFactory<Gateway.Program> _factory;
+    private readonly WebApplicationFactory<Program> _factory;
 
-    public GatewayTests(WebApplicationFactory<Gateway.Program> factory)
+    public GatewayTests(WebApplicationFactory<Program> factory)
     {
         _factory = factory;
     }
@@ -35,13 +35,12 @@ public class GatewayTests : IClassFixture<WebApplicationFactory<Gateway.Program>
         // Arrange
         var client = _factory.CreateClient();
 
-        // Act - We can test this by checking if the server hosts CORS middleware
-        // Since we can't easily test internal middleware without making requests,
-        // we'll verify the application builds correctly which implies services are registered
-        var host = _factory.Server.Host;
+        // Act
+        var baseAddress = client.BaseAddress;
 
         // Assert
-        Assert.NotNull(host);
+        Assert.NotNull(baseAddress);
+        Assert.NotEmpty(baseAddress.ToString());
     }
 
     [Fact]
@@ -66,7 +65,7 @@ public class GatewayTests : IClassFixture<WebApplicationFactory<Gateway.Program>
     {
         // Arrange
         var host = _factory.Services;
-        var configuration = host.GetService(typeof(IConfiguration));
+        var configuration = host.GetRequiredService<IConfiguration>();
 
         // Act & Assert
         Assert.NotNull(configuration);
@@ -88,7 +87,7 @@ public class GatewayTests : IClassFixture<WebApplicationFactory<Gateway.Program>
 
         // Act & Assert
         // Verify that Serilog is configured by checking if we can get ILogger
-        var logger = host.GetService(typeof(ILogger<Gateway.Program>));
+        var logger = host.GetService(typeof(ILogger<Program>));
         Assert.NotNull(logger);
     }
 }

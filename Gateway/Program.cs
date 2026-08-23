@@ -6,6 +6,10 @@ using System.IO;
 using Serilog;
 using Serilog.Sinks.ApplicationInsights;
 
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Gateway.Tests")]
+
 var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .WriteTo.Console()
@@ -42,10 +46,10 @@ builder.Services.AddCors(options =>
 builder.Services.AddOcelot();
 builder.Services.AddHealthChecks();
 
-var app = builder.Build();
-
-// ── SERILOG SETUP ────────────────────────────────────────────────
+// ── SERILOG SETUP ────────────────────────────────────────────
 builder.Host.UseSerilog();
+
+var app = builder.Build();
 
 app.UseCors("AllowAngular");
 app.MapHealthChecks("/health");
@@ -56,3 +60,5 @@ app.MapHealthChecks("/health");
 await app.UseOcelot();
 
 app.Run();
+
+public partial class Program { }
