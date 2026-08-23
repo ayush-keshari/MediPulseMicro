@@ -14,7 +14,7 @@ public class TelemetryDbContext : DbContext
 {
     public TelemetryDbContext(DbContextOptions<TelemetryDbContext> options) : base(options) { }
 
-    public DbSet<SensorDevice>    SensorDevices    => Set<SensorDevice>();
+    public DbSet<SensorDevice> SensorDevices => Set<SensorDevice>();
     public DbSet<TelemetryRecord> TelemetryRecords => Set<TelemetryRecord>();
 
     protected override void OnModelCreating(ModelBuilder mb)

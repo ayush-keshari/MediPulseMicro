@@ -15,22 +15,22 @@ namespace InventoryService.Controllers;
                Roles.DeviceManager, Roles.ComplianceOfficer)]
 public class ExceptionsController : ControllerBase
 {
-    private readonly IExceptionService  _service;
+    private readonly IExceptionService _service;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly string?            _notifBaseUrl;
+    private readonly string? _notifBaseUrl;
 
-    private string  CallerId    => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+    private string CallerId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                                 ?? User.FindFirst("sub")?.Value ?? string.Empty;
     private string? BearerToken => HttpContext.Request.Headers["Authorization"].FirstOrDefault();
 
     public ExceptionsController(
-        IExceptionService  service,
+        IExceptionService service,
         IHttpClientFactory httpClientFactory,
-        IConfiguration     configuration)
+        IConfiguration configuration)
     {
-        _service           = service;
+        _service = service;
         _httpClientFactory = httpClientFactory;
-        _notifBaseUrl      = configuration["NotificationService:BaseUrl"];
+        _notifBaseUrl = configuration["NotificationService:BaseUrl"];
     }
 
     // GET /api/exceptions?type=Stockout&status=Open&severity=High
@@ -58,10 +58,10 @@ public class ExceptionsController : ControllerBase
 
         NotificationClient.Send(
             _httpClientFactory, _notifBaseUrl, BearerToken,
-            userId:   CallerId,
+            userId: CallerId,
             category: "Exception",
-            title:    "Exception Reported",
-            message:  $"Exception logged (Severity: {request.Severity})");
+            title: "Exception Reported",
+            message: $"Exception logged (Severity: {request.Severity})");
 
         return NoContent();
     }
@@ -98,10 +98,10 @@ public class ExceptionsController : ControllerBase
         if (result.TotalCreated > 0)
             NotificationClient.Send(
                 _httpClientFactory, _notifBaseUrl, BearerToken,
-                userId:   CallerId,
+                userId: CallerId,
                 category: "Exception",
-                title:    "Exception Scan Complete",
-                message:  $"{result.TotalCreated} exception(s) detected: {result.StockoutCount} stockout(s), {result.ExpiryCount} expiry alert(s)");
+                title: "Exception Scan Complete",
+                message: $"{result.TotalCreated} exception(s) detected: {result.StockoutCount} stockout(s), {result.ExpiryCount} expiry alert(s)");
 
         return Ok(result);
     }

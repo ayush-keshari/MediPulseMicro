@@ -7,11 +7,11 @@ public class InventoryDbContext : DbContext
 {
     public InventoryDbContext(DbContextOptions<InventoryDbContext> options) : base(options) { }
 
-    public DbSet<Item>              Items              { get; set; }
+    public DbSet<Item> Items { get; set; }
     public DbSet<InventoryPosition> InventoryPositions { get; set; }
-    public DbSet<ExceptionEvent>    ExceptionEvents    { get; set; }
-    public DbSet<RecallAction>      RecallActions      { get; set; }
-    public DbSet<Forecast>          Forecasts          { get; set; }
+    public DbSet<ExceptionEvent> ExceptionEvents { get; set; }
+    public DbSet<RecallAction> RecallActions { get; set; }
+    public DbSet<Forecast> Forecasts { get; set; }
     public DbSet<ReplenishmentPlan> ReplenishmentPlans { get; set; }
 
     // Read-only cross-service view — owned by LogisticsService, same DB

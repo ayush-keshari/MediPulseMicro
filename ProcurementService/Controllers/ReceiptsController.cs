@@ -16,21 +16,21 @@ namespace ProcurementService.Controllers;
 public class ReceiptsController : ControllerBase
 {
     private readonly IProcurementService _service;
-    private readonly IHttpClientFactory  _httpClientFactory;
-    private readonly string?             _notifBaseUrl;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string? _notifBaseUrl;
 
-    private string  CallerId    => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+    private string CallerId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                                 ?? User.FindFirst("sub")?.Value ?? string.Empty;
     private string? BearerToken => HttpContext.Request.Headers["Authorization"].FirstOrDefault();
 
     public ReceiptsController(
         IProcurementService service,
-        IHttpClientFactory  httpClientFactory,
-        IConfiguration      configuration)
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration)
     {
-        _service           = service;
+        _service = service;
         _httpClientFactory = httpClientFactory;
-        _notifBaseUrl      = configuration["NotificationService:BaseUrl"];
+        _notifBaseUrl = configuration["NotificationService:BaseUrl"];
     }
 
     // GET /api/receipts
@@ -60,10 +60,10 @@ public class ReceiptsController : ControllerBase
 
             NotificationClient.Send(
                 _httpClientFactory, _notifBaseUrl, BearerToken,
-                userId:   CallerId,
+                userId: CallerId,
                 category: "Receipt",
-                title:    "Goods Receipt Recorded",
-                message:  $"Goods receipt recorded for PO #{request.PoId} ({request.QuantityReceived} units, status: {request.QualityStatus})");
+                title: "Goods Receipt Recorded",
+                message: $"Goods receipt recorded for PO #{request.PoId} ({request.QuantityReceived} units, status: {request.QualityStatus})");
 
             return NoContent();
         }

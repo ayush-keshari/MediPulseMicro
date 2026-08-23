@@ -14,12 +14,12 @@ public static class NotificationClient
 {
     public static void Send(
         IHttpClientFactory factory,
-        string?            baseUrl,
-        string?            bearerToken,
-        string             userId,
-        string             category,
-        string             title,
-        string             message)
+        string? baseUrl,
+        string? bearerToken,
+        string userId,
+        string category,
+        string title,
+        string message)
     {
         if (string.IsNullOrEmpty(baseUrl) || string.IsNullOrEmpty(userId)) return;
 
@@ -29,7 +29,7 @@ public static class NotificationClient
             {
                 var payload = JsonSerializer.Serialize(new { userId, category, title, message });
                 var content = new StringContent(payload, Encoding.UTF8, "application/json");
-                var client  = factory.CreateClient();
+                var client = factory.CreateClient();
                 if (!string.IsNullOrEmpty(bearerToken))
                     client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", bearerToken);
                 await client.PostAsync($"{baseUrl.TrimEnd('/')}/api/notifications", content);

@@ -59,9 +59,9 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             UserId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value,
-            Name   = User.Identity?.Name,
-            Email  = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value,
-            Role   = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
+            Name = User.Identity?.Name,
+            Email = User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value,
+            Role = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value
         });
     }
 }

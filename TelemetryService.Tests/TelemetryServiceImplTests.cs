@@ -390,7 +390,7 @@ public class TelemetryServiceImplTests
         // Assert
         Assert.NotNull(result);
         var list = result.ToList();
-        Assert.Equal(1, list.Count);
+        Assert.Single(list);
         Assert.True(list[0].IsExcursion);
         Assert.Equal(10.0m, list[0].Temperature);
     }

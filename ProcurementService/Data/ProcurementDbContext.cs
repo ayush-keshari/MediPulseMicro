@@ -15,9 +15,9 @@ public class ProcurementDbContext : DbContext
 {
     public ProcurementDbContext(DbContextOptions<ProcurementDbContext> options) : base(options) { }
 
-    public DbSet<Supplier>      Suppliers      => Set<Supplier>();
+    public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<PurchaseOrder> PurchaseOrders => Set<PurchaseOrder>();
-    public DbSet<Receipt>       Receipts       => Set<Receipt>();
+    public DbSet<Receipt> Receipts => Set<Receipt>();
 
     protected override void OnModelCreating(ModelBuilder mb)
     {

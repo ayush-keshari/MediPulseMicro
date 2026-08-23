@@ -161,11 +161,15 @@ public class AuditLogServiceImplTests
         await service.CreateAsync(request);
 
         // Act
-        var result = await service.GetByIdAsync(1);
+        var logs = await context.AuditLogs.ToListAsync();
+        Assert.Single(logs);
+        int logId = logs[0].AuditLogId;
+
+        var result = await service.GetByIdAsync(logId);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(1, result.AuditLogId);
+        Assert.Equal(logId, result.AuditLogId);
         Assert.Equal("admin", result.UserId);
         Assert.Equal("Admin User", result.UserName);
         Assert.Equal("Administrator", result.UserRole);
@@ -257,17 +261,17 @@ public class AuditLogServiceImplTests
         // Assert
         // By UserId - should get 2 records (Alice's two requests)
         Assert.Equal(2, resultByUserId.Total);
-        Assert.Equal(2, resultByUserId.Items.Count);
+        Assert.Equal(2, resultByUserId.Items.Count());
         Assert.All(resultByUserId.Items, item => Assert.Equal("user1", item.UserId));
 
         // By UserRole - should get 2 records (both admins)
         Assert.Equal(2, resultByRole.Total);
-        Assert.Equal(2, resultByRole.Items.Count);
-        Assert.All(resultByRole.Items, item => Assert.Equal("Administrator", item.UserRole));
+        Assert.Equal(2, resultByRole.Items.Count());
+        Assert.All(resultByRole.Items, item => Assert.Equal("Admin", item.UserRole));
 
         // By ServiceName - should get 1 record (ItemService)
         Assert.Equal(1, resultByService.Total);
-        Assert.Equal(1, resultByService.Items.Count);
+        Assert.Equal(1, resultByService.Items.Count());
         Assert.Equal("ItemService", resultByService.Items.First().ServiceName);
     }
 }

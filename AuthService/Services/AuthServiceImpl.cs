@@ -53,10 +53,10 @@ public class AuthServiceImpl : IAuthService
 
         return new AuthResponse
         {
-            Token     = GenerateJwtToken(user, expiresAt),
-            Name      = user.Name,
-            Email     = user.Email,
-            Role      = user.Role,
+            Token = GenerateJwtToken(user, expiresAt),
+            Name = user.Name,
+            Email = user.Email,
+            Role = user.Role,
             ExpiresAt = expiresAt
         };
     }
@@ -71,10 +71,10 @@ public class AuthServiceImpl : IAuthService
         // PUT /api/users/{id}/role immediately after creation in the admin UI.
         var user = new User
         {
-            Name     = request.Name,
-            Email    = request.Email,
-            Phone    = request.Phone,
-            Role     = "Unassigned",
+            Name = request.Name,
+            Email = request.Email,
+            Phone = request.Phone,
+            Role = "Unassigned",
             Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
@@ -127,10 +127,10 @@ public class AuthServiceImpl : IAuthService
             throw new InvalidOperationException("A user with this email already exists.");
         }
 
-        user.Name  = request.Name;
+        user.Name = request.Name;
         user.Email = request.Email;
         user.Phone = request.Phone;
-        user.Role  = request.Role;
+        user.Role = request.Role;
 
         // Password is optional on edit — only re-hash when the admin actually
         // typed a new one. Empty/whitespace/null means "keep the existing hash".
@@ -158,7 +158,7 @@ public class AuthServiceImpl : IAuthService
 
     private string GenerateJwtToken(User user, DateTime expiresAt)
     {
-        var key   = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var claims = new[]
@@ -171,10 +171,10 @@ public class AuthServiceImpl : IAuthService
         };
 
         var token = new JwtSecurityToken(
-            issuer:             _config["Jwt:Issuer"],
-            audience:           _config["Jwt:Audience"],
-            claims:             claims,
-            expires:            expiresAt,
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: expiresAt,
             signingCredentials: creds
         );
 
@@ -184,9 +184,9 @@ public class AuthServiceImpl : IAuthService
     private static UserDto MapToDto(User user) => new()
     {
         UserId = user.UserId,
-        Name   = user.Name,
-        Email  = user.Email,
-        Role   = user.Role,
-        Phone  = user.Phone
+        Name = user.Name,
+        Email = user.Email,
+        Role = user.Role,
+        Phone = user.Phone
     };
 }

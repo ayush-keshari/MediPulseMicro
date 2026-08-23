@@ -25,28 +25,28 @@ namespace Shared.Filters;
 // the "AuditService:BaseUrl" key.
 public class ActivityLogFilter : IActionFilter
 {
-    private readonly ILogger<ActivityLogFilter>  _logger;
-    private readonly IHttpClientFactory          _httpClientFactory;
-    private readonly string?                     _auditServiceUrl;
-    private readonly string?                     _serviceName;
+    private readonly ILogger<ActivityLogFilter> _logger;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string? _auditServiceUrl;
+    private readonly string? _serviceName;
 
     // Context captured in OnActionExecuting, consumed in OnActionExecuted.
-    private string _userId  = "anonymous";
-    private string _role    = "none";
-    private string _method  = string.Empty;
-    private string _path    = string.Empty;
+    private string _userId = "anonymous";
+    private string _role = "none";
+    private string _method = string.Empty;
+    private string _path = string.Empty;
     private string? _entityType;
     private string? _entityId;
 
     public ActivityLogFilter(
         ILogger<ActivityLogFilter> logger,
-        IHttpClientFactory         httpClientFactory,
-        IConfiguration             configuration)
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration)
     {
-        _logger            = logger;
+        _logger = logger;
         _httpClientFactory = httpClientFactory;
-        _auditServiceUrl   = configuration["AuditService:BaseUrl"]?.TrimEnd('/');
-        _serviceName       = configuration["ServiceName"];
+        _auditServiceUrl = configuration["AuditService:BaseUrl"]?.TrimEnd('/');
+        _serviceName = configuration["ServiceName"];
     }
 
     public void OnActionExecuting(ActionExecutingContext context)
@@ -67,7 +67,7 @@ public class ActivityLogFilter : IActionFilter
              ?? "none";
 
         _method = context.HttpContext.Request.Method;
-        _path   = context.HttpContext.Request.Path;
+        _path = context.HttpContext.Request.Path;
 
         // Try to extract entity type from path segments: /api/{entityType}/{id}
         var segments = _path.Trim('/').Split('/');
@@ -97,15 +97,15 @@ public class ActivityLogFilter : IActionFilter
         // there is no JWT in the incoming request — the user is exchanging credentials FOR a token.
         // If the response contains a "token" field (login succeeded), decode it to capture who logged in.
         // We also grab "name" directly from the response body (AuthResponse has a Name property).
-        string? responseJwt      = null;
+        string? responseJwt = null;
         string? responseUserName = null;
         if (_userId == "anonymous" && context.Result is ObjectResult { Value: not null } objResult)
             (responseJwt, responseUserName) = ExtractFromResponse(objResult.Value);
 
         if (!string.IsNullOrEmpty(responseJwt))
         {
-            _userId = DecodeJwtClaim(responseJwt, "sub")   ?? _userId;
-            _role   = DecodeJwtClaim(responseJwt, "role")  ?? _role;
+            _userId = DecodeJwtClaim(responseJwt, "sub") ?? _userId;
+            _role = DecodeJwtClaim(responseJwt, "role") ?? _role;
         }
 
         var user = context.HttpContext.User;
@@ -120,18 +120,18 @@ public class ActivityLogFilter : IActionFilter
 
         var payload = new
         {
-            userId      = _userId,
+            userId = _userId,
             userName,
-            userRole    = _role,
-            httpMethod  = _method,
-            endpoint    = _path,
-            entityType  = _entityType,
-            entityId    = _entityId,
+            userRole = _role,
+            httpMethod = _method,
+            endpoint = _path,
+            entityType = _entityType,
+            entityId = _entityId,
             statusCode,
             serviceName = _serviceName
         };
 
-        var json    = JsonSerializer.Serialize(payload);
+        var json = JsonSerializer.Serialize(payload);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
         // Fire-and-forget: copy the bearer token from the current request so
@@ -216,7 +216,7 @@ public class ActivityLogFilter : IActionFilter
                 _ => b64
             };
             var jsonBytes = Convert.FromBase64String(b64.Replace('-', '+').Replace('_', '/'));
-            var json      = Encoding.UTF8.GetString(jsonBytes);
+            var json = Encoding.UTF8.GetString(jsonBytes);
 
             using var doc = JsonDocument.Parse(json);
 
@@ -229,7 +229,7 @@ public class ActivityLogFilter : IActionFilter
                 {
                     JsonValueKind.String => prop.Value.GetString(),
                     JsonValueKind.Number => prop.Value.GetRawText(),
-                    _                   => null
+                    _ => null
                 };
             }
             return null;

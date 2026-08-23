@@ -31,13 +31,13 @@ public static class ServiceCollectionExtensions
             {
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    ValidateIssuer           = true,
-                    ValidateAudience         = true,
-                    ValidateLifetime         = true,
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer              = config["Jwt:Issuer"],
-                    ValidAudience            = config["Jwt:Audience"],
-                    IssuerSigningKey         = new SymmetricSecurityKey(
+                    ValidIssuer = config["Jwt:Issuer"],
+                    ValidAudience = config["Jwt:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(
                                                   Encoding.UTF8.GetBytes(jwtKey))
                 };
             });
@@ -105,12 +105,12 @@ public static class ServiceCollectionExtensions
 
             options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
             {
-                Name         = "Authorization",
-                Type         = SecuritySchemeType.Http,
-                Scheme       = "bearer",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = "bearer",
                 BearerFormat = "JWT",
-                In           = ParameterLocation.Header,
-                Description  = "Paste your JWT token. Swagger adds 'Bearer ' prefix automatically."
+                In = ParameterLocation.Header,
+                Description = "Paste your JWT token. Swagger adds 'Bearer ' prefix automatically."
             });
 
             options.AddSecurityRequirement(new OpenApiSecurityRequirement

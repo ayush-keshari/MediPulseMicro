@@ -25,7 +25,7 @@ public class NotificationServiceImpl : INotificationService
             query = query.Where(n => n.IsRead == q.IsRead.Value);
 
         var pageSize = Math.Max(1, q.PageSize);
-        var page     = Math.Max(1, q.Page);
+        var page = Math.Max(1, q.Page);
 
         return await query
             .OrderByDescending(n => n.CreatedAt)
@@ -44,11 +44,11 @@ public class NotificationServiceImpl : INotificationService
     {
         var notification = new Notification
         {
-            UserId    = request.UserId,
-            Category  = request.Category,
-            Title     = request.Title,
-            Message   = request.Message,
-            IsRead    = false,
+            UserId = request.UserId,
+            Category = request.Category,
+            Title = request.Title,
+            Message = request.Message,
+            IsRead = false,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -100,11 +100,11 @@ public class NotificationServiceImpl : INotificationService
     private static NotificationDto ToDto(Notification n) => new()
     {
         NotificationId = n.NotificationId,
-        UserId         = n.UserId,
-        Category       = n.Category,
-        Title          = n.Title,
-        Message        = n.Message,
-        IsRead         = n.IsRead,
-        CreatedAt      = DateTime.SpecifyKind(n.CreatedAt, DateTimeKind.Utc)
+        UserId = n.UserId,
+        Category = n.Category,
+        Title = n.Title,
+        Message = n.Message,
+        IsRead = n.IsRead,
+        CreatedAt = DateTime.SpecifyKind(n.CreatedAt, DateTimeKind.Utc)
     };
 }

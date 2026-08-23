@@ -5,10 +5,10 @@ namespace InventoryService.Models;
 // Period format: "YYYY-MM" (e.g. "2026-06")
 public class Forecast
 {
-    public int      ForecastId       { get; set; }
-    public int      ItemId           { get; set; }
-    public int      FacilityId       { get; set; }
-    public string   Period           { get; set; } = string.Empty;  // e.g. "2026-06"
-    public int      ForecastQuantity { get; set; }
-    public DateTime GeneratedDate    { get; set; } = DateTime.UtcNow;
+    public int ForecastId { get; set; }
+    public int ItemId { get; set; }
+    public int FacilityId { get; set; }
+    public string Period { get; set; } = string.Empty;  // e.g. "2026-06"
+    public int ForecastQuantity { get; set; }
+    public DateTime GeneratedDate { get; set; } = DateTime.UtcNow;
 }

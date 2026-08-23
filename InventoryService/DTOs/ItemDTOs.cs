@@ -45,12 +45,12 @@ public class UpdateItemRequest
 
 public class ItemResponse
 {
-    public int    ItemId             { get; set; }
-    public string ItemCode           { get; set; } = string.Empty;
-    public string Name               { get; set; } = string.Empty;
-    public string Category           { get; set; } = string.Empty;
-    public string Unit               { get; set; } = string.Empty;
+    public int ItemId { get; set; }
+    public string ItemCode { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+    public string Unit { get; set; } = string.Empty;
     public string StorageRequirement { get; set; } = string.Empty;
-    public int    SafetyStock        { get; set; }
-    public int    TotalStock         { get; set; }   // sum of all lot quantities
+    public int SafetyStock { get; set; }
+    public int TotalStock { get; set; }   // sum of all lot quantities
 }

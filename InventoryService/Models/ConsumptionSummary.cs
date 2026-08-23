@@ -9,8 +9,8 @@ namespace InventoryService.Models;
 [Keyless]
 public class ConsumptionSummary
 {
-    public int      ItemId           { get; set; }
-    public int      FacilityId       { get; set; }
-    public int      QuantityConsumed { get; set; }
-    public DateTime ConsumedDate     { get; set; }
+    public int ItemId { get; set; }
+    public int FacilityId { get; set; }
+    public int QuantityConsumed { get; set; }
+    public DateTime ConsumedDate { get; set; }
 }

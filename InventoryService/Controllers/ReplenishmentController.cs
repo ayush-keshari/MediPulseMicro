@@ -15,21 +15,21 @@ namespace InventoryService.Controllers;
 public class ReplenishmentController : ControllerBase
 {
     private readonly IReplenishmentService _service;
-    private readonly IHttpClientFactory    _httpClientFactory;
-    private readonly string?               _notifBaseUrl;
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string? _notifBaseUrl;
 
-    private string  CallerId    => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+    private string CallerId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                                 ?? User.FindFirst("sub")?.Value ?? string.Empty;
     private string? BearerToken => HttpContext.Request.Headers["Authorization"].FirstOrDefault();
 
     public ReplenishmentController(
         IReplenishmentService service,
-        IHttpClientFactory    httpClientFactory,
-        IConfiguration        configuration)
+        IHttpClientFactory httpClientFactory,
+        IConfiguration configuration)
     {
-        _service           = service;
+        _service = service;
         _httpClientFactory = httpClientFactory;
-        _notifBaseUrl      = configuration["NotificationService:BaseUrl"];
+        _notifBaseUrl = configuration["NotificationService:BaseUrl"];
     }
 
     // ── Forecasts ─────────────────────────────────────────────────────────
@@ -100,10 +100,10 @@ public class ReplenishmentController : ControllerBase
 
         NotificationClient.Send(
             _httpClientFactory, _notifBaseUrl, BearerToken,
-            userId:   CallerId,
+            userId: CallerId,
             category: "Replenishment",
-            title:    "Replenishment Plans Generated",
-            message:  $"{result.PlansCreated} plan(s) and {result.ForecastsCreated} forecast(s) generated for facility {result.FacilityId}");
+            title: "Replenishment Plans Generated",
+            message: $"{result.PlansCreated} plan(s) and {result.ForecastsCreated} forecast(s) generated for facility {result.FacilityId}");
 
         return Ok(result);
     }

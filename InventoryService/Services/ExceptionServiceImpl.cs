@@ -18,8 +18,8 @@ public class ExceptionServiceImpl : IExceptionService
     {
         var query = _db.ExceptionEvents.Include(e => e.Actions).AsQueryable();
 
-        if (!string.IsNullOrWhiteSpace(type))     query = query.Where(e => e.Type     == type);
-        if (!string.IsNullOrWhiteSpace(status))   query = query.Where(e => e.Status   == status);
+        if (!string.IsNullOrWhiteSpace(type)) query = query.Where(e => e.Type == type);
+        if (!string.IsNullOrWhiteSpace(status)) query = query.Where(e => e.Status == status);
         if (!string.IsNullOrWhiteSpace(severity)) query = query.Where(e => e.Severity == severity);
 
         return await query
@@ -40,16 +40,16 @@ public class ExceptionServiceImpl : IExceptionService
     {
         var ev = new ExceptionEvent
         {
-            Type          = request.Type,
+            Type = request.Type,
             ReferenceType = request.ReferenceType,
-            ReferenceId   = request.ReferenceId,
-            ItemId        = request.ItemId,
-            ItemName      = request.ItemName,
-            FacilityId    = request.FacilityId,
-            LotId         = request.LotId,
-            Severity      = request.Severity,
-            Status        = "Open",
-            DetectedDate  = DateTime.UtcNow
+            ReferenceId = request.ReferenceId,
+            ItemId = request.ItemId,
+            ItemName = request.ItemName,
+            FacilityId = request.FacilityId,
+            LotId = request.LotId,
+            Severity = request.Severity,
+            Status = "Open",
+            DetectedDate = DateTime.UtcNow
         };
         _db.ExceptionEvents.Add(ev);
         await _db.SaveChangesAsync();
@@ -80,7 +80,7 @@ public class ExceptionServiceImpl : IExceptionService
     public async Task<DetectExceptionsResult> DetectAsync(int? facilityId, int expiryThresholdDays)
     {
         var result = new DetectExceptionsResult();
-        var now    = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
         var expiryThreshold = now.AddDays(expiryThresholdDays);
 
         var posQuery = _db.InventoryPositions.Include(p => p.Item).AsQueryable();
@@ -107,16 +107,16 @@ public class ExceptionServiceImpl : IExceptionService
                 {
                     _db.ExceptionEvents.Add(new ExceptionEvent
                     {
-                        Type          = "Stockout",
+                        Type = "Stockout",
                         ReferenceType = "InventoryPosition",
-                        ReferenceId   = pos.PositionId,
-                        ItemId        = pos.ItemId,
-                        ItemName      = pos.Item?.Name,
-                        FacilityId    = pos.FacilityId,
-                        LotId         = pos.LotId,
-                        Severity      = pos.Quantity == 0 ? "High" : "Medium",
-                        Status        = "Open",
-                        DetectedDate  = now
+                        ReferenceId = pos.PositionId,
+                        ItemId = pos.ItemId,
+                        ItemName = pos.Item?.Name,
+                        FacilityId = pos.FacilityId,
+                        LotId = pos.LotId,
+                        Severity = pos.Quantity == 0 ? "High" : "Medium",
+                        Status = "Open",
+                        DetectedDate = now
                     });
                     result.StockoutCount++;
                 }
@@ -135,16 +135,16 @@ public class ExceptionServiceImpl : IExceptionService
                     var daysLeft = (pos.ExpiryDate - now).Days;
                     _db.ExceptionEvents.Add(new ExceptionEvent
                     {
-                        Type          = "ExpiryAlert",
+                        Type = "ExpiryAlert",
                         ReferenceType = "InventoryPosition",
-                        ReferenceId   = pos.PositionId,
-                        ItemId        = pos.ItemId,
-                        ItemName      = pos.Item?.Name,
-                        FacilityId    = pos.FacilityId,
-                        LotId         = pos.LotId,
-                        Severity      = daysLeft <= 7 ? "High" : daysLeft <= 14 ? "Medium" : "Low",
-                        Status        = "Open",
-                        DetectedDate  = now
+                        ReferenceId = pos.PositionId,
+                        ItemId = pos.ItemId,
+                        ItemName = pos.Item?.Name,
+                        FacilityId = pos.FacilityId,
+                        LotId = pos.LotId,
+                        Severity = daysLeft <= 7 ? "High" : daysLeft <= 14 ? "Medium" : "Low",
+                        Status = "Open",
+                        DetectedDate = now
                     });
                     result.ExpiryCount++;
                 }
@@ -179,11 +179,11 @@ public class ExceptionServiceImpl : IExceptionService
 
         var action = new RecallAction
         {
-            ExceptionId       = request.ExceptionId,
-            OwnerId           = request.OwnerId,
+            ExceptionId = request.ExceptionId,
+            OwnerId = request.OwnerId,
             ActionDescription = request.ActionDescription,
-            DueDate           = request.DueDate,
-            Status            = "Pending"
+            DueDate = request.DueDate,
+            Status = "Pending"
         };
         _db.RecallActions.Add(action);
         await _db.SaveChangesAsync();
@@ -196,8 +196,8 @@ public class ExceptionServiceImpl : IExceptionService
         if (action == null) return false;
 
         if (request.ActionDescription != null) action.ActionDescription = request.ActionDescription;
-        if (request.DueDate           != null) action.DueDate           = request.DueDate.Value;
-        if (request.Status            != null) action.Status            = request.Status;
+        if (request.DueDate != null) action.DueDate = request.DueDate.Value;
+        if (request.Status != null) action.Status = request.Status;
 
         await _db.SaveChangesAsync();
         return true;
@@ -216,27 +216,27 @@ public class ExceptionServiceImpl : IExceptionService
 
     private static ExceptionEventDto ToEventDto(ExceptionEvent e) => new()
     {
-        ExceptionId   = e.ExceptionId,
-        Type          = e.Type,
+        ExceptionId = e.ExceptionId,
+        Type = e.Type,
         ReferenceType = e.ReferenceType,
-        ReferenceId   = e.ReferenceId,
-        ItemId        = e.ItemId,
-        ItemName      = e.ItemName,
-        FacilityId    = e.FacilityId,
-        LotId         = e.LotId,
-        Severity      = e.Severity,
-        Status        = e.Status,
-        DetectedDate  = e.DetectedDate,
-        Actions       = e.Actions.Select(a => ToActionDto(a)).ToList()
+        ReferenceId = e.ReferenceId,
+        ItemId = e.ItemId,
+        ItemName = e.ItemName,
+        FacilityId = e.FacilityId,
+        LotId = e.LotId,
+        Severity = e.Severity,
+        Status = e.Status,
+        DetectedDate = e.DetectedDate,
+        Actions = e.Actions.Select(a => ToActionDto(a)).ToList()
     };
 
     private static RecallActionDto ToActionDto(RecallAction a) => new()
     {
-        RecallActionId    = a.RecallActionId,
-        ExceptionId       = a.ExceptionId,
-        OwnerId           = a.OwnerId,
+        RecallActionId = a.RecallActionId,
+        ExceptionId = a.ExceptionId,
+        OwnerId = a.OwnerId,
         ActionDescription = a.ActionDescription,
-        DueDate           = a.DueDate,
-        Status            = a.Status
+        DueDate = a.DueDate,
+        Status = a.Status
     };
 }

@@ -31,15 +31,15 @@ public class FacilityServiceImpl : IFacilityService
     {
         if (await _db.Facilities.AnyAsync(f =>
                 f.Name.ToLower() == request.Name.ToLower() &&
-                f.Type           == request.Type &&
-                f.Region         == request.Region))
+                f.Type == request.Type &&
+                f.Region == request.Region))
             throw new InvalidOperationException(
                 $"A facility named '{request.Name}' of type '{request.Type}' in region '{request.Region}' already exists.");
 
         var facility = new Facility
         {
-            Name   = request.Name,
-            Type   = request.Type,
+            Name = request.Name,
+            Type = request.Type,
             Region = request.Region
         };
 
@@ -54,15 +54,15 @@ public class FacilityServiceImpl : IFacilityService
         if (facility == null) return false;
 
         if (await _db.Facilities.AnyAsync(f =>
-                f.FacilityId     != id &&
+                f.FacilityId != id &&
                 f.Name.ToLower() == request.Name.ToLower() &&
-                f.Type           == request.Type &&
-                f.Region         == request.Region))
+                f.Type == request.Type &&
+                f.Region == request.Region))
             throw new InvalidOperationException(
                 $"A facility named '{request.Name}' of type '{request.Type}' in region '{request.Region}' already exists.");
 
-        facility.Name   = request.Name;
-        facility.Type   = request.Type;
+        facility.Name = request.Name;
+        facility.Type = request.Type;
         facility.Region = request.Region;
 
         await _db.SaveChangesAsync();
@@ -125,18 +125,18 @@ public class FacilityServiceImpl : IFacilityService
 
         var normalizedName = request.Name.ToLower();
         if (await _db.StorageZones.AnyAsync(z =>
-                z.FacilityId     == request.FacilityId &&
-                z.Name           != null &&
+                z.FacilityId == request.FacilityId &&
+                z.Name != null &&
                 z.Name.ToLower() == normalizedName))
             throw new InvalidOperationException(
                 $"A zone named '{request.Name}' already exists in this facility.");
 
         var zone = new StorageZone
         {
-            FacilityId         = request.FacilityId,
-            Name               = request.Name,
+            FacilityId = request.FacilityId,
+            Name = request.Name,
             TemperatureProfile = request.TemperatureProfile,
-            Capacity           = request.Capacity
+            Capacity = request.Capacity
         };
 
         _db.StorageZones.Add(zone);
@@ -151,16 +151,16 @@ public class FacilityServiceImpl : IFacilityService
 
         var normalizedName = request.Name.ToLower();
         if (await _db.StorageZones.AnyAsync(z =>
-                z.ZoneId         != id &&
-                z.FacilityId     == zone.FacilityId &&
-                z.Name           != null &&
+                z.ZoneId != id &&
+                z.FacilityId == zone.FacilityId &&
+                z.Name != null &&
                 z.Name.ToLower() == normalizedName))
             throw new InvalidOperationException(
                 $"A zone named '{request.Name}' already exists in this facility.");
 
-        zone.Name               = request.Name;
+        zone.Name = request.Name;
         zone.TemperatureProfile = request.TemperatureProfile;
-        zone.Capacity           = request.Capacity;
+        zone.Capacity = request.Capacity;
 
         await _db.SaveChangesAsync();
         return true;
@@ -181,19 +181,19 @@ public class FacilityServiceImpl : IFacilityService
     private static FacilityDto ToFacilityDto(Facility f) => new()
     {
         FacilityId = f.FacilityId,
-        Name       = f.Name,
-        Type       = f.Type,
-        Region     = f.Region
+        Name = f.Name,
+        Type = f.Type,
+        Region = f.Region
     };
 
     private static StorageZoneDto ToZoneDto(StorageZone z) => new()
     {
-        ZoneId             = z.ZoneId,
-        FacilityId         = z.FacilityId,
-        FacilityName       = z.Facility?.Name ?? string.Empty,
-        Name               = z.Name,
+        ZoneId = z.ZoneId,
+        FacilityId = z.FacilityId,
+        FacilityName = z.Facility?.Name ?? string.Empty,
+        Name = z.Name,
         TemperatureProfile = z.TemperatureProfile,
-        Capacity           = z.Capacity
+        Capacity = z.Capacity
     };
 
 }

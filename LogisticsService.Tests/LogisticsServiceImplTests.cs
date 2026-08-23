@@ -52,7 +52,8 @@ public class LogisticsServiceImplTests
         await using var context = CreateInMemoryDbContext();
 
         // Add inventory position with insufficient stock (less than requested quantity)
-        context.InventoryPositions.Add(new InventoryPosition {
+        context.InventoryPositions.Add(new InventoryPosition
+        {
             ItemId = 1,
             LotId = "LOT-001",
             ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -92,7 +93,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -147,7 +149,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -224,7 +227,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -272,7 +276,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -327,7 +332,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -389,7 +395,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -443,7 +450,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),
@@ -496,7 +504,8 @@ public class LogisticsServiceImplTests
 
         // Add inventory positions with sufficient stock
         context.InventoryPositions.AddRange(
-            new InventoryPosition {
+            new InventoryPosition
+            {
                 ItemId = 1,
                 LotId = "LOT-001",
                 ExpiryDate = DateTime.UtcNow.AddYears(1),

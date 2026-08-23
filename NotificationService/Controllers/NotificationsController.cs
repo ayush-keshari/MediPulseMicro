@@ -21,7 +21,7 @@ public class NotificationsController : ControllerBase
     // ── Helpers ───────────────────────────────────────────────────────────
     private string CallerId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                            ?? User.FindFirst("sub")?.Value ?? string.Empty;
-    private bool IsAdmin   => (User.FindFirst(ClaimTypes.Role)?.Value
+    private bool IsAdmin => (User.FindFirst(ClaimTypes.Role)?.Value
                            ?? User.FindFirst("role")?.Value) == Roles.Admin;
 
     // ── GET /api/notifications ────────────────────────────────────────────

@@ -29,15 +29,15 @@ public class ProcurementServiceImpl : IProcurementService
     {
         if (await _db.Suppliers.AnyAsync(s =>
                 s.Name.ToLower() == request.Name.ToLower() &&
-                s.SupplierType   == request.SupplierType))
+                s.SupplierType == request.SupplierType))
             throw new InvalidOperationException(
                 $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
 
         var supplier = new Supplier
         {
-            Name         = request.Name,
+            Name = request.Name,
             SupplierType = request.SupplierType,
-            Status       = request.Status
+            Status = request.Status
         };
         _db.Suppliers.Add(supplier);
         await _db.SaveChangesAsync();
@@ -50,15 +50,15 @@ public class ProcurementServiceImpl : IProcurementService
         if (supplier == null) return false;
 
         if (await _db.Suppliers.AnyAsync(s =>
-                s.SupplierId     != id &&
+                s.SupplierId != id &&
                 s.Name.ToLower() == request.Name.ToLower() &&
-                s.SupplierType   == request.SupplierType))
+                s.SupplierType == request.SupplierType))
             throw new InvalidOperationException(
                 $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
 
-        supplier.Name         = request.Name;
+        supplier.Name = request.Name;
         supplier.SupplierType = request.SupplierType;
-        supplier.Status       = request.Status;
+        supplier.Status = request.Status;
 
         await _db.SaveChangesAsync();
         return true;
@@ -119,11 +119,11 @@ public class ProcurementServiceImpl : IProcurementService
 
         var po = new PurchaseOrder
         {
-            SupplierId           = request.SupplierId,
-            OrderDate            = request.OrderDate,
+            SupplierId = request.SupplierId,
+            OrderDate = request.OrderDate,
             ExpectedDeliveryDate = request.ExpectedDeliveryDate,
-            Status               = "Draft",
-            Notes                = request.Notes
+            Status = "Draft",
+            Notes = request.Notes
         };
 
         _db.PurchaseOrders.Add(po);
@@ -149,9 +149,9 @@ public class ProcurementServiceImpl : IProcurementService
             po.SupplierId = request.SupplierId;
         }
 
-        po.OrderDate            = request.OrderDate;
+        po.OrderDate = request.OrderDate;
         po.ExpectedDeliveryDate = request.ExpectedDeliveryDate;
-        po.Notes                = request.Notes;
+        po.Notes = request.Notes;
 
         await _db.SaveChangesAsync();
         return true;
@@ -225,11 +225,11 @@ public class ProcurementServiceImpl : IProcurementService
 
         var receipt = new Receipt
         {
-            PoId             = request.PoId,
-            SupplierLot      = request.SupplierLot,
-            ReceivedDate     = request.ReceivedDate,
-            ReceivedBy       = request.ReceivedBy,
-            QualityStatus    = request.QualityStatus,
+            PoId = request.PoId,
+            SupplierLot = request.SupplierLot,
+            ReceivedDate = request.ReceivedDate,
+            ReceivedBy = request.ReceivedBy,
+            QualityStatus = request.QualityStatus,
             QuantityReceived = request.QuantityReceived
         };
 
@@ -247,10 +247,10 @@ public class ProcurementServiceImpl : IProcurementService
         var receipt = await _db.Receipts.FindAsync(id);
         if (receipt == null) return false;
 
-        receipt.SupplierLot      = request.SupplierLot;
-        receipt.ReceivedDate     = request.ReceivedDate;
-        receipt.ReceivedBy       = request.ReceivedBy;
-        receipt.QualityStatus    = request.QualityStatus;
+        receipt.SupplierLot = request.SupplierLot;
+        receipt.ReceivedDate = request.ReceivedDate;
+        receipt.ReceivedBy = request.ReceivedBy;
+        receipt.QualityStatus = request.QualityStatus;
         receipt.QuantityReceived = request.QuantityReceived;
 
         await _db.SaveChangesAsync();
@@ -271,34 +271,34 @@ public class ProcurementServiceImpl : IProcurementService
 
     private static SupplierDto ToSupplierDto(Supplier s) => new()
     {
-        SupplierId   = s.SupplierId,
-        Name         = s.Name,
+        SupplierId = s.SupplierId,
+        Name = s.Name,
         SupplierType = s.SupplierType,
-        Status       = s.Status
+        Status = s.Status
     };
 
     private static PurchaseOrderDto ToPurchaseOrderDto(PurchaseOrder po) => new()
     {
-        PoId                 = po.PoId,
-        SupplierId           = po.SupplierId,
-        SupplierName         = po.Supplier?.Name ?? string.Empty,
-        OrderDate            = po.OrderDate,
+        PoId = po.PoId,
+        SupplierId = po.SupplierId,
+        SupplierName = po.Supplier?.Name ?? string.Empty,
+        OrderDate = po.OrderDate,
         ExpectedDeliveryDate = po.ExpectedDeliveryDate,
-        Status               = po.Status,
-        Notes                = po.Notes,
-        ReceiptCount         = po.Receipts?.Count ?? 0
+        Status = po.Status,
+        Notes = po.Notes,
+        ReceiptCount = po.Receipts?.Count ?? 0
     };
 
     private static ReceiptDto ToReceiptDto(Receipt r) => new()
     {
-        ReceiptId        = r.ReceiptId,
-        PoId             = r.PoId,
-        SupplierLot      = r.SupplierLot,
-        ReceivedDate     = r.ReceivedDate,
-        ReceivedBy       = r.ReceivedBy,
-        QualityStatus    = r.QualityStatus,
+        ReceiptId = r.ReceiptId,
+        PoId = r.PoId,
+        SupplierLot = r.SupplierLot,
+        ReceivedDate = r.ReceivedDate,
+        ReceivedBy = r.ReceivedBy,
+        QualityStatus = r.QualityStatus,
         QuantityReceived = r.QuantityReceived,
-        SupplierName     = r.PurchaseOrder?.Supplier?.Name ?? string.Empty
+        SupplierName = r.PurchaseOrder?.Supplier?.Name ?? string.Empty
     };
 
     private static bool IsValidStatusTransition(string current, string next)
@@ -306,12 +306,12 @@ public class ProcurementServiceImpl : IProcurementService
         if (next == "Cancelled") return current != "FullyReceived";
         return (current, next) switch
         {
-            ("Draft",             "Submitted")         => true,
-            ("Submitted",         "Approved")          => true,
-            ("Submitted",         "Draft")             => true,
-            ("Approved",          "Shipped")           => true,
-            ("Shipped",           "PartiallyReceived") => true,
-            ("PartiallyReceived", "FullyReceived")     => true,
+            ("Draft", "Submitted") => true,
+            ("Submitted", "Approved") => true,
+            ("Submitted", "Draft") => true,
+            ("Approved", "Shipped") => true,
+            ("Shipped", "PartiallyReceived") => true,
+            ("PartiallyReceived", "FullyReceived") => true,
             _ => false
         };
     }
@@ -319,11 +319,11 @@ public class ProcurementServiceImpl : IProcurementService
     private static IEnumerable<string> GetAllowedNextStatuses(string current) =>
         current switch
         {
-            "Draft"             => ["Submitted", "Cancelled"],
-            "Submitted"         => ["Approved", "Draft", "Cancelled"],
-            "Approved"          => ["Shipped", "Cancelled"],
-            "Shipped"           => ["PartiallyReceived", "Cancelled"],
+            "Draft" => ["Submitted", "Cancelled"],
+            "Submitted" => ["Approved", "Draft", "Cancelled"],
+            "Approved" => ["Shipped", "Cancelled"],
+            "Shipped" => ["PartiallyReceived", "Cancelled"],
             "PartiallyReceived" => ["FullyReceived", "Cancelled"],
-            _                   => []
+            _ => []
         };
 }

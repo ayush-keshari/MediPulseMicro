@@ -41,12 +41,12 @@ public class InventoryServiceImpl : IInventoryService
 
         var item = new Item
         {
-            ItemCode           = request.ItemCode,
-            Name               = request.Name,
-            Category           = request.Category,
-            Unit               = request.Unit,
+            ItemCode = request.ItemCode,
+            Name = request.Name,
+            Category = request.Category,
+            Unit = request.Unit,
             StorageRequirement = request.StorageRequirement,
-            SafetyStock        = request.SafetyStock
+            SafetyStock = request.SafetyStock
         };
 
         _context.Items.Add(item);
@@ -59,11 +59,11 @@ public class InventoryServiceImpl : IInventoryService
         var item = await _context.Items.FindAsync(id);
         if (item is null) return false;
 
-        if (request.Name               is not null) item.Name               = request.Name;
-        if (request.Category           is not null) item.Category           = request.Category;
-        if (request.Unit               is not null) item.Unit               = request.Unit;
+        if (request.Name is not null) item.Name = request.Name;
+        if (request.Category is not null) item.Category = request.Category;
+        if (request.Unit is not null) item.Unit = request.Unit;
         if (request.StorageRequirement is not null) item.StorageRequirement = request.StorageRequirement;
-        if (request.SafetyStock        is not null) item.SafetyStock        = request.SafetyStock.Value;
+        if (request.SafetyStock is not null) item.SafetyStock = request.SafetyStock.Value;
 
         await _context.SaveChangesAsync();
         return true;
@@ -128,7 +128,7 @@ public class InventoryServiceImpl : IInventoryService
             .GroupBy(p => p.ItemId)
             .Select(g => new FacilityStockDto
             {
-                ItemId       = g.Key,
+                ItemId = g.Key,
                 AvailableQty = g.Sum(p => p.Quantity)
             })
             .ToListAsync();
@@ -147,13 +147,13 @@ public class InventoryServiceImpl : IInventoryService
     {
         var position = new InventoryPosition
         {
-            ItemId        = request.ItemId,
-            LotId         = request.LotId,
-            ExpiryDate    = request.ExpiryDate,
-            Quantity      = request.Quantity,
-            FacilityId    = request.FacilityId,
+            ItemId = request.ItemId,
+            LotId = request.LotId,
+            ExpiryDate = request.ExpiryDate,
+            Quantity = request.Quantity,
+            FacilityId = request.FacilityId,
             StorageZoneId = request.StorageZoneId,
-            SafetyStock   = request.SafetyStock
+            SafetyStock = request.SafetyStock
         };
 
         _context.InventoryPositions.Add(position);
@@ -166,11 +166,11 @@ public class InventoryServiceImpl : IInventoryService
         var position = await _context.InventoryPositions.FindAsync(id);
         if (position is null) return false;
 
-        if (request.Quantity      is not null) position.Quantity      = request.Quantity.Value;
-        if (request.FacilityId    is not null) position.FacilityId    = request.FacilityId.Value;
+        if (request.Quantity is not null) position.Quantity = request.Quantity.Value;
+        if (request.FacilityId is not null) position.FacilityId = request.FacilityId.Value;
         if (request.StorageZoneId is not null) position.StorageZoneId = request.StorageZoneId.Value;
-        if (request.SafetyStock   is not null) position.SafetyStock   = request.SafetyStock.Value;
-        if (request.ExpiryDate    is not null) position.ExpiryDate    = request.ExpiryDate.Value;
+        if (request.SafetyStock is not null) position.SafetyStock = request.SafetyStock.Value;
+        if (request.ExpiryDate is not null) position.ExpiryDate = request.ExpiryDate.Value;
 
         await _context.SaveChangesAsync();
         return true;
@@ -190,27 +190,27 @@ public class InventoryServiceImpl : IInventoryService
 
     private static ItemResponse MapItemToResponse(Item item) => new()
     {
-        ItemId             = item.ItemId,
-        ItemCode           = item.ItemCode,
-        Name               = item.Name,
-        Category           = item.Category,
-        Unit               = item.Unit,
+        ItemId = item.ItemId,
+        ItemCode = item.ItemCode,
+        Name = item.Name,
+        Category = item.Category,
+        Unit = item.Unit,
         StorageRequirement = item.StorageRequirement,
-        SafetyStock        = item.SafetyStock,
-        TotalStock         = item.Positions.Sum(p => p.Quantity)
+        SafetyStock = item.SafetyStock,
+        TotalStock = item.Positions.Sum(p => p.Quantity)
     };
 
     private static PositionResponse MapPositionToResponse(InventoryPosition p) => new()
     {
-        PositionId    = p.PositionId,
-        ItemId        = p.ItemId,
-        ItemName      = p.Item?.Name     ?? string.Empty,
-        ItemCode      = p.Item?.ItemCode ?? string.Empty,
-        LotId         = p.LotId,
-        ExpiryDate    = p.ExpiryDate,
-        Quantity      = p.Quantity,
-        FacilityId    = p.FacilityId,
+        PositionId = p.PositionId,
+        ItemId = p.ItemId,
+        ItemName = p.Item?.Name ?? string.Empty,
+        ItemCode = p.Item?.ItemCode ?? string.Empty,
+        LotId = p.LotId,
+        ExpiryDate = p.ExpiryDate,
+        Quantity = p.Quantity,
+        FacilityId = p.FacilityId,
         StorageZoneId = p.StorageZoneId,
-        SafetyStock   = p.SafetyStock
+        SafetyStock = p.SafetyStock
     };
 }

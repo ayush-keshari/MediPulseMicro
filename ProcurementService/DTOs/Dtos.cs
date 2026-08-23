@@ -6,10 +6,10 @@ namespace ProcurementService.DTOs;
 
 public class SupplierDto
 {
-    public int     SupplierId   { get; set; }
-    public string  Name         { get; set; } = string.Empty;
+    public int SupplierId { get; set; }
+    public string Name { get; set; } = string.Empty;
     public string? SupplierType { get; set; }
-    public string  Status       { get; set; } = string.Empty;
+    public string Status { get; set; } = string.Empty;
 }
 
 public class CreateSupplierRequest
@@ -49,15 +49,15 @@ public class UpdateSupplierRequest
 
 public class PurchaseOrderDto
 {
-    public int       PoId                 { get; set; }
-    public int       SupplierId           { get; set; }
+    public int PoId { get; set; }
+    public int SupplierId { get; set; }
     // Resolved via EF Include(po => po.Supplier) -- no HTTP call needed
-    public string    SupplierName         { get; set; } = string.Empty;
-    public DateTime  OrderDate            { get; set; }
+    public string SupplierName { get; set; } = string.Empty;
+    public DateTime OrderDate { get; set; }
     public DateTime? ExpectedDeliveryDate { get; set; }
-    public string    Status               { get; set; } = string.Empty;
-    public string?   Notes                { get; set; }
-    public int       ReceiptCount         { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string? Notes { get; set; }
+    public int ReceiptCount { get; set; }
 }
 
 public class CreatePurchaseOrderRequest
@@ -101,15 +101,15 @@ public class UpdatePoStatusRequest
 
 public class ReceiptDto
 {
-    public int      ReceiptId        { get; set; }
-    public int      PoId             { get; set; }
-    public string?  SupplierLot      { get; set; }
-    public DateTime ReceivedDate     { get; set; }
-    public string   ReceivedBy       { get; set; } = string.Empty;
-    public string   QualityStatus    { get; set; } = string.Empty;
-    public int      QuantityReceived { get; set; }
+    public int ReceiptId { get; set; }
+    public int PoId { get; set; }
+    public string? SupplierLot { get; set; }
+    public DateTime ReceivedDate { get; set; }
+    public string ReceivedBy { get; set; } = string.Empty;
+    public string QualityStatus { get; set; } = string.Empty;
+    public int QuantityReceived { get; set; }
     // Resolved via EF: Receipt -> PurchaseOrder -> Supplier
-    public string   SupplierName     { get; set; } = string.Empty;
+    public string SupplierName { get; set; } = string.Empty;
 }
 
 public class CreateReceiptRequest

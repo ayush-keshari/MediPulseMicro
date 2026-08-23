@@ -17,7 +17,7 @@ public class ReplenishmentServiceImpl : IReplenishmentService
     {
         var query = _db.Forecasts.AsQueryable();
         if (facilityId.HasValue) query = query.Where(f => f.FacilityId == facilityId.Value);
-        if (itemId.HasValue)     query = query.Where(f => f.ItemId     == itemId.Value);
+        if (itemId.HasValue) query = query.Where(f => f.ItemId == itemId.Value);
 
         return await query
             .OrderByDescending(f => f.GeneratedDate)
@@ -37,9 +37,9 @@ public class ReplenishmentServiceImpl : IReplenishmentService
         int? facilityId, string? status, string? priority)
     {
         var query = _db.ReplenishmentPlans.AsQueryable();
-        if (facilityId.HasValue)                  query = query.Where(p => p.FacilityId == facilityId.Value);
-        if (!string.IsNullOrWhiteSpace(status))   query = query.Where(p => p.Status     == status);
-        if (!string.IsNullOrWhiteSpace(priority)) query = query.Where(p => p.Priority   == priority);
+        if (facilityId.HasValue) query = query.Where(p => p.FacilityId == facilityId.Value);
+        if (!string.IsNullOrWhiteSpace(status)) query = query.Where(p => p.Status == status);
+        if (!string.IsNullOrWhiteSpace(priority)) query = query.Where(p => p.Priority == priority);
 
         return await query
             .OrderByDescending(p => p.GeneratedDate)
@@ -77,7 +77,7 @@ public class ReplenishmentServiceImpl : IReplenishmentService
     public async Task<GenerateReplenishmentResult> GenerateAsync(int facilityId)
     {
         var result = new GenerateReplenishmentResult { FacilityId = facilityId };
-        var now    = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
         var period = now.ToString("yyyy-MM");
         var lookback = now.AddDays(-30);
 
@@ -117,15 +117,15 @@ public class ReplenishmentServiceImpl : IReplenishmentService
         foreach (var stock in stockByItem)
         {
             var totalConsumed = consumptionMap.GetValueOrDefault(stock.ItemId, 0);
-            var forecastQty   = (int)Math.Ceiling(totalConsumed / 30.0 * 30);
+            var forecastQty = (int)Math.Ceiling(totalConsumed / 30.0 * 30);
 
             _db.Forecasts.Add(new Forecast
             {
-                ItemId           = stock.ItemId,
-                FacilityId       = facilityId,
-                Period           = period,
+                ItemId = stock.ItemId,
+                FacilityId = facilityId,
+                Period = period,
                 ForecastQuantity = forecastQty,
-                GeneratedDate    = now
+                GeneratedDate = now
             });
             result.ForecastsCreated++;
 
@@ -138,12 +138,12 @@ public class ReplenishmentServiceImpl : IReplenishmentService
 
                 _db.ReplenishmentPlans.Add(new ReplenishmentPlan
                 {
-                    ItemId            = stock.ItemId,
-                    FacilityId        = facilityId,
+                    ItemId = stock.ItemId,
+                    FacilityId = facilityId,
                     SuggestedOrderQty = suggestedQty,
-                    Priority          = priority,
-                    Status            = "Pending",
-                    GeneratedDate     = now
+                    Priority = priority,
+                    Status = "Pending",
+                    GeneratedDate = now
                 });
                 result.PlansCreated++;
             }
@@ -157,22 +157,22 @@ public class ReplenishmentServiceImpl : IReplenishmentService
 
     private static ForecastDto ToForecastDto(Forecast f) => new()
     {
-        ForecastId       = f.ForecastId,
-        ItemId           = f.ItemId,
-        FacilityId       = f.FacilityId,
-        Period           = f.Period,
+        ForecastId = f.ForecastId,
+        ItemId = f.ItemId,
+        FacilityId = f.FacilityId,
+        Period = f.Period,
         ForecastQuantity = f.ForecastQuantity,
-        GeneratedDate    = f.GeneratedDate
+        GeneratedDate = f.GeneratedDate
     };
 
     private static ReplenishmentPlanDto ToPlanDto(ReplenishmentPlan p) => new()
     {
-        PlanId            = p.PlanId,
-        ItemId            = p.ItemId,
-        FacilityId        = p.FacilityId,
+        PlanId = p.PlanId,
+        ItemId = p.ItemId,
+        FacilityId = p.FacilityId,
         SuggestedOrderQty = p.SuggestedOrderQty,
-        Priority          = p.Priority,
-        Status            = p.Status,
-        GeneratedDate     = p.GeneratedDate
+        Priority = p.Priority,
+        Status = p.Status,
+        GeneratedDate = p.GeneratedDate
     };
 }

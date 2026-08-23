@@ -6,11 +6,11 @@ namespace LogisticsService.DTOs;
 
 public class TransferOrderItemDto
 {
-    public int    TransferOrderItemId { get; set; }
-    public int    ItemId              { get; set; }
-    public string ItemName            { get; set; } = string.Empty;
-    public int    Quantity            { get; set; }
-    public int    ToStorageZoneId     { get; set; }
+    public int TransferOrderItemId { get; set; }
+    public int ItemId { get; set; }
+    public string ItemName { get; set; } = string.Empty;
+    public int Quantity { get; set; }
+    public int ToStorageZoneId { get; set; }
 }
 
 public class TransferOrderItemRequest
@@ -35,14 +35,14 @@ public class TransferOrderItemRequest
 
 public class TransferOrderDto
 {
-    public int    TransferOrderId  { get; set; }
-    public int    FromFacilityId   { get; set; }
+    public int TransferOrderId { get; set; }
+    public int FromFacilityId { get; set; }
     public string FromFacilityName { get; set; } = string.Empty;
-    public int    ToFacilityId     { get; set; }
-    public string ToFacilityName   { get; set; } = string.Empty;
-    public string RequestedBy      { get; set; } = string.Empty;
-    public DateTime RequestedDate  { get; set; }
-    public string Status           { get; set; } = string.Empty;
+    public int ToFacilityId { get; set; }
+    public string ToFacilityName { get; set; } = string.Empty;
+    public string RequestedBy { get; set; } = string.Empty;
+    public DateTime RequestedDate { get; set; }
+    public string Status { get; set; } = string.Empty;
     public List<TransferOrderItemDto> Items { get; set; } = new();
 }
 
@@ -91,14 +91,14 @@ public class UpdateTransferStatusRequest
 
 public class ConsumptionRecordDto
 {
-    public int      ConsumptionId    { get; set; }
-    public int      FacilityId       { get; set; }
-    public int?     WardId           { get; set; }
-    public int      ItemId           { get; set; }
-    public string   ItemName         { get; set; } = string.Empty;
-    public int      QuantityConsumed { get; set; }
-    public DateTime ConsumedDate     { get; set; }
-    public string   ConsumedBy       { get; set; } = string.Empty;
+    public int ConsumptionId { get; set; }
+    public int FacilityId { get; set; }
+    public int? WardId { get; set; }
+    public int ItemId { get; set; }
+    public string ItemName { get; set; } = string.Empty;
+    public int QuantityConsumed { get; set; }
+    public DateTime ConsumedDate { get; set; }
+    public string ConsumedBy { get; set; } = string.Empty;
 }
 
 public class CreateConsumptionRequest

@@ -9,7 +9,7 @@ public class FacilityDbContext : DbContext
 {
     public FacilityDbContext(DbContextOptions<FacilityDbContext> options) : base(options) { }
 
-    public DbSet<Facility>    Facilities   => Set<Facility>();
+    public DbSet<Facility> Facilities => Set<Facility>();
     public DbSet<StorageZone> StorageZones => Set<StorageZone>();
 
     protected override void OnModelCreating(ModelBuilder mb)

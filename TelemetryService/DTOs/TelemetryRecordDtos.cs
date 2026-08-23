@@ -6,15 +6,15 @@ namespace TelemetryService.DTOs;
 
 public class TelemetryRecordDto
 {
-    public int      TelemetryId   { get; set; }
-    public int      SensorId      { get; set; }
+    public int TelemetryId { get; set; }
+    public int SensorId { get; set; }
     // Resolved via EF Include(t => t.SensorDevice) — DeviceType surfaced for convenience.
-    public string   DeviceType    { get; set; } = string.Empty;
-    public DateTime Timestamp     { get; set; }
-    public decimal? Temperature   { get; set; }
-    public decimal? Humidity      { get; set; }
-    public string?  Location      { get; set; }
-    public bool     IsExcursion   { get; set; }
+    public string DeviceType { get; set; } = string.Empty;
+    public DateTime Timestamp { get; set; }
+    public decimal? Temperature { get; set; }
+    public decimal? Humidity { get; set; }
+    public string? Location { get; set; }
+    public bool IsExcursion { get; set; }
 }
 
 public class CreateTelemetryRecordRequest

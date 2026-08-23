@@ -31,7 +31,7 @@ public class GlobalExceptionFilter : IExceptionFilter
         context.Result = new ObjectResult(new
         {
             message = "An unexpected server error occurred.",
-            detail  = context.Exception.Message
+            detail = context.Exception.Message
         })
         {
             StatusCode = StatusCodes.Status500InternalServerError

@@ -57,18 +57,18 @@ public class LogisticsServiceImpl : ILogisticsService
 
         var order = new TransferOrder
         {
-            FromFacilityId   = request.FromFacilityId,
+            FromFacilityId = request.FromFacilityId,
             FromFacilityName = request.FromFacilityName,
-            ToFacilityId     = request.ToFacilityId,
-            ToFacilityName   = request.ToFacilityName,
-            RequestedBy      = request.RequestedBy,
-            RequestedDate    = DateTime.UtcNow,
-            Status           = "Draft",
-            Items            = request.Items.Select(i => new TransferOrderItem
+            ToFacilityId = request.ToFacilityId,
+            ToFacilityName = request.ToFacilityName,
+            RequestedBy = request.RequestedBy,
+            RequestedDate = DateTime.UtcNow,
+            Status = "Draft",
+            Items = request.Items.Select(i => new TransferOrderItem
             {
-                ItemId          = i.ItemId,
-                ItemName        = i.ItemName,
-                Quantity        = i.Quantity,
+                ItemId = i.ItemId,
+                ItemName = i.ItemName,
+                Quantity = i.Quantity,
                 ToStorageZoneId = i.ToStorageZoneId
             }).ToList()
         };
@@ -95,9 +95,9 @@ public class LogisticsServiceImpl : ILogisticsService
         order.Items = request.Items.Select(i => new TransferOrderItem
         {
             TransferOrderId = id,
-            ItemId          = i.ItemId,
-            ItemName        = i.ItemName,
-            Quantity        = i.Quantity,
+            ItemId = i.ItemId,
+            ItemName = i.ItemName,
+            Quantity = i.Quantity,
             ToStorageZoneId = i.ToStorageZoneId
         }).ToList();
 
@@ -180,13 +180,13 @@ public class LogisticsServiceImpl : ILogisticsService
     {
         var record = new ConsumptionRecord
         {
-            FacilityId       = request.FacilityId,
-            WardId           = request.WardId,
-            ItemId           = request.ItemId,
-            ItemName         = request.ItemName,
+            FacilityId = request.FacilityId,
+            WardId = request.WardId,
+            ItemId = request.ItemId,
+            ItemName = request.ItemName,
             QuantityConsumed = request.QuantityConsumed,
-            ConsumedDate     = request.ConsumedDate,
-            ConsumedBy       = request.ConsumedBy
+            ConsumedDate = request.ConsumedDate,
+            ConsumedBy = request.ConsumedBy
         };
 
         _db.ConsumptionRecords.Add(record);
@@ -203,8 +203,8 @@ public class LogisticsServiceImpl : ILogisticsService
         if (record == null) return false;
 
         record.QuantityConsumed = request.QuantityConsumed;
-        record.ConsumedDate     = request.ConsumedDate;
-        record.ConsumedBy       = request.ConsumedBy;
+        record.ConsumedDate = request.ConsumedDate;
+        record.ConsumedBy = request.ConsumedBy;
 
         await _db.SaveChangesAsync();
         return true;
@@ -234,9 +234,9 @@ public class LogisticsServiceImpl : ILogisticsService
         foreach (var pos in positions)
         {
             if (remaining <= 0) break;
-            var take    = Math.Min(pos.Quantity, remaining);
+            var take = Math.Min(pos.Quantity, remaining);
             pos.Quantity -= take;
-            remaining    -= take;
+            remaining -= take;
         }
 
         await _db.SaveChangesAsync();
@@ -264,7 +264,7 @@ public class LogisticsServiceImpl : ILogisticsService
             if (remaining <= 0) break;
             var take = Math.Min(pos.Quantity, remaining);
             pos.Quantity -= take;
-            remaining    -= take;
+            remaining -= take;
         }
 
         // ── 2. Credit destination ─────────────────────────────────────────
@@ -284,13 +284,13 @@ public class LogisticsServiceImpl : ILogisticsService
             // No position exists for this item in the chosen zone — create one.
             _db.InventoryPositions.Add(new InventoryPosition
             {
-                ItemId        = itemId,
-                LotId         = $"XFER-{transferOrderId}",
-                FacilityId    = toFacilityId,
+                ItemId = itemId,
+                LotId = $"XFER-{transferOrderId}",
+                FacilityId = toFacilityId,
                 StorageZoneId = toStorageZoneId,
-                Quantity      = quantity,
-                SafetyStock   = sourceTemplate?.SafetyStock ?? 0,
-                ExpiryDate    = sourceTemplate?.ExpiryDate  ?? DateTime.UtcNow.AddYears(2),
+                Quantity = quantity,
+                SafetyStock = sourceTemplate?.SafetyStock ?? 0,
+                ExpiryDate = sourceTemplate?.ExpiryDate ?? DateTime.UtcNow.AddYears(2),
             });
         }
 
@@ -301,34 +301,34 @@ public class LogisticsServiceImpl : ILogisticsService
 
     private static TransferOrderDto ToTransferOrderDto(TransferOrder t) => new()
     {
-        TransferOrderId  = t.TransferOrderId,
-        FromFacilityId   = t.FromFacilityId,
+        TransferOrderId = t.TransferOrderId,
+        FromFacilityId = t.FromFacilityId,
         FromFacilityName = t.FromFacilityName,
-        ToFacilityId     = t.ToFacilityId,
-        ToFacilityName   = t.ToFacilityName,
-        RequestedBy      = t.RequestedBy,
-        RequestedDate    = t.RequestedDate,
-        Status           = t.Status,
-        Items            = t.Items.Select(i => new TransferOrderItemDto
+        ToFacilityId = t.ToFacilityId,
+        ToFacilityName = t.ToFacilityName,
+        RequestedBy = t.RequestedBy,
+        RequestedDate = t.RequestedDate,
+        Status = t.Status,
+        Items = t.Items.Select(i => new TransferOrderItemDto
         {
             TransferOrderItemId = i.TransferOrderItemId,
-            ItemId              = i.ItemId,
-            ItemName            = i.ItemName,
-            Quantity            = i.Quantity,
-            ToStorageZoneId     = i.ToStorageZoneId
+            ItemId = i.ItemId,
+            ItemName = i.ItemName,
+            Quantity = i.Quantity,
+            ToStorageZoneId = i.ToStorageZoneId
         }).ToList()
     };
 
     private static ConsumptionRecordDto ToConsumptionDto(ConsumptionRecord c) => new()
     {
-        ConsumptionId    = c.ConsumptionId,
-        FacilityId       = c.FacilityId,
-        WardId           = c.WardId,
-        ItemId           = c.ItemId,
-        ItemName         = c.ItemName,
+        ConsumptionId = c.ConsumptionId,
+        FacilityId = c.FacilityId,
+        WardId = c.WardId,
+        ItemId = c.ItemId,
+        ItemName = c.ItemName,
         QuantityConsumed = c.QuantityConsumed,
-        ConsumedDate     = c.ConsumedDate,
-        ConsumedBy       = c.ConsumedBy
+        ConsumedDate = c.ConsumedDate,
+        ConsumedBy = c.ConsumedBy
     };
 
     private static bool IsValidStatusTransition(string current, string next)
@@ -336,10 +336,10 @@ public class LogisticsServiceImpl : ILogisticsService
         if (next == "Cancelled") return current != "Completed";
         return (current, next) switch
         {
-            ("Draft",     "Submitted") => true,
-            ("Submitted", "Approved")  => true,
-            ("Submitted", "Draft")     => true,
-            ("Approved",  "InTransit") => true,
+            ("Draft", "Submitted") => true,
+            ("Submitted", "Approved") => true,
+            ("Submitted", "Draft") => true,
+            ("Approved", "InTransit") => true,
             ("InTransit", "Completed") => true,
             _ => false
         };
@@ -348,10 +348,10 @@ public class LogisticsServiceImpl : ILogisticsService
     private static IEnumerable<string> GetAllowedNextStatuses(string current) =>
         current switch
         {
-            "Draft"     => ["Submitted", "Cancelled"],
+            "Draft" => ["Submitted", "Cancelled"],
             "Submitted" => ["Approved", "Draft", "Cancelled"],
-            "Approved"  => ["InTransit", "Cancelled"],
+            "Approved" => ["InTransit", "Cancelled"],
             "InTransit" => ["Completed", "Cancelled"],
-            _           => []
+            _ => []
         };
 }

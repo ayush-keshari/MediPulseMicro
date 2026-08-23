@@ -6,12 +6,12 @@ namespace TelemetryService.DTOs;
 
 public class SensorDeviceDto
 {
-    public int    SensorId         { get; set; }
-    public string DeviceName       { get; set; } = string.Empty;
-    public string DeviceType       { get; set; } = string.Empty;
-    public string AssignedTo       { get; set; } = string.Empty;
-    public int?   AssignedEntityId { get; set; }
-    public string Status           { get; set; } = string.Empty;
+    public int SensorId { get; set; }
+    public string DeviceName { get; set; } = string.Empty;
+    public string DeviceType { get; set; } = string.Empty;
+    public string AssignedTo { get; set; } = string.Empty;
+    public int? AssignedEntityId { get; set; }
+    public string Status { get; set; } = string.Empty;
 }
 
 public class CreateSensorDeviceRequest

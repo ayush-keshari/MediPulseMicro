@@ -29,11 +29,11 @@ public class TelemetryServiceImpl : ITelemetryService
     {
         var sensor = new SensorDevice
         {
-            DeviceName       = request.DeviceName,
-            DeviceType       = request.DeviceType,
-            AssignedTo       = request.AssignedTo,
+            DeviceName = request.DeviceName,
+            DeviceType = request.DeviceType,
+            AssignedTo = request.AssignedTo,
             AssignedEntityId = request.AssignedEntityId,
-            Status           = request.Status
+            Status = request.Status
         };
         _db.SensorDevices.Add(sensor);
         await _db.SaveChangesAsync();
@@ -45,11 +45,11 @@ public class TelemetryServiceImpl : ITelemetryService
         var sensor = await _db.SensorDevices.FindAsync(id);
         if (sensor == null) return false;
 
-        sensor.DeviceName       = request.DeviceName;
-        sensor.DeviceType       = request.DeviceType;
-        sensor.AssignedTo       = request.AssignedTo;
+        sensor.DeviceName = request.DeviceName;
+        sensor.DeviceType = request.DeviceType;
+        sensor.AssignedTo = request.AssignedTo;
         sensor.AssignedEntityId = request.AssignedEntityId;
-        sensor.Status           = request.Status;
+        sensor.Status = request.Status;
 
         await _db.SaveChangesAsync();
         return true;
@@ -111,11 +111,11 @@ public class TelemetryServiceImpl : ITelemetryService
 
         var record = new TelemetryRecord
         {
-            SensorId    = request.SensorId,
-            Timestamp   = request.Timestamp,
+            SensorId = request.SensorId,
+            Timestamp = request.Timestamp,
             Temperature = request.Temperature,
-            Humidity    = request.Humidity,
-            Location    = request.Location
+            Humidity = request.Humidity,
+            Location = request.Location
         };
 
         DetectExcursion(record);
@@ -130,10 +130,10 @@ public class TelemetryServiceImpl : ITelemetryService
         var record = await _db.TelemetryRecords.FindAsync(id);
         if (record == null) return false;
 
-        record.Timestamp   = request.Timestamp;
+        record.Timestamp = request.Timestamp;
         record.Temperature = request.Temperature;
-        record.Humidity    = request.Humidity;
-        record.Location    = request.Location;
+        record.Humidity = request.Humidity;
+        record.Location = request.Location;
 
         record.IsExcursion = false;
         DetectExcursion(record);
@@ -176,23 +176,23 @@ public class TelemetryServiceImpl : ITelemetryService
 
     private static SensorDeviceDto ToSensorDto(SensorDevice s) => new()
     {
-        SensorId         = s.SensorId,
-        DeviceName       = s.DeviceName,
-        DeviceType       = s.DeviceType,
-        AssignedTo       = s.AssignedTo,
+        SensorId = s.SensorId,
+        DeviceName = s.DeviceName,
+        DeviceType = s.DeviceType,
+        AssignedTo = s.AssignedTo,
         AssignedEntityId = s.AssignedEntityId,
-        Status           = s.Status
+        Status = s.Status
     };
 
     private static TelemetryRecordDto ToTelemetryDto(TelemetryRecord t) => new()
     {
-        TelemetryId   = t.TelemetryId,
-        SensorId      = t.SensorId,
-        DeviceType    = t.SensorDevice?.DeviceType ?? string.Empty,
-        Timestamp     = t.Timestamp,
-        Temperature   = t.Temperature,
-        Humidity      = t.Humidity,
-        Location      = t.Location,
-        IsExcursion   = t.IsExcursion
+        TelemetryId = t.TelemetryId,
+        SensorId = t.SensorId,
+        DeviceType = t.SensorDevice?.DeviceType ?? string.Empty,
+        Timestamp = t.Timestamp,
+        Temperature = t.Temperature,
+        Humidity = t.Humidity,
+        Location = t.Location,
+        IsExcursion = t.IsExcursion
     };
 }

@@ -14,22 +14,22 @@ namespace LogisticsService.Controllers;
 [RoleAuthorize(Roles.Admin, Roles.SupplyManager, Roles.ProcurementOfficer, Roles.DeviceManager)]
 public class TransferOrdersController : ControllerBase
 {
-    private readonly ILogisticsService  _service;
+    private readonly ILogisticsService _service;
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly string?            _notifBaseUrl;
+    private readonly string? _notifBaseUrl;
 
-    private string  CallerId    => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+    private string CallerId => User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                                 ?? User.FindFirst("sub")?.Value ?? string.Empty;
     private string? BearerToken => HttpContext.Request.Headers["Authorization"].FirstOrDefault();
 
     public TransferOrdersController(
-        ILogisticsService  service,
+        ILogisticsService service,
         IHttpClientFactory httpClientFactory,
-        IConfiguration     configuration)
+        IConfiguration configuration)
     {
-        _service           = service;
+        _service = service;
         _httpClientFactory = httpClientFactory;
-        _notifBaseUrl      = configuration["NotificationService:BaseUrl"];
+        _notifBaseUrl = configuration["NotificationService:BaseUrl"];
     }
 
     // GET /api/transferorders
@@ -61,10 +61,10 @@ public class TransferOrdersController : ControllerBase
 
             NotificationClient.Send(
                 _httpClientFactory, _notifBaseUrl, BearerToken,
-                userId:   CallerId,
+                userId: CallerId,
                 category: "SystemAlert",
-                title:    "Transfer Order Created",
-                message:  $"Transfer order created: {request.FromFacilityName} → {request.ToFacilityName}");
+                title: "Transfer Order Created",
+                message: $"Transfer order created: {request.FromFacilityName} → {request.ToFacilityName}");
 
             return NoContent();
         }
