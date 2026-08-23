@@ -1,0 +1,55 @@
+# .editorconfig for MediPulseMicro
+# See https://editorconfig.org/ for details
+
+root = true
+
+# C# files
+[{*.cs}]
+indent_style = space
+indent_size = 4
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# C# project files
+[{*.csproj}]
+indent_style = space
+indent_size = 4
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# JSON files
+[{*.json}]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Markdown files
+[{*.md}]
+trim_trailing_whitespace = false
+max_line_length = off
+insert_final_newline = true
+
+# YAML files
+[{*.yml, *.yaml}]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# SQL files
+[{*.sql}]
+indent_style = space
+indent_size = 2
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true

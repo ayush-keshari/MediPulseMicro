@@ -60,8 +60,10 @@ jobs:
     - name: Build solution
       run: dotnet build --no-restore --configuration Release
 
+    - name: Install dotnet-format
+      run: dotnet tool install --global dotnet-format
     - name: Verify .NET formatting
-      run: dotnet format --verify-no-changes || echo "Formatting check completed"
+      run: dotnet format --verify-no-changes
 
     - name: Run unit tests with coverage
       run: |
