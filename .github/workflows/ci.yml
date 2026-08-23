@@ -55,10 +55,10 @@ jobs:
         # Generate coverage report
         reportgenerator "-reports:../TestResults/coverage.opencover.xml" "-targetdir:../TestResults/CoverageReport" "-reporttypes:HtmlSummary"
         # Extract coverage percentage from summary
-        COVERAGE_PERCENT=$(grep -oP '(?<=Lines covered\: ).*(?=%)' ../TestResults/CoverageReport/Summary.txt | head -1)
+        COVERAGE_PERCENT=$(awk '/Lines covered:/ {gsub(/%/, ""); print $NF}' ../TestResults/CoverageReport/Summary.txt)
         echo "Coverage: $COVERAGE_PERCENT%"
-        # Check if coverage is below 40%
-        if (( $(echo "$COVERAGE_PERCENT < 40" | bc -l) )); then
+        # Check if coverage is below 40% using awk
+        if [ "$(awk -v cov="$COVERAGE_PERCENT" 'BEGIN {print (cov < 40)}')" -eq 1 ]; then
           echo "Error: Coverage is below 40%"
           exit 1
         fi
