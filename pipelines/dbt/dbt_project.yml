@@ -1,0 +1,22 @@
+name: mediapulse_dq
+version: '1.0'
+config-version: 2
+
+profile: mediapulse_dq
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+test-paths: ["tests"]
+macro-paths: ["macro"]
+docs-paths: ["docs"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_modules"
+
+require-dbt-version: [">=1.0.0", "<2.0.0"]
+
+models:
+  mediapulse_dq:
+    +materialized: view

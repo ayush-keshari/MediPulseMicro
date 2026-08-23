@@ -1,0 +1,15 @@
+mediapulse_dq:
+  target: dev
+  outputs:
+    dev:
+      type: sqlserver
+      driver: ODBC Driver 17 for SQL Server
+      server: YOUR_SERVER_HOST
+      database: MedipulseMain
+      schema: dbo
+      username: YOUR_USERNAME
+      password: YOUR_PASSWORD
+      port: 1433
+      # Optional: if you need to encrypt
+      encrypt: true
+      trust_server_certificate: true

@@ -1,0 +1,480 @@
+version: 2
+
+sources:
+  - name: mediapulse_main
+    database: MedipulseMain
+    schema: dbo
+    tables:
+      - name: Facility
+        description: Healthcare facilities and storage zones
+        columns:
+          - name: FacilityID
+            description: Primary key
+            tests:
+              - unique
+              - not_null
+          - name: Name
+            tests:
+              - not_null
+          - name: Type
+            tests:
+              - not_null
+          - name: Region
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 6
+      - name: StorageZone
+        description: Storage zones within facilities
+        columns:
+          - name: StorageZoneID
+            tests:
+              - unique
+              - not_null
+          - name: FacilityID
+            tests:
+              - not_null
+          - name: Name
+            tests:
+              - not_null
+          - name: TemperatureProfile
+            tests:
+              - not_null
+          - name: Capacity
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 8
+      - name: Item
+        description: Medical inventory items
+        columns:
+          - name: ItemID
+            tests:
+              - unique
+              - not_null
+          - name: ItemCode
+            tests:
+              - not_null
+          - name: Name
+            tests:
+              - not_null
+          - name: Category
+            tests:
+              - not_null
+          - name: Unit
+            tests:
+              - not_null
+          - name: SafetyStock
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 8
+      - name: InventoryPositions
+        description: Inventory positions linking items to lots and locations
+        columns:
+          - name: InventoryPositionID
+            tests:
+              - unique
+              - not_null
+          - name: ItemId
+            tests:
+              - not_null
+          - name: LotId
+            tests:
+              - not_null
+          - name: Quantity
+            tests:
+              - not_null
+          - name: FacilityId
+            tests:
+              - not_null
+          - name: StorageZoneId
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 8
+      - name: ExceptionEvent
+        description: Exceptions detected in inventory
+        columns:
+          - name: ExceptionEventID
+            tests:
+              - unique
+              - not_null
+          - name: Type
+            tests:
+              - not_null
+          - name: ReferenceType
+            tests:
+              - not_null
+          - name: ReferenceId
+            tests:
+              - not_null
+          - name: Severity
+            tests:
+              - not_null
+          - name: Status
+            tests:
+              - not_null
+          - name: DetectedDate
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 4
+      - name: RecallAction
+        description: Actions taken in response to exceptions
+        columns:
+          - name: RecallActionID
+            tests:
+              - unique
+              - not_null
+          - name: ExceptionId
+            tests:
+              - not_null
+          - name: OwnerId
+            tests:
+              - not_null
+          - name: ActionDescription
+            tests:
+              - not_null
+          - name: DueDate
+            tests:
+              - not_null
+          - name: Status
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 4
+      - name: Forecast
+        description: Demand forecast for items
+        columns:
+          - name: ForecastID
+            tests:
+              - unique
+              - not_null
+          - name: ItemId
+            tests:
+              - not_null
+          - name: FacilityId
+            tests:
+              - not_null
+          - name: Period
+            tests:
+              - not_null
+          - name: ForecastQuantity
+            tests:
+              - not_null
+          - name: GeneratedDate
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 6
+      - name: ReplenishmentPlan
+        description: Suggested replenishment actions
+        columns:
+          - name: ReplenishmentPlanID
+            tests:
+              - unique
+              - not_null
+          - name: ItemId
+            tests:
+              - not_null
+          - name: FacilityId
+            tests:
+              - not_null
+          - name: SuggestedOrderQty
+            tests:
+              - not_null
+          - name: Priority
+            tests:
+              - not_null
+          - name: Status
+            tests:
+              - not_null
+          - name: GeneratedDate
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 4
+      - name: Supplier
+        description: Suppliers of medical items
+        columns:
+          - name: SupplierID
+            tests:
+              - unique
+              - not_null
+          - name: Name
+            tests:
+              - not_null
+          - name: SupplierType
+            tests:
+              - not_null
+          - name: Status
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 7
+      - name: PurchaseOrder
+        description: Purchase orders to suppliers
+        columns:
+          - name: PurchaseOrderID
+            tests:
+              - unique
+              - not_null
+          - name: SupplierID
+            tests:
+              - not_null
+          - name: OrderDate
+            tests:
+              - not_null
+          - name: Status
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 6
+      - name: Receipt
+        description: Receipt of purchase orders
+        columns:
+          - name: ReceiptID
+            tests:
+              - unique
+              - not_null
+          - name: POID
+            tests:
+              - not_null
+          - name: SupplierLot
+            tests:
+              - not_null
+          - name: ReceivedDate
+            tests:
+              - not_null
+          - name: ReceivedBy
+            tests:
+              - not_null
+          - name: QualityStatus
+            tests:
+              - not_null
+          - name: QuantityReceived
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 6
+      - name: TransferOrder
+        description: Transfer orders between facilities
+        columns:
+          - name: TransferOrderID
+            tests:
+              - unique
+              - not_null
+          - name: FromFacilityId
+            tests:
+              - not_null
+          - name: FromFacilityName
+            tests:
+              - not_null
+          - name: ToFacilityId
+            tests:
+              - not_null
+          - name: ToFacilityName
+            tests:
+              - not_null
+          - name: RequestedBy
+            tests:
+              - not_null
+          - name: RequestedDate
+            tests:
+              - not_null
+          - name: Status
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 4
+      - name: TransferOrderItem
+        description: Items within a transfer order
+        columns:
+          - name: TransferOrderItemID
+            tests:
+              - unique
+              - not_null
+          - name: TransferOrderId
+            tests:
+              - not_null
+          - name: ItemId
+            tests:
+              - not_null
+          - name: ItemName
+            tests:
+              - not_null
+          - name: Quantity
+            tests:
+              - not_null
+          - name: ToStorageZoneId
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 6
+      - name: ConsumptionRecord
+        description: Consumption of items by wards/patients
+        columns:
+          - name: ConsumptionRecordID
+            tests:
+              - unique
+              - not_null
+          - name: FacilityId
+            tests:
+              - not_null
+          - name: WardId
+            tests:
+              - not_null
+          - name: ItemId
+            tests:
+              - not_null
+          - name: ItemName
+            tests:
+              - not_null
+          - name: QuantityConsumed
+            tests:
+              - not_null
+          - name: ConsumedDate
+            tests:
+              - not_null
+          - name: ConsumedBy
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 6
+      - name: SensorDevice
+        description: Telemetry sensor devices
+        columns:
+          - name: SensorDeviceID
+            tests:
+              - unique
+              - not_null
+          - name: DeviceName
+            tests:
+              - not_null
+          - name: DeviceType
+            tests:
+              - not_null
+          - name: AssignedTo
+            tests:
+              - not_null
+          - name: Status
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 8
+      - name: TelemetryRecord
+        description: Telemetry readings from sensors
+        columns:
+          - name: TelemetryRecordID
+            tests:
+              - unique
+              - not_null
+          - name: SensorID
+            tests:
+              - not_null
+          - name: Timestamp
+            tests:
+              - not_null
+          - name: Temperature
+            tests:
+              - not_null
+          - name: Humidity
+            tests:
+              - not_null
+          - name: Location
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 12
+      - name: Notification
+        description: System notifications to users
+        columns:
+          - name: NotificationID
+            tests:
+              - unique
+              - not_null
+          - name: UserId
+            tests:
+              - not_null
+          - name: Category
+            tests:
+              - not_null
+          - name: Title
+            tests:
+              - not_null
+          - name: Message
+            tests:
+              - not_null
+          - name: IsRead
+            tests:
+              - not_null
+          - name: CreatedAt
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 6
+      - name: User
+        description: Application users
+        columns:
+          - name: UserID
+            tests:
+              - unique
+              - not_null
+          - name: Name
+            tests:
+              - not_null
+          - name: Role
+            tests:
+              - not_null
+          - name: Email
+            tests:
+              - not_null
+          - name: Password
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 7
+      - name: AuditLog
+        description: Audit trail of system actions
+        columns:
+          - name: AuditLogID
+            tests:
+              - unique
+              - not_null
+          - name: UserId
+            tests:
+              - not_null
+          - name: HttpMethod
+            tests:
+              - not_null
+          - name: Endpoint
+            tests:
+              - not_null
+          - name: Timestamp
+            tests:
+              - not_null
+          - name: Details
+            tests:
+              - not_null
+        tests:
+          - min_rows:
+              min_value: 7
