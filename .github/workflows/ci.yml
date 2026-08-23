@@ -24,6 +24,28 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v7
 
+    - name: Validate lockfiles are present
+      run: |
+        LOCKFILES=(
+          "AuditService/packages.lock.json"
+          "AuthService/packages.lock.json"
+          "FacilityService/packages.lock.json"
+          "Gateway/packages.lock.json"
+          "InventoryService/packages.lock.json"
+          "LogisticsService/packages.lock.json"
+          "NotificationService/packages.lock.json"
+          "ProcurementService/packages.lock.json"
+          "TelemetryService/packages.lock.json"
+          "Shared/packages.lock.json"
+        )
+        for lockfile in "${LOCKFILES[@]}"; do
+          if [ ! -f "$lockfile" ]; then
+            echo "Error: Lockfile $lockfile is missing"
+            exit 1
+          fi
+        done
+        echo "All lockfiles are present"
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v6
       with:
