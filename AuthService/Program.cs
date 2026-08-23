@@ -2,13 +2,15 @@ using AuthService.Data;
 using AuthService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
+using Shared.Middleware;
 using Serilog;
+using Serilog.Formatting.Json;
 using System;
 using Serilog.Sinks.ApplicationInsights;
 
 var loggerConfiguration = new LoggerConfiguration()
     .Enrich.FromLogContext()
-    .WriteTo.Console()
+    .WriteTo.Console(new JsonFormatter())
     .MinimumLevel.Information();
 
 if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
@@ -39,6 +41,8 @@ builder.Services.AddHealthChecks();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+
+app.UseMediPulseExceptionHandling();
 
 // Auto-create / migrate database on startup (retry handles concurrent-start race on shared DB)
 using (var scope = app.Services.CreateScope())
