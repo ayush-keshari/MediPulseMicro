@@ -26,6 +26,26 @@ All backend services follow a clean layered architecture:
 
 ## 🚀 Quick Start
 
+## 📋 Data Quality Checks
+
+You can run the data quality checks locally to validate the database schema and data integrity.
+
+```bash
+# Ensure SQL Server is running (via docker compose) and the MediPulseMicro database is populated.
+# If you have not yet started the stack, do:
+docker compose up -d sqlserver migrator
+docker compose up migrator --abort-on-container-exit --exit-code-from migrator
+
+# Set the SA_PASSWORD environment variable (matches the one in .env or docker-compose.yml)
+export SA_PASSWORD=MediPulse@2024!Dev   # Linux/macOS
+# For Windows PowerShell:
+# $env:SA_PASSWORD = "MediPulse@2024!Dev"
+
+# Run the data quality check script
+powershell -ExecutionPolicy Bypass -File ScriptsRun-DqChecks.ps1
+```
+
+
 ### Prerequisites
 - Docker Engine
 - Docker Compose
