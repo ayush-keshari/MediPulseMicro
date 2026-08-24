@@ -3,44 +3,30 @@ using FacilityService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
 using Serilog;
-using Serilog.Formatting.Json;
-using Serilog.Sinks.ApplicationInsights;
-using Shared.Middleware;
-
-var loggerConfiguration = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.Console(new JsonFormatter())
-    .MinimumLevel.Information();
-
-if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
-{
-    loggerConfiguration.WriteTo.ApplicationInsights(
-        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"),
-        null);
-}
-
-Log.Logger = loggerConfiguration.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ── SHARED INFRASTRUCTURE (one line each — logic lives in Shared) ──────────
-builder.Services.AddMediPulseControllers();                         // controllers + 3 global filters
-builder.Services.AddMediPulseSwagger("Facility Service");           // Swagger UI with JWT Authorize button
-builder.Services.AddJwtAuthentication(builder.Configuration);       // JWT Bearer middleware
-builder.Services.AddMediPulseCors();                                // CORS for Angular port 4200
+// Add centralized Serilog logging
+builder.AddMediPulseSerilog();
+
+// ── SHARED INFRASTRUCTURE ─────────────────────────────────────────────────
+builder.Services.AddMediPulseControllers();
+builder.Services.AddMediPulseSwagger("Facility Service");
+builder.Services.AddJwtAuthentication(builder.Configuration);
+builder.Services.AddMediPulseCors();
 
 // ── SERVICE-SPECIFIC REGISTRATIONS ────────────────────────────────────────
 builder.Services.AddDbContext<FacilityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddScoped<IFacilityService, FacilityServiceImpl>();
 builder.Services.AddHealthChecks();
 
-// ── SERILOG SETUP ────────────────────────────────────────────────
-builder.Host.UseSerilog();
-
-// ── BUILD & PIPELINE ───────────────────────────────────────────────────────
+// ── BUILD & PIPELINE ──────────────────────────────────────────────────────
 var app = builder.Build();
+
+// Correct middleware order: Exception handling → CORS → Authentication → Authorization
+app.UseMediPulseExceptionHandling();    // Handle exceptions from entire pipeline
+app.UseMediPulseMiddleware();           // CORS → Authentication → Authorization
 
 // Auto-create / migrate database on startup (retry handles concurrent-start race on shared DB)
 using (var scope = app.Services.CreateScope())
@@ -59,9 +45,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMediPulseMiddleware();   // CORS → Authentication → Authorization
-app.UseMediPulseExceptionHandling();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+public partial class Program { }

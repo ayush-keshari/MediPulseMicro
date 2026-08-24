@@ -1,28 +1,13 @@
-using Microsoft.EntityFrameworkCore;
 using TelemetryService.Data;
 using TelemetryService.Services;
+using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
 using Serilog;
-using Serilog.Sinks.ApplicationInsights;
-using Serilog.Formatting.Json;
-using System;
-using Shared.Middleware;
-
-var loggerConfiguration = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.Console(new JsonFormatter())
-    .MinimumLevel.Information();
-
-if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
-{
-    loggerConfiguration.WriteTo.ApplicationInsights(
-        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"),
-        null);
-}
-
-Log.Logger = loggerConfiguration.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add centralized Serilog logging
+builder.AddMediPulseSerilog();
 
 // ── SHARED INFRASTRUCTURE ──────────────────────────────────────────────────
 builder.Services.AddMediPulseControllers();
@@ -33,15 +18,15 @@ builder.Services.AddMediPulseCors();
 // ── SERVICE-SPECIFIC REGISTRATIONS ────────────────────────────────────────
 builder.Services.AddDbContext<TelemetryDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddScoped<ITelemetryService, TelemetryServiceImpl>();
 builder.Services.AddHealthChecks();
 
-// ── SERILOG SETUP ────────────────────────────────────────────────
-builder.Host.UseSerilog();
-
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+
+// Correct middleware order: Exception handling → CORS → Authentication → Authorization
+app.UseMediPulseExceptionHandling();    // Handle exceptions from entire pipeline
+app.UseMediPulseMiddleware();           // CORS → Authentication → Authorization
 
 // Auto-create / migrate database on startup (retry handles concurrent-start race on shared DB)
 using (var scope = app.Services.CreateScope())
@@ -60,9 +45,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMediPulseMiddleware();
-app.UseMediPulseExceptionHandling();
 app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+public partial class Program { }

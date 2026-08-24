@@ -4,28 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
 using Shared.Middleware;
 using Serilog;
-using Serilog.Formatting.Json;
-using System;
-using Serilog.Sinks.ApplicationInsights;
-
-var loggerConfiguration = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.Console(new JsonFormatter())
-    .MinimumLevel.Information();
-
-if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
-{
-    loggerConfiguration.WriteTo.ApplicationInsights(
-        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"),
-        null);
-}
-
-Log.Logger = loggerConfiguration.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Use Serilog as the logging provider
-builder.Host.UseSerilog();
+// Add centralized Serilog logging
+builder.AddMediPulseSerilog();
 
 // ── SHARED INFRASTRUCTURE (one line each — logic lives in Shared) ──────────
 builder.Services.AddMediPulseControllers();                         // controllers + 3 global filters
@@ -43,7 +26,9 @@ builder.Services.AddHealthChecks();
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
 
-app.UseMediPulseExceptionHandling();
+// Correct middleware order: Exception handling → CORS → Authentication → Authorization
+app.UseMediPulseExceptionHandling();    // Handle exceptions from entire pipeline
+app.UseMediPulseMiddleware();           // CORS → Authentication → Authorization
 
 // Auto-create / migrate database on startup (retry handles concurrent-start race on shared DB)
 using (var scope = app.Services.CreateScope())
@@ -62,8 +47,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMediPulseMiddleware();   // CORS → Authentication → Authorization (order matters)
 app.MapControllers();
 app.MapHealthChecks("/health");
 
 app.Run();
+
+public partial class Program { }

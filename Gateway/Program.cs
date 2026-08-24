@@ -10,21 +10,10 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Gateway.Tests")]
 
-var loggerConfiguration = new LoggerConfiguration()
-    .Enrich.FromLogContext()
-    .WriteTo.Console()
-    .MinimumLevel.Information();
-
-if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY")))
-{
-    loggerConfiguration.WriteTo.ApplicationInsights(
-        Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY"),
-        null);
-}
-
-Log.Logger = loggerConfiguration.CreateLogger();
-
 var builder = WebApplication.CreateBuilder(args);
+
+// Add centralized Serilog logging
+builder.AddMediPulseSerilog();
 
 // Load ocelot.json alongside appsettings.json.
 // Ocelot reads all route definitions from this file.
@@ -32,15 +21,7 @@ builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange
 
 // CORS — Angular (port 4200) talks to Gateway (port 5000).
 // Only the Gateway needs CORS since it's the single entry point for the frontend.
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAngular", policy =>
-        policy.WithOrigins(
-                  "http://localhost:4200",
-                  "http://127.0.0.1:4200")   // Angular dev server may bind to either
-          .AllowAnyHeader()
-          .AllowAnyMethod());
-});
+builder.Services.AddMediPulseCors();
 
 // Register Ocelot — reads ocelot.json and sets up the reverse proxy routing.
 builder.Services.AddOcelot();
