@@ -242,7 +242,29 @@ BEGIN
 END
 
 -- ============================================================================
--- 5. SHARED ENTITIES VALIDATION
+-- 5. TELEMETRY SERVICE VALIDATION
+-- ============================================================================
+
+PRINT 'Checking Telemetry Service referential integrity...';
+
+-- Check TelemetryRecord references valid SensorDevice
+IF EXISTS (
+    SELECT 1
+    FROM [TelemetryRecord] tr
+    LEFT JOIN [SensorDevice] sd ON tr.[SensorID] = sd.[SensorID]
+    WHERE sd.[SensorID] IS NULL
+)
+BEGIN
+    PRINT 'ERROR: TelemetryRecord references non-existent SensorDevice';
+    SET @ErrorCount = @ErrorCount + 1;
+END
+ELSE
+BEGIN
+    PRINT 'OK: TelemetryRecord -> SensorDevice references are valid';
+END
+
+-- ============================================================================
+-- 6. SHARED ENTITIES VALIDATION
 -- ============================================================================
 
 -- Assuming User table exists in AuthService

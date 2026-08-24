@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -10,76 +11,90 @@ namespace ProcurementService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Supplier')
-                BEGIN
-                    CREATE TABLE [Supplier] (
-                        [SupplierID] int IDENTITY(1,1) NOT NULL,
-                        [Name] nvarchar(100) NOT NULL,
-                        [SupplierType] nvarchar(50) NULL,
-                        [Status] nvarchar(50) NOT NULL DEFAULT 'Active',
-                        CONSTRAINT [PK_Supplier] PRIMARY KEY ([SupplierID])
-                    );
-                END
-            ");
+            migrationBuilder.CreateTable(
+                name: "Supplier",
+                columns: table => new
+                {
+                    SupplierId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    SupplierType = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Active")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Supplier", x => x.SupplierId);
+                });
 
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'PurchaseOrder')
-                BEGIN
-                    CREATE TABLE [PurchaseOrder] (
-                        [POID] int IDENTITY(1,1) NOT NULL,
-                        [SupplierID] int NOT NULL,
-                        [OrderDate] datetime2 NOT NULL,
-                        [ExpectedDeliveryDate] datetime2 NULL,
-                        [Status] nvarchar(50) NOT NULL DEFAULT 'Draft',
-                        [Notes] nvarchar(500) NULL,
-                        CONSTRAINT [PK_PurchaseOrder] PRIMARY KEY ([POID]),
-                        CONSTRAINT [FK_PurchaseOrder_Supplier] FOREIGN KEY ([SupplierID])
-                            REFERENCES [Supplier] ([SupplierID]) ON DELETE NO ACTION
-                    );
-                END
-            ");
+            migrationBuilder.CreateTable(
+                name: "PurchaseOrder",
+                columns: table => new
+                {
+                    PoId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ExpectedDeliveryDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Draft"),
+                    Notes = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PurchaseOrder", x => x.PoId);
+                    table.ForeignKey(
+                        name: "FK_PurchaseOrder_Supplier",
+                        column: x => x.SupplierId,
+                        principalTable: "Supplier",
+                        principalColumn: "SupplierId",
+                        onDelete: ReferentialAction.Restrict);
+                });
 
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_PurchaseOrder_SupplierID')
-                BEGIN
-                    CREATE INDEX [IX_PurchaseOrder_SupplierID] ON [PurchaseOrder] ([SupplierID]);
-                END
-            ");
+            migrationBuilder.CreateIndex(
+                name: "IX_PurchaseOrder_SupplierId",
+                table: "PurchaseOrder",
+                column: "SupplierId");
 
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Receipt')
-                BEGIN
-                    CREATE TABLE [Receipt] (
-                        [ReceiptID] int IDENTITY(1,1) NOT NULL,
-                        [POID] int NOT NULL,
-                        [SupplierLot] nvarchar(100) NULL,
-                        [ReceivedDate] datetime2 NOT NULL,
-                        [ReceivedBy] nvarchar(100) NOT NULL,
-                        [QualityStatus] nvarchar(50) NOT NULL DEFAULT 'Accepted',
-                        [QuantityReceived] int NOT NULL,
-                        [Remarks] nvarchar(500) NULL,
-                        CONSTRAINT [PK_Receipt] PRIMARY KEY ([ReceiptID]),
-                        CONSTRAINT [FK_Receipt_PurchaseOrder] FOREIGN KEY ([POID])
-                            REFERENCES [PurchaseOrder] ([POID]) ON DELETE CASCADE
-                    );
-                END
-            ");
+            migrationBuilder.CreateTable(
+                name: "Receipt",
+                columns: table => new
+                {
+                    ReceiptId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    PoId = table.Column<int>(type: "int", nullable: false),
+                    SupplierLot = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    ReceivedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ReceivedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    QualityStatus = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Accepted"),
+                    QuantityReceived = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Receipt", x => x.ReceiptId);
+                    table.ForeignKey(
+                        name: "FK_Receipt_PurchaseOrder",
+                        column: x => x.PoId,
+                        principalTable: "PurchaseOrder",
+                        principalColumn: "PoId",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Receipt_POID')
-                BEGIN
-                    CREATE INDEX [IX_Receipt_POID] ON [Receipt] ([POID]);
-                END
-            ");
+            migrationBuilder.CreateIndex(
+                name: "IX_Receipt_PoId",
+                table: "Receipt",
+                column: "PoId");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Receipt') DROP TABLE [Receipt];");
-            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'PurchaseOrder') DROP TABLE [PurchaseOrder];");
-            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'Supplier') DROP TABLE [Supplier];");
+            migrationBuilder.DropTable(
+                name: "Receipt");
+
+            migrationBuilder.DropTable(
+                name: "PurchaseOrder");
+
+            migrationBuilder.DropTable(
+                name: "Supplier");
         }
     }
 }

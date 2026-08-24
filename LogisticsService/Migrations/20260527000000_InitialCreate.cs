@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -10,70 +11,83 @@ namespace LogisticsService.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'TransferOrder')
-                BEGIN
-                    CREATE TABLE [TransferOrder] (
-                        [TransferOrderId]   int IDENTITY(1,1) NOT NULL,
-                        [FromFacilityId]    int NOT NULL,
-                        [FromFacilityName]  nvarchar(100) NOT NULL,
-                        [ToFacilityId]      int NOT NULL,
-                        [ToFacilityName]    nvarchar(100) NOT NULL,
-                        [RequestedBy]       nvarchar(100) NOT NULL,
-                        [RequestedDate]     datetime2 NOT NULL,
-                        [Status]            nvarchar(50) NOT NULL DEFAULT 'Draft',
-                        CONSTRAINT [PK_TransferOrder] PRIMARY KEY ([TransferOrderId])
-                    );
-                END
-            ");
+            migrationBuilder.CreateTable(
+                name: "TransferOrder",
+                columns: table => new
+                {
+                    TransferOrderId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FromFacilityId = table.Column<int>(type: "int", nullable: false),
+                    FromFacilityName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    ToFacilityId = table.Column<int>(type: "int", nullable: false),
+                    ToFacilityName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RequestedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    RequestedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false, defaultValue: "Draft")
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransferOrder", x => x.TransferOrderId);
+                });
 
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'TransferOrderItem')
-                BEGIN
-                    CREATE TABLE [TransferOrderItem] (
-                        [TransferOrderItemId]  int IDENTITY(1,1) NOT NULL,
-                        [TransferOrderId]      int NOT NULL,
-                        [ItemId]               int NOT NULL,
-                        [ItemName]             nvarchar(150) NOT NULL,
-                        [Quantity]             int NOT NULL,
-                        CONSTRAINT [PK_TransferOrderItem] PRIMARY KEY ([TransferOrderItemId]),
-                        CONSTRAINT [FK_TransferOrderItem_TransferOrder] FOREIGN KEY ([TransferOrderId])
-                            REFERENCES [TransferOrder] ([TransferOrderId]) ON DELETE CASCADE
-                    );
-                END
-            ");
+            migrationBuilder.CreateTable(
+                name: "TransferOrderItem",
+                columns: table => new
+                {
+                    TransferOrderItemId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TransferOrderId = table.Column<int>(type: "int", nullable: false),
+                    ItemId = table.Column<int>(type: "int", nullable: false),
+                    ItemName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TransferOrderItem", x => x.TransferOrderItemId);
+                    table.ForeignKey(
+                        name: "FK_TransferOrderItem_TransferOrder",
+                        column: x => x.TransferOrderId,
+                        principalTable: "TransferOrder",
+                        principalColumn: "TransferOrderId",
+                        onDelete: ReferentialAction.Cascade);
+                });
 
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_TransferOrderItem_TransferOrderId')
-                BEGIN
-                    CREATE INDEX [IX_TransferOrderItem_TransferOrderId] ON [TransferOrderItem] ([TransferOrderId]);
-                END
-            ");
+            migrationBuilder.CreateIndex(
+                name: "IX_TransferOrderItem_TransferOrderId",
+                table: "TransferOrderItem",
+                column: "TransferOrderId");
 
-            migrationBuilder.Sql(@"
-                IF NOT EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ConsumptionRecord')
-                BEGIN
-                    CREATE TABLE [ConsumptionRecord] (
-                        [ConsumptionId]     int IDENTITY(1,1) NOT NULL,
-                        [FacilityId]        int NOT NULL,
-                        [WardId]            int NULL,
-                        [ItemId]            int NOT NULL,
-                        [ItemName]          nvarchar(150) NOT NULL,
-                        [QuantityConsumed]  int NOT NULL,
-                        [ConsumedDate]      datetime2 NOT NULL,
-                        [ConsumedBy]        nvarchar(100) NOT NULL,
-                        CONSTRAINT [PK_ConsumptionRecord] PRIMARY KEY ([ConsumptionId])
-                    );
-                END
-            ");
+            migrationBuilder.CreateTable(
+                name: "ConsumptionRecord",
+                columns: table => new
+                {
+                    ConsumptionId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    FacilityId = table.Column<int>(type: "int", nullable: false),
+                    WardId = table.Column<int>(type: "int", nullable: true),
+                    ItemId = table.Column<int>(type: "int", nullable: false),
+                    ItemName = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    QuantityConsumed = table.Column<int>(type: "int", nullable: false),
+                    ConsumedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ConsumedBy = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConsumptionRecord", x => x.ConsumptionId);
+                });
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'TransferOrderItem') DROP TABLE [TransferOrderItem];");
-            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'TransferOrder') DROP TABLE [TransferOrder];");
-            migrationBuilder.Sql("IF EXISTS (SELECT 1 FROM sys.tables WHERE name = 'ConsumptionRecord') DROP TABLE [ConsumptionRecord];");
+            migrationBuilder.DropTable(
+                name: "ConsumptionRecord");
+
+            migrationBuilder.DropTable(
+                name: "TransferOrderItem");
+
+            migrationBuilder.DropTable(
+                name: "TransferOrder");
         }
     }
 }

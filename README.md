@@ -26,6 +26,24 @@ All backend services follow a clean layered architecture:
 
 ## 🚀 Quick Start
 
+## 🗄️ Database Initialization
+
+The database initialization follows a two-step process:
+1. **Schema Creation**: EF Core migrations are applied to create database tables
+2. **Seed Data Population**: Idempotent SQL scripts insert mock data
+
+This approach ensures:
+- Schema changes are managed through EF Core migrations (versioned, reversible)
+- Data insertion is idempotent (safe to run multiple times without duplication)
+- Clear separation of concerns between schema and data
+- Integration with existing Docker Compose orchestration
+
+The initialization flow in docker-compose.yml:
+1. The `migrator` service waits for SQL Server to be ready
+2. Applies EF Core migrations for all services using `dotnet ef database update`
+3. Loads mock data using `sqlcmd` with `Scripts/MockData_InsertOnly.sql`
+4. Services start only after migrator completes successfully
+
 ## 📋 Data Quality Checks
 
 You can run the data quality checks locally to validate the database schema and data integrity.
@@ -42,7 +60,7 @@ export SA_PASSWORD=MediPulse@2024!Dev   # Linux/macOS
 # $env:SA_PASSWORD = "MediPulse@2024!Dev"
 
 # Run the data quality check script
-powershell -ExecutionPolicy Bypass -File ScriptsRun-DqChecks.ps1
+powershell -ExecutionPolicy Bypass -File Scripts\Run-DqChecks.ps1
 ```
 
 
