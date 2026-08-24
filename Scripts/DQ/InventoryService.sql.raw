@@ -1,0 +1,232 @@
+-- 2. INVENTORY SERVICE
+-- ============================================================================
+
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'Item')
+BEGIN
+    PRINT 'Checking InventoryService tables...';
+
+    -- Item
+    SELECT @TableName = 'Item', @ExpectedMin = 8;
+    SELECT @ActualCount = COUNT(*) FROM [Item];
+    IF @ActualCount < @ExpectedMin
+    BEGIN
+        PRINT 'ERROR: Item row count ' + CAST(@ActualCount AS NVARCHAR) + ' is less than expected minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: Item row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+    END
+
+    -- Check NOT NULL columns: ItemCode, Name, Category, Unit, SafetyStock
+    SELECT @NullCount = SUM(CASE WHEN [ItemCode] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Name] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Category] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Unit] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [SafetyStock] IS NULL THEN 1 ELSE 0 END)
+    FROM [Item];
+    IF @NullCount > 0
+    BEGIN
+        PRINT 'ERROR: Item has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (ItemCode, Name, Category, Unit, SafetyStock)';
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: Item mandatory columns (ItemCode, Name, Category, Unit, SafetyStock) have no NULL values';
+    END
+END
+ELSE
+BEGIN
+    PRINT 'INFO: Item table not found. Skipping Item checks.';
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'InventoryPositions')
+BEGIN
+    -- InventoryPositions
+    SELECT @TableName = 'InventoryPositions', @ExpectedMin = 8;
+    SELECT @ActualCount = COUNT(*) FROM [InventoryPositions];
+    IF @ActualCount < @ExpectedMin
+    BEGIN
+        PRINT 'ERROR: InventoryPositions row count ' + CAST(@ActualCount AS NVARCHAR) + ' is less than expected minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: InventoryPositions row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+    END
+
+    -- Check NOT NULL columns: ItemId, LotId, ExpiryDate, Quantity, FacilityId, StorageZoneId, SafetyStock
+    SELECT @NullCount = SUM(CASE WHEN [ItemId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [LotId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [ExpiryDate] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Quantity] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [FacilityId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [StorageZoneId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [SafetyStock] IS NULL THEN 1 ELSE 0 END)
+    FROM [InventoryPositions];
+    IF @NullCount > 0
+    BEGIN
+        PRINT 'ERROR: InventoryPositions has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (ItemId, LotId, ExpiryDate, Quantity, FacilityId, StorageZoneId, SafetyStock)';
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: InventoryPositions mandatory columns (ItemId, LotId, ExpiryDate, Quantity, FacilityId, StorageZoneId, SafetyStock) have no NULL values';
+    END
+END
+ELSE
+BEGIN
+    PRINT 'INFO: InventoryPositions table not found. Skipping InventoryPositions checks.';
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'ExceptionEvent')
+BEGIN
+    -- ExceptionEvent
+    SELECT @TableName = 'ExceptionEvent', @ExpectedMin = 4;
+    SELECT @ActualCount = COUNT(*) FROM [ExceptionEvent];
+    IF @ActualCount < @ExpectedMin
+    BEGIN
+        PRINT 'ERROR: ExceptionEvent row count ' + CAST(@ActualCount AS NVARCHAR) + ' is less than expected minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: ExceptionEvent row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+    END
+
+    -- Check NOT NULL columns: Type, ReferenceType, ReferenceId, Severity, Status, DetectedDate
+    SELECT @NullCount = SUM(CASE WHEN [Type] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [ReferenceType] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [ReferenceId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Severity] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Status] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [DetectedDate] IS NULL THEN 1 ELSE 0 END)
+    FROM [ExceptionEvent];
+    IF @NullCount > 0
+    BEGIN
+        PRINT 'ERROR: ExceptionEvent has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (Type, ReferenceType, ReferenceId, Severity, Status, DetectedDate)';
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: ExceptionEvent mandatory columns (Type, ReferenceType, ReferenceId, Severity, Status, DetectedDate) have no NULL values';
+    END
+END
+ELSE
+BEGIN
+    PRINT 'INFO: ExceptionEvent table not found. Skipping ExceptionEvent checks.';
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'RecallAction')
+BEGIN
+    -- RecallAction
+    SELECT @TableName = 'RecallAction', @ExpectedMin = 4;
+    SELECT @ActualCount = COUNT(*) FROM [RecallAction];
+    IF @ActualCount < @ExpectedMin
+    BEGIN
+        PRINT 'ERROR: RecallAction row count ' + CAST(@ActualCount AS NVARCHAR) + ' is less than expected minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: RecallAction row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+    END
+
+    -- Check NOT NULL columns: ExceptionId, OwnerId, ActionDescription, DueDate, Status
+    SELECT @NullCount = SUM(CASE WHEN [ExceptionId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [OwnerId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [ActionDescription] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [DueDate] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Status] IS NULL THEN 1 ELSE 0 END)
+    FROM [RecallAction];
+    IF @NullCount > 0
+    BEGIN
+        PRINT 'ERROR: RecallAction has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (ExceptionId, OwnerId, ActionDescription, DueDate, Status)';
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: RecallAction mandatory columns (ExceptionId, OwnerId, ActionDescription, DueDate, Status) have no NULL values';
+    END
+END
+ELSE
+BEGIN
+    PRINT 'INFO: RecallAction table not found. Skipping RecallAction checks.';
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'Forecast')
+BEGIN
+    -- Forecast
+    SELECT @TableName = 'Forecast', @ExpectedMin = 6;
+    SELECT @ActualCount = COUNT(*) FROM [Forecast];
+    IF @ActualCount < @ExpectedMin
+    BEGIN
+        PRINT 'ERROR: Forecast row count ' + CAST(@ActualCount AS NVARCHAR) + ' is less than expected minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: Forecast row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+    END
+
+    -- Check NOT NULL columns: ItemId, FacilityId, Period, ForecastQuantity, GeneratedDate
+    SELECT @NullCount = SUM(CASE WHEN [ItemId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [FacilityId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Period] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [ForecastQuantity] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [GeneratedDate] IS NULL THEN 1 ELSE 0 END)
+    FROM [Forecast];
+    IF @NullCount > 0
+    BEGIN
+        PRINT 'ERROR: Forecast has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (ItemId, FacilityId, Period, ForecastQuantity, GeneratedDate)';
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: Forecast mandatory columns (ItemId, FacilityId, Period, ForecastQuantity, GeneratedDate) have no NULL values';
+    END
+END
+ELSE
+BEGIN
+    PRINT 'INFO: Forecast table not found. Skipping Forecast checks.';
+END
+
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'ReplenishmentPlan')
+BEGIN
+    -- ReplenishmentPlan
+    SELECT @TableName = 'ReplenishmentPlan', @ExpectedMin = 4;
+    SELECT @ActualCount = COUNT(*) FROM [ReplenishmentPlan];
+    IF @ActualCount < @ExpectedMin
+    BEGIN
+        PRINT 'ERROR: ReplenishmentPlan row count ' + CAST(@ActualCount AS NVARCHAR) + ' is less than expected minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: ReplenishmentPlan row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR);
+    END
+
+    -- Check NOT NULL columns: ItemId, FacilityId, SuggestedOrderQty, Priority, Status, GeneratedDate
+    SELECT @NullCount = SUM(CASE WHEN [ItemId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [FacilityId] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [SuggestedOrderQty] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Priority] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [Status] IS NULL THEN 1 ELSE 0 END)
+                        + SUM(CASE WHEN [GeneratedDate] IS NULL THEN 1 ELSE 0 END)
+    FROM [ReplenishmentPlan];
+    IF @NullCount > 0
+    BEGIN
+        PRINT 'ERROR: ReplenishmentPlan has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (ItemId, FacilityId, SuggestedOrderQty, Priority, Status, GeneratedDate)';
+        SET @ErrorCount = @ErrorCount + 1;
+    END
+    ELSE
+    BEGIN
+        PRINT 'OK: ReplenishmentPlan mandatory columns (ItemId, FacilityId, SuggestedOrderQty, Priority, Status, GeneratedDate) have no NULL values';
+    END
+END
+ELSE
+BEGIN
+    PRINT 'INFO: ReplenishmentPlan table not found. Skipping ReplenishmentPlan checks.';
+END
+
+-- ============================================================================
