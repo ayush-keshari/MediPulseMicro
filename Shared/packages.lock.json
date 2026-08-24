@@ -11,6 +11,12 @@
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
         }
       },
+      "Microsoft.Extensions.DependencyInjection.Abstractions": {
+        "type": "Direct",
+        "requested": "[9.0.4, )",
+        "resolved": "9.0.4",
+        "contentHash": "UI0TQPVkS78bFdjkTodmkH0Fe8lXv9LnhGFKgKrsgUJ5a5FVdFRcgjIkBVLbGgdRhxWirxH/8IXUtEyYJx6GQg=="
+      },
       "Serilog": {
         "type": "Direct",
         "requested": "[3.1.1, )",
@@ -42,6 +48,17 @@
           "Serilog": "3.1.1"
         }
       },
+      "Serilog.Sinks.ApplicationInsights": {
+        "type": "Direct",
+        "requested": "[3.0.0, )",
+        "resolved": "3.0.0",
+        "contentHash": "+pBODh+Lafhcp0x23mZOmXIYMzZm9NV+nq8LV/XAQyZZxMeneK3umC2O4ZoJcKzlR629gf1mhHRS7uKu7J5/+Q==",
+        "dependencies": {
+          "Microsoft.ApplicationInsights": "2.9.1",
+          "NETStandard.Library": "1.6.1",
+          "Serilog": "2.8.0"
+        }
+      },
       "Serilog.Sinks.Console": {
         "type": "Direct",
         "requested": "[5.0.0, )",
@@ -61,6 +78,14 @@
           "Swashbuckle.AspNetCore.Swagger": "7.3.1",
           "Swashbuckle.AspNetCore.SwaggerGen": "7.3.1",
           "Swashbuckle.AspNetCore.SwaggerUI": "7.3.1"
+        }
+      },
+      "Microsoft.ApplicationInsights": {
+        "type": "Transitive",
+        "resolved": "2.9.1",
+        "contentHash": "gAC+bFCr10ckAdM6VJ+aL0yfYfbYuklukYJoMjaSCOVHH/h4Xr9SiyPq+Befk/yUSdSv7Fa3nl0ynLATKIwKng==",
+        "dependencies": {
+          "NETStandard.Library": "1.6.1"
         }
       },
       "Microsoft.Extensions.ApiDescription.Server": {
@@ -119,10 +144,23 @@
           "Microsoft.IdentityModel.Logging": "8.0.1"
         }
       },
+      "Microsoft.NETCore.Platforms": {
+        "type": "Transitive",
+        "resolved": "1.1.0",
+        "contentHash": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A=="
+      },
       "Microsoft.OpenApi": {
         "type": "Transitive",
         "resolved": "1.6.22",
         "contentHash": "aBvunmrdu/x+4CaA/UP1Jx4xWGwk4kymhoIRnn2Vp+zi5/KOPQJ9EkSXHRUr01WcGKtYl3Au7XfkPJbU1G2sjQ=="
+      },
+      "NETStandard.Library": {
+        "type": "Transitive",
+        "resolved": "1.6.1",
+        "contentHash": "WcSp3+vP+yHNgS8EV5J7pZ9IRpeDuARBPN28by8zqff1wJQXm26PVU8L3/fYLBJVU7BtDyqNVWq2KlCVvSSR4A==",
+        "dependencies": {
+          "Microsoft.NETCore.Platforms": "1.1.0"
+        }
       },
       "Serilog.Extensions.Hosting": {
         "type": "Transitive",

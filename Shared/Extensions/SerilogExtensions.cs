@@ -2,6 +2,7 @@ using Serilog;
 using Serilog.Formatting.Json;
 using Serilog.Sinks.ApplicationInsights;
 using System;
+using Microsoft.AspNetCore.Builder;
 
 namespace Shared.Extensions;
 

@@ -18,6 +18,10 @@
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks" Version="8.0.0" />
     <PackageVersion Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageVersion Include="Ocelot" Version="23.4.3" />
+    <!-- Dependency Injection abstractions -->
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.4" />
+    <!-- ASP.NET Core HTTP abstractions -->
+    <PackageVersion Include="Microsoft.AspNetCore.Http.Abstractions" Version="9.0.4" />
     <!-- Test dependencies -->
     <PackageVersion Include="coverlet.collector" Version="6.0.4" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.0" />

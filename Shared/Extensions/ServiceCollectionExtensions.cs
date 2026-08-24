@@ -1,9 +1,19 @@
-// ── CORS ──────────────────────────────────────────────────────────────
-    // Allows Angular (port 4200) to call the Gateway/services during development.
-    // Every service calls this ONE line:
-    //   builder.Services.AddMediPulseCors();
-    public static IServiceCollection AddMediPulseCors(
-        this IServiceCollection services)
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Shared.Extensions;
+
+/// <summary>
+/// Extension methods for CORS configuration.
+/// Centralizes CORS setup to avoid duplication across services.
+/// </summary>
+public static class ServiceCollectionExtensions
+{
+    /// <summary>
+    /// Adds CORS policy allowing Angular application (port 4200) to call the Gateway/services.
+    /// </summary>
+    /// <param name="services">The IServiceCollection to add the policy to.</param>
+    /// <returns>The same IServiceCollection instance for chaining.</returns>
+    public static IServiceCollection AddMediPulseCors(this IServiceCollection services)
     {
         services.AddCors(options =>
         {
@@ -15,3 +25,4 @@
 
         return services;
     }
+}

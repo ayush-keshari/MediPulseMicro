@@ -514,9 +514,11 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[9.0.4, )",
+          "Microsoft.AspNetCore.Builder": "[9.0.4, )",
           "Serilog": "[3.1.1, )",
           "Serilog.AspNetCore": "[8.0.3, )",
           "Serilog.Settings.Configuration": "[8.0.4, )",
+          "Serilog.Sinks.ApplicationInsights": "[3.0.0, )",
           "Serilog.Sinks.Console": "[5.0.0, )",
           "Swashbuckle.AspNetCore": "[7.3.1, )"
         }
