@@ -62,6 +62,7 @@ jobs:
 
     - name: Install dotnet-format
       run: dotnet tool install --global dotnet-format
+
     - name: Verify .NET formatting
       run: dotnet format --verify-no-changes
 
@@ -181,23 +182,38 @@ jobs:
         fi
         echo "Mock data validation passed"
 
-    - name: Run data quality check on MedipulseMain
+    - name: Run data quality checks on MedipulseMain
       run: |
-        RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/dq_checks.sql -d MedipulseMain -h -1 | tail -n 1)
-        if [ "$RESULT" -gt 0 ]; then
-          echo "Data quality check on MedipulseMain failed with $RESULT errors"
-          exit 1
+        EXIT_CODE=0
+        for sqlfile in Scripts/DQ/*.sql; do
+          # Skip AuditService.sql as it runs against MedipulseAudit
+          if [[ "$sqlfile" == *"AuditService.sql" ]]; then
+            continue
+          fi
+          echo "Running $sqlfile against MedipulseMain..."
+          RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i "$sqlfile" -d MedipulseMain -h -1 | tail -n 1)
+          if [ "$RESULT" -gt 0 ]; then
+            echo "Data quality check failed in $(basename "$sqlfile") with $RESULT error(s)"
+            EXIT_CODE=1
+          else
+            echo "Data quality check passed in $(basename "$sqlfile")"
+          fi
+        done
+        if [ $EXIT_CODE -ne 0 ]; then
+          exit $EXIT_CODE
         fi
-        echo "Data quality check on MedipulseMain passed"
+        echo "All MedipulseMain data quality checks passed"
 
     - name: Run data quality check on MedipulseAudit
       run: |
-        RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/dq_checks.sql -d MedipulseAudit -h -1 | tail -n 1)
+        echo "Running Scripts/DQ/AuditService.sql against MedipulseAudit..."
+        RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/DQ/AuditService.sql -d MedipulseAudit -h -1 | tail -n 1)
         if [ "$RESULT" -gt 0 ]; then
-          echo "Data quality check on MedipulseAudit failed with $RESULT errors"
+          echo "Data quality check failed in AuditService.sql with $RESULT error(s)"
           exit 1
         fi
-        echo "Data quality check on MedipulseAudit passed"
+        echo "Data quality check passed in AuditService.sql"
+
   # Data quality job - runs dbt tests against the migrated database
   data-quality:
     runs-on: ubuntu-latest
