@@ -80,7 +80,7 @@ public class StockMovementTests
 
         // Verify order status is completed
         var updatedOrder = await context.TransferOrders.FindAsync(order.TransferOrderId);
-        Assert.Equal("Completed", updatedOrder.Status);
+        Assert.Equal("Completed", updatedOrder!.Status);
 
         // Verify stock was deducted from source facility (FEFO)
         var sourcePosition = await context.InventoryPositions

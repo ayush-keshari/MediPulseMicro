@@ -69,7 +69,7 @@ public class TransferOrderDeletionTests
 
         // Verify it's now Submitted
         order = await context.TransferOrders.FindAsync(order.TransferOrderId);
-        Assert.Equal("Submitted", order.Status);
+        Assert.Equal("Submitted", order!.Status);
 
         // Act & Assert - Trying to delete a non-Draft/non-Cancelled order should throw InvalidOperationException
         await Assert.ThrowsAsync<BusinessRuleException>(() =>
@@ -180,7 +180,7 @@ public class TransferOrderDeletionTests
 
         // Verify it's now Cancelled
         order = await context.TransferOrders.FindAsync(order.TransferOrderId);
-        Assert.Equal("Cancelled", order.Status);
+        Assert.Equal("Cancelled", order!.Status);
 
         // Act
         var result = await service.DeleteTransferOrderAsync(order.TransferOrderId);

@@ -139,6 +139,6 @@ public class TransferOrderCreationTests
 
         // Verify stock was NOT deducted yet (only happens on completion)
         var position = await context.InventoryPositions.FirstOrDefaultAsync();
-        Assert.Equal(200, position.Quantity); // Should still be 200
+        Assert.Equal(200, position!.Quantity); // Should still be 200
     }
 }

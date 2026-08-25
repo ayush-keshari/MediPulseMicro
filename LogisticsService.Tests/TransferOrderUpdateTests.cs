@@ -69,7 +69,7 @@ public class TransferOrderUpdateTests
 
         // Verify it's now Submitted
         order = await context.TransferOrders.FindAsync(order.TransferOrderId);
-        Assert.Equal("Submitted", order.Status);
+        Assert.Equal("Submitted", order!.Status);
 
         // Act & Assert - Trying to update a non-Draft order should throw InvalidOperationException
         var updateRequest = new UpdateTransferOrderRequest

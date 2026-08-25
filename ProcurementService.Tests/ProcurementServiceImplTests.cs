@@ -249,7 +249,7 @@ public class ProcurementServiceImplTests
 
         // Verify status was updated
         var updatedPo = await context.PurchaseOrders.FindAsync(po.PoId);
-        Assert.Equal("Submitted", updatedPo.Status);
+        Assert.Equal("Submitted", updatedPo!.Status);
     }
 
     [Fact]

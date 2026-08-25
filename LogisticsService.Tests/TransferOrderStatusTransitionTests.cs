@@ -90,11 +90,11 @@ public class TransferOrderStatusTransitionTests
 
         // Verify order status is completed
         var updatedOrder = await context.TransferOrders.FindAsync(order.TransferOrderId);
-        Assert.Equal("Completed", updatedOrder.Status);
+        Assert.Equal("Completed", updatedOrder!.Status);
 
         // Verify stock was deducted from source facility
         var position = await context.InventoryPositions.FirstOrDefaultAsync();
-        Assert.Equal(100, position.Quantity); // 200 - 100 = 100 remaining
+        Assert.Equal(100, position!.Quantity); // 200 - 100 = 100 remaining
     }
 
     // NEW TESTS FOR TASK #3: Specific status transition tests with InvalidOperationException asserts
@@ -196,7 +196,7 @@ public class TransferOrderStatusTransitionTests
 
         // Verify it's now Approved
         order = await context.TransferOrders.FindAsync(order.TransferOrderId);
-        Assert.Equal("Approved", order.Status);
+        Assert.Equal("Approved", order!.Status);
 
         // Act & Assert - Trying to go from Approved back to Draft should fail
         var invalidRequest = new UpdateTransferStatusRequest { Status = "Draft" };

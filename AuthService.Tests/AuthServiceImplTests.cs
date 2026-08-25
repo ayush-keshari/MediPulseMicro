@@ -64,8 +64,8 @@ public class AuthServiceImplTests
 
         // Verify password is hashed (not stored as plain text)
         var savedUser = await context.Users.FindAsync(result.UserId);
-        Assert.NotEqual("SecurePassword123!", savedUser.Password);
-        Assert.NotNull(savedUser.Password);
+        Assert.NotEqual("SecurePassword123!", savedUser!.Password);
+        Assert.NotNull(savedUser!.Password);
     }
 
     [Fact]
