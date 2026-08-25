@@ -108,17 +108,17 @@ dotnet test
 
 Copy `.env.example` to `.env` and adjust as needed:
 
-| Variable | Description | Default |
-|----------|-------------|---------|
+| Variable | Description | Default (Example) |
+|----------|-------------|-------------------|
 | `DB_SERVER` | SQL Server hostname | `sqlserver` |
 | `DB_NAME_MAIN` | Main database name | `MedipulseMain` |
 | `DB_NAME_AUDIT` | Audit database name | `MedipulseAudit` |
-| `SA_PASSWORD` | SQL Server sa password | `MediPulse@2024!Dev` |
-| `JWT_KEY` | Secret key for JWT tokens | `MediPulse@SuperSecretJWT_Key_2024!ForDev` |
+| `SA_PASSWORD` | SQL Server sa password | `YOUR_STRONG_PASSWORD_HERE` |
+| `JWT_KEY` | Secret key for JWT tokens | `YOUR_STRONG_KEY_HERE_MIN_32_CHARS` |
 | `JWT_ISSUER` | JWT token issuer | `MediPulseAuthService` |
 | `JWT_AUDIENCE` | JWT token audience | `MediPulseAPI` |
 
-> **Note**: For production, always override these values with strong secrets.
+> **Warning**: The example values above are for local development only. In production, you MUST override these with strong, unique secrets. Never use the example values in a production environment.
 
 ## 🧪 Running Tests
 
