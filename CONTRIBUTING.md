@@ -88,7 +88,7 @@ docker compose up migrator --abort-on-container-exit --exit-code-from migrator
   ```
 
 ### General
-- Write meaningful commit messages.
+- Write meaningful commit messages using the [Conventional Commits](https://www.conventionalcommits.org/) specification (e.g., `feat: add new feature`, `fix: resolve login issue`, `docs: update README`).
 - Keep pull requests focused on a single concern.
 - Update documentation when changing interfaces or configuration.
 - Add unit tests for new features and bug fixes.

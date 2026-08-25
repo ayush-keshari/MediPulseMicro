@@ -18,10 +18,10 @@ DECLARE @ExpectedMin INT;
 DECLARE @ActualCount INT;
 DECLARE @NullCount INT;
 
--- Item
+-- Item table
 IF EXISTS (SELECT * FROM sys.tables WHERE name = 'Item')
 BEGIN
-    -- Item row count
+    -- Item
     SELECT @TableName = 'Item', @ExpectedMin = 8;
     SELECT @ActualCount = COUNT(*) FROM [Item];
     IF @ActualCount >= @ExpectedMin
@@ -59,10 +59,10 @@ BEGIN
     VALUES ('Item.TableExists', 'InventoryService', 0, 'Table Item exists', 'Table not found', GETDATE(), 'INFO: Item table not found. Skipping Item checks.');
 END
 
--- InventoryPositions
+-- InventoryPositions table
 IF EXISTS (SELECT * FROM sys.tables WHERE name = 'InventoryPositions')
 BEGIN
-    -- InventoryPositions row count
+    -- InventoryPositions
     SELECT @TableName = 'InventoryPositions', @ExpectedMin = 8;
     SELECT @ActualCount = COUNT(*) FROM [InventoryPositions];
     IF @ActualCount >= @ExpectedMin
@@ -102,10 +102,10 @@ BEGIN
     VALUES ('InventoryPositions.TableExists', 'InventoryService', 0, 'Table InventoryPositions exists', 'Table not found', GETDATE(), 'INFO: InventoryPositions table not found. Skipping InventoryPositions checks.');
 END
 
--- ExceptionEvent
+-- ExceptionEvent table
 IF EXISTS (SELECT * FROM sys.tables WHERE name = 'ExceptionEvent')
 BEGIN
-    -- ExceptionEvent row count
+    -- ExceptionEvent
     SELECT @TableName = 'ExceptionEvent', @ExpectedMin = 4;
     SELECT @ActualCount = COUNT(*) FROM [ExceptionEvent];
     IF @ActualCount >= @ExpectedMin
@@ -144,16 +144,16 @@ BEGIN
     VALUES ('ExceptionEvent.TableExists', 'InventoryService', 0, 'Table ExceptionEvent exists', 'Table not found', GETDATE(), 'INFO: ExceptionEvent table not found. Skipping ExceptionEvent checks.');
 END
 
--- RecallAction
+-- RecallAction table
 IF EXISTS (SELECT * FROM sys.tables WHERE name = 'RecallAction')
 BEGIN
-    -- RecallAction row count
+    -- RecallAction
     SELECT @TableName = 'RecallAction', @ExpectedMin = 4;
     SELECT @ActualCount = COUNT(*) FROM [RecallAction];
     IF @ActualCount >= @ExpectedMin
     BEGIN
         INSERT INTO @Results (CheckName, Domain, Status, ExpectedCondition, ActualResult, Timestamp, Message)
-        VALUES ('RecallAction.RowCount', 'InventoryService', 0, 'Row count >= ' + CAST(@ExpectedMin AS NVARCHAR), 'Row count = ' + CAST(@ActualCount AS NVARCHAR), GETDATE(), 'OK: RecallAction row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR));
+        VALUES ('RecallAction.RowCount', 'InventoryService', 0, 'Row count >= ' + CAST(@ExpectedMin AS NVARCHAR), 'Row count = ' + CAST(@ActualCount AS NVARCHAR), GETDATE(), 'OK: RecallAction row count ' = CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR));
     END
     ELSE
     BEGIN
@@ -185,10 +185,10 @@ BEGIN
     VALUES ('RecallAction.TableExists', 'InventoryService', 0, 'Table RecallAction exists', 'Table not found', GETDATE(), 'INFO: RecallAction table not found. Skipping RecallAction checks.');
 END
 
--- Forecast
+-- Forecast table
 IF EXISTS (SELECT * FROM sys.tables WHERE name = 'Forecast')
 BEGIN
-    -- Forecast row count
+    -- Forecast
     SELECT @TableName = 'Forecast', @ExpectedMin = 6;
     SELECT @ActualCount = COUNT(*) FROM [Forecast];
     IF @ActualCount >= @ExpectedMin
@@ -212,12 +212,12 @@ BEGIN
     IF @NullCount = 0
     BEGIN
         INSERT INTO @Results (CheckName, Domain, Status, ExpectedCondition, ActualResult, Timestamp, Message)
-        VALUES ('Forecast.NotNull_ItemId_FacilityId_Period_ForecastQuantity_GeneratedDate', 'InventoryService', 0, 'No NULL values in ItemId, FacilityId, Period, ForecastQuantity, GeneratedDate', 'NULL count = 0', GETDATE(), 'OK: Forecast mandatory columns (ItemId, FacilityId, Period, ForecastQuantity, GeneratedDate) have no NULL values');
+        VALUES ('Forecast.NotNull_ItemId_FacilityId_Period_ForeachQuantity_GeneratedDate', 'InventoryService', 0, 'No NULL values in ItemId, FacilityId, Period, ForeachQuantity, GeneratedDate', 'NULL count = 0', GETDATE(), 'OK: Forecast mandatory columns (ItemId, FacilityId, Period, ForeachQuantity, GeneratedDate) have no NULL values');
     END
     ELSE
     BEGIN
         INSERT INTO @Results (CheckName, Domain, Status, ExpectedCondition, ActualResult, Timestamp, Message)
-        VALUES ('Forecast.NotNull_ItemId_FacilityId_Period_ForecastQuantity_GeneratedDate', 'InventoryService', 1, 'No NULL values in ItemId, FacilityId, Period, ForecastQuantity, GeneratedDate', 'NULL count = ' + CAST(@NullCount AS NVARCHAR), GETDATE(), 'ERROR: Forecast has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (ItemId, FacilityId, Period, ForecastQuantity, GeneratedDate)');
+        VALUES ('Forecast.NotNull_ItemId_FacilityId_Period_ForeachQuantity_GeneratedDate', 'InventoryService', 1, 'No NULL values in ItemId, FacilityId, Period, ForeachQuantity, GeneratedDate', 'NULL count = ' + CAST(@NullCount AS NVARCHAR), GETDATE(), 'ERROR: Forecast has ' + CAST(@NullCount AS NVARCHAR) + ' NULL values in mandatory columns (ItemId, FacilityId, Period, ForeachQuantity, GeneratedDate)');
     END
 END
 ELSE
@@ -226,10 +226,10 @@ BEGIN
     VALUES ('Forecast.TableExists', 'InventoryService', 0, 'Table Forecast exists', 'Table not found', GETDATE(), 'INFO: Forecast table not found. Skipping Forecast checks.');
 END
 
--- ReplenishmentPlan
+-- ReplenishmentPlan table
 IF EXISTS (SELECT * FROM sys.tables WHERE name = 'ReplenishmentPlan')
 BEGIN
-    -- ReplenishmentPlan row count
+    -- ReplenishmentPlan
     SELECT @TableName = 'ReplenishmentPlan', @ExpectedMin = 4;
     SELECT @ActualCount = COUNT(*) FROM [ReplenishmentPlan];
     IF @ActualCount >= @ExpectedMin
