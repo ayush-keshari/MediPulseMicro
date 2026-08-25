@@ -651,6 +651,7 @@ public class ProcurementServiceImplTests
 
         // Verify it's no longer in Draft status
         var submittedPo = await context.PurchaseOrders.FindAsync(po.PoId);
+        Assert.NotNull(submittedPo);
         Assert.Equal("Submitted", submittedPo.Status);
 
         // Update request
