@@ -6,6 +6,7 @@ using AuthService.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
+using Shared.Exceptions;
 
 namespace AuthService.Tests;
 
@@ -96,7 +97,7 @@ public class AuthServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        await Assert.ThrowsAsync<BusinessRuleException>(async () =>
             await service.RegisterAsync(duplicateRequest));
     }
 

@@ -4,6 +4,7 @@ using TelemetryService.Services;
 using TelemetryService.DTOs;
 using TelemetryService.Data;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 
 namespace TelemetryService.Tests;
 
@@ -153,7 +154,7 @@ public class TelemetryServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateTelemetryAsync(telemetryRequest));
     }
 

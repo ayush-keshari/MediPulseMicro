@@ -4,6 +4,7 @@ using LogisticsService.DTOs;
 using LogisticsService.Models;
 using LogisticsService.Services;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 
 namespace LogisticsService.Tests;
 
@@ -41,7 +42,7 @@ public class LogisticsServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateTransferOrderAsync(request));
     }
 
@@ -81,7 +82,7 @@ public class LogisticsServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateTransferOrderAsync(request));
     }
 
@@ -264,7 +265,7 @@ public class LogisticsServiceImplTests
 
         // Act & Assert - Trying to go from Draft directly to Completed should fail
         var invalidRequest = new UpdateTransferStatusRequest { Status = "Completed" };
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdateTransferStatusAsync(order.TransferOrderId, invalidRequest));
     }
 
@@ -320,7 +321,7 @@ public class LogisticsServiceImplTests
 
         // Act & Assert - Trying to go from Approved back to Draft should fail
         var invalidRequest = new UpdateTransferStatusRequest { Status = "Draft" };
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdateTransferStatusAsync(order.TransferOrderId, invalidRequest));
     }
 
@@ -383,7 +384,7 @@ public class LogisticsServiceImplTests
             }
         };
 
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdateTransferOrderAsync(order.TransferOrderId, updateRequest));
     }
 
@@ -438,7 +439,7 @@ public class LogisticsServiceImplTests
         Assert.Equal("Submitted", order.Status);
 
         // Act & Assert - Trying to delete a non-Draft/non-Cancelled order should throw InvalidOperationException
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.DeleteTransferOrderAsync(order.TransferOrderId));
     }
 
@@ -679,7 +680,7 @@ public class LogisticsServiceImplTests
 
         // Act & Assert - Trying to go from Draft directly to Completed should fail
         var invalidRequest = new UpdateTransferStatusRequest { Status = "Completed" };
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdateTransferStatusAsync(order.TransferOrderId, invalidRequest));
     }
 
@@ -722,7 +723,7 @@ public class LogisticsServiceImplTests
         };
 
         // Act & Assert - Should throw InvalidOperationException during creation due to insufficient stock
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateTransferOrderAsync(createRequest));
     }
 }

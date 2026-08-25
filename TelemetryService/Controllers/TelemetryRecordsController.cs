@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TelemetryService.DTOs;
 using TelemetryService.Services;
 using Shared.Constants;
+using Shared.Exceptions;
 using Shared.Filters;
 
 namespace TelemetryService.Controllers;
@@ -45,9 +46,9 @@ public class TelemetryRecordsController : ControllerBase
             await _service.CreateTelemetryAsync(request);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
-            return UnprocessableEntity(new { message = ex.Message });
+            return Conflict(new { message = ex.Message });
         }
     }
 

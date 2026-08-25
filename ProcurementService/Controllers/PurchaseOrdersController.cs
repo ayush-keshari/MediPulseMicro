@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using ProcurementService.DTOs;
 using ProcurementService.Services;
 using Shared.Constants;
+using Shared.Exceptions;
 using Shared.Filters;
 
 namespace ProcurementService.Controllers;
@@ -48,9 +49,9 @@ public class PurchaseOrdersController : ControllerBase
             await _service.CreatePurchaseOrderAsync(request);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
-            return UnprocessableEntity(new { message = ex.Message });
+            return Conflict(new { message = ex.Message });
         }
     }
 
@@ -65,7 +66,7 @@ public class PurchaseOrdersController : ControllerBase
             if (!updated) return NotFound(new { message = $"Purchase order {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -83,7 +84,7 @@ public class PurchaseOrdersController : ControllerBase
             if (!updated) return NotFound(new { message = $"Purchase order {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -100,7 +101,7 @@ public class PurchaseOrdersController : ControllerBase
             if (!result) return NotFound(new { message = $"Purchase order {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }

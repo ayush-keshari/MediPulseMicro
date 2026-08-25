@@ -4,6 +4,7 @@ using LogisticsService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Shared.Constants;
+using Shared.Exceptions;
 using Shared.Filters;
 using Shared.Helpers;
 
@@ -68,7 +69,7 @@ public class TransferOrdersController : ControllerBase
 
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -84,7 +85,7 @@ public class TransferOrdersController : ControllerBase
             if (!updated) return NotFound(new { message = $"Transfer order {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -100,7 +101,7 @@ public class TransferOrdersController : ControllerBase
             if (!updated) return NotFound(new { message = $"Transfer order {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -117,7 +118,7 @@ public class TransferOrdersController : ControllerBase
             if (!result) return NotFound(new { message = $"Transfer order {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }

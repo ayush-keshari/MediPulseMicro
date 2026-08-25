@@ -6,6 +6,7 @@ using ProcurementService.Services;
 using Shared.Constants;
 using Shared.Filters;
 using Shared.Helpers;
+using Shared.Exceptions;
 
 namespace ProcurementService.Controllers;
 
@@ -67,7 +68,7 @@ public class ReceiptsController : ControllerBase
 
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return UnprocessableEntity(new { message = ex.Message });
         }

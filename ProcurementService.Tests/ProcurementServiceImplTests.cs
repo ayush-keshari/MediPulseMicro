@@ -4,6 +4,7 @@ using ProcurementService.DTOs;
 using ProcurementService.Models;
 using ProcurementService.Services;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 
 namespace ProcurementService.Tests;
 
@@ -18,6 +19,27 @@ public class ProcurementServiceImplTests
         var context = new ProcurementDbContext(options);
         context.Database.EnsureCreated();
         return context;
+    }
+
+    private IEnumerable<string> GetPathFromDraftToState(string targetState)
+    {
+        // Define the valid workflow: Draft -> Submitted -> Approved -> Shipped -> PartiallyReceived -> FullyReceived
+        // Plus: Any state -> Cancelled (except FullyReceived -> Cancelled is not allowed)
+        // And: Submitted -> Draft (backwards one step)
+
+        // Since we always start from Draft in our tests (newly created POs start as Draft),
+        // we define the path from Draft to each target state
+        return targetState switch
+        {
+            "Draft" => Array.Empty<string>(),
+            "Submitted" => new[] { "Submitted" },
+            "Approved" => new[] { "Submitted", "Approved" },
+            "Shipped" => new[] { "Submitted", "Approved", "Shipped" },
+            "PartiallyReceived" => new[] { "Submitted", "Approved", "Shipped", "PartiallyReceived" },
+            "FullyReceived" => new[] { "Submitted", "Approved", "Shipped", "PartiallyReceived", "FullyReceived" },
+            "Cancelled" => new[] { "Cancelled" },
+            _ => throw new ArgumentException($"Unknown state: {targetState}")
+        };
     }
 
     [Fact]
@@ -46,7 +68,7 @@ public class ProcurementServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateSupplierAsync(duplicateRequest));
     }
 
@@ -88,7 +110,7 @@ public class ProcurementServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdateSupplierAsync(supplierToUpdate.SupplierId, updateRequest));
     }
 
@@ -134,7 +156,7 @@ public class ProcurementServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreatePurchaseOrderAsync(request));
     }
 
@@ -267,7 +289,7 @@ public class ProcurementServiceImplTests
 
         // Act & Assert - Trying to go from Draft directly to FullyReceived should fail
         var invalidRequest = new UpdatePoStatusRequest { Status = "FullyReceived" };
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdatePoStatusAsync(po.PoId, invalidRequest));
     }
 
@@ -323,19 +345,49 @@ public class ProcurementServiceImplTests
 
         foreach (var transition in transitions)
         {
-            // Create a fresh purchase order for each transition test
+            // Create a fresh purchase order for each transition test (starts as Draft)
+            var expectedOrderDate = DateTime.UtcNow;
+            var expectedExpectedDeliveryDate = DateTime.UtcNow.AddDays(7);
             var poRequest = new CreatePurchaseOrderRequest
             {
                 SupplierId = supplier.SupplierId,
-                OrderDate = DateTime.UtcNow,
-                ExpectedDeliveryDate = DateTime.UtcNow.AddDays(7),
+                OrderDate = expectedOrderDate,
+                ExpectedDeliveryDate = expectedExpectedDeliveryDate,
                 Notes = $"Test PO for {transition.From} to {transition.To}"
             };
 
-            await service.CreatePurchaseOrderAsync(poRequest);
+            bool created = await service.CreatePurchaseOrderAsync(poRequest);
+            Assert.True(created, "Failed to create purchase order");
             var po = await context.PurchaseOrders.FirstOrDefaultAsync(po => po.Notes == poRequest.Notes);
             Assert.NotNull(po);
-            Assert.Equal(transition.From, po.Status); // Verify starting state
+
+            // If the transition doesn't start from Draft, we need to transition to the From state first
+            if (transition.From != "Draft")
+            {
+                // Determine the path from Draft to the From state
+                var pathToFrom = GetPathFromDraftToState(transition.From);
+
+                // Apply each transition in the path
+                foreach (var state in pathToFrom)
+                {
+                    var setupRequest = new UpdatePoStatusRequest { Status = state };
+                    var setupResult = await service.UpdatePoStatusAsync(po.PoId, setupRequest);
+                    Assert.True(setupResult, $"Failed to transition PO to {state} state during setup");
+
+                    // Verify the setup worked
+                    var setupPo = await context.PurchaseOrders.FirstOrDefaultAsync(p => p.PoId == po.PoId);
+                    Assert.NotNull(setupPo);
+                    Assert.Equal(setupPo.Status, state);
+
+                    // Use this PO for the next transition in the path
+                    po = setupPo;
+                }
+            }
+            else
+            {
+                // Verify starting state is Draft
+                Assert.Equal(transition.From, po.Status); // Verify starting state
+            }
 
             // Act
             var statusRequest = new UpdatePoStatusRequest { Status = transition.To };
@@ -344,9 +396,10 @@ public class ProcurementServiceImplTests
             // Assert
             Assert.True(result, $"Failed to transition from {transition.From} to {transition.To}");
 
-            // Verify status was updated
-            var updatedPo = await context.PurchaseOrders.FindAsync(po.PoId);
-            Assert.Equal(transition.To, updatedPo.Status, $"Status not correctly updated from {transition.From} to {transition.To}");
+            // Verify status was updated - use a fresh query to avoid context caching issues
+            var updatedPo = await context.PurchaseOrders.FirstOrDefaultAsync(p => p.PoId == po.PoId);
+            Assert.NotNull(updatedPo);
+            Assert.Equal(transition.To, updatedPo.Status);
         }
     }
 
@@ -410,7 +463,7 @@ public class ProcurementServiceImplTests
 
         foreach (var transition in invalidTransitions)
         {
-            // Create a fresh purchase order for each transition test
+            // Create a fresh purchase order for each transition test (starts as Draft)
             var poRequest = new CreatePurchaseOrderRequest
             {
                 SupplierId = supplier.SupplierId,
@@ -419,14 +472,42 @@ public class ProcurementServiceImplTests
                 Notes = $"Test PO for invalid {transition.From} to {transition.To}"
             };
 
-            await service.CreatePurchaseOrderAsync(poRequest);
+            bool created = await service.CreatePurchaseOrderAsync(poRequest);
+            Assert.True(created, "Failed to create purchase order");
             var po = await context.PurchaseOrders.FirstOrDefaultAsync(po => po.Notes == poRequest.Notes);
             Assert.NotNull(po);
-            Assert.Equal(transition.From, po.Status); // Verify starting state
+
+            // If the transition doesn't start from Draft, we need to transition to the From state first
+            if (transition.From != "Draft")
+            {
+                // Determine the path from Draft to the From state
+                var pathToFrom = GetPathFromDraftToState(transition.From);
+
+                // Apply each transition in the path
+                foreach (var state in pathToFrom)
+                {
+                    var setupRequest = new UpdatePoStatusRequest { Status = state };
+                    var setupResult = await service.UpdatePoStatusAsync(po.PoId, setupRequest);
+                    Assert.True(setupResult, $"Failed to transition PO to {state} state during setup");
+
+                    // Verify the setup worked
+                    var setupPo = await context.PurchaseOrders.FirstOrDefaultAsync(p => p.PoId == po.PoId);
+                    Assert.NotNull(setupPo);
+                    Assert.Equal(setupPo.Status, state);
+
+                    // Use this PO for the next transition in the path
+                    po = setupPo;
+                }
+            }
+            else
+            {
+                // Verify starting state is Draft
+                Assert.Equal(transition.From, po.Status); // Verify starting state
+            }
 
             // Act & Assert
             var statusRequest = new UpdatePoStatusRequest { Status = transition.To };
-            await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            await Assert.ThrowsAsync<BusinessRuleException>(() =>
                 service.UpdatePoStatusAsync(po.PoId, statusRequest));
         }
     }
@@ -506,12 +587,16 @@ public class ProcurementServiceImplTests
         Assert.NotNull(po);
         Assert.Equal("Draft", po.Status);
 
+        // Calculate expected dates
+        var expectedOrderDate = DateTime.UtcNow.AddDays(1);
+        var expectedExpectedDeliveryDate = DateTime.UtcNow.AddDays(10);
+
         // Update request
         var updateRequest = new UpdatePurchaseOrderRequest
         {
             SupplierId = supplier.SupplierId,
-            OrderDate = DateTime.UtcNow.AddDays(1),
-            ExpectedDeliveryDate = DateTime.UtcNow.AddDays(10),
+            OrderDate = expectedOrderDate,
+            ExpectedDeliveryDate = expectedExpectedDeliveryDate,
             Notes = "Updated notes"
         };
 
@@ -524,8 +609,8 @@ public class ProcurementServiceImplTests
         // Verify purchase order was updated
         var updatedPo = await context.PurchaseOrders.FindAsync(po.PoId);
         Assert.NotNull(updatedPo);
-        Assert.Equal(DateTime.UtcNow.AddDays(1), updatedPo.OrderDate);
-        Assert.Equal(DateTime.UtcNow.AddDays(10), updatedPo.ExpectedDeliveryDate);
+        Assert.Equal(expectedOrderDate, updatedPo.OrderDate);
+        Assert.Equal(expectedExpectedDeliveryDate, updatedPo.ExpectedDeliveryDate);
         Assert.Equal("Updated notes", updatedPo.Notes);
         Assert.Equal("Draft", updatedPo.Status); // Status should remain unchanged
     }
@@ -578,7 +663,7 @@ public class ProcurementServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdatePurchaseOrderAsync(po.PoId, updateRequest));
     }
 
@@ -623,7 +708,7 @@ public class ProcurementServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdatePurchaseOrderAsync(po.PoId, updateRequest));
     }
 

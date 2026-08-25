@@ -3,6 +3,7 @@ using ProcurementService.DTOs;
 using ProcurementService.Services;
 using Shared.Constants;
 using Shared.Filters;
+using Shared.Exceptions;
 
 namespace ProcurementService.Controllers;
 
@@ -48,7 +49,7 @@ public class SuppliersController : ControllerBase
             await _service.CreateSupplierAsync(request);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -65,7 +66,7 @@ public class SuppliersController : ControllerBase
             if (!updated) return NotFound(new { message = $"Supplier {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -83,7 +84,7 @@ public class SuppliersController : ControllerBase
             if (!result) return NotFound(new { message = $"Supplier {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }

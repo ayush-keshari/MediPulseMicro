@@ -2,6 +2,7 @@ using LogisticsService.Data;
 using LogisticsService.DTOs;
 using LogisticsService.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 
 namespace LogisticsService.Services;
 
@@ -39,7 +40,7 @@ public class LogisticsServiceImpl : ILogisticsService
     public async Task<bool> CreateTransferOrderAsync(CreateTransferOrderRequest request)
     {
         if (request.FromFacilityId == request.ToFacilityId)
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 "Source and destination facility cannot be the same.");
 
         // Validate each item has enough stock at the source facility
@@ -50,7 +51,7 @@ public class LogisticsServiceImpl : ILogisticsService
                 .SumAsync(p => (int?)p.Quantity) ?? 0;
 
             if (item.Quantity > available)
-                throw new InvalidOperationException(
+                throw new BusinessRuleException(
                     $"Insufficient stock for '{item.ItemName}' at the source facility. " +
                     $"Requested: {item.Quantity}, Available: {available}.");
         }
@@ -87,7 +88,7 @@ public class LogisticsServiceImpl : ILogisticsService
         if (order == null) return false;
 
         if (order.Status != "Draft")
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Transfer order {id} cannot be edited in '{order.Status}' status. Only Draft orders can be modified.");
 
         _db.TransferOrderItems.RemoveRange(order.Items);
@@ -113,7 +114,7 @@ public class LogisticsServiceImpl : ILogisticsService
         if (order == null) return false;
 
         if (!IsValidStatusTransition(order.Status, request.Status))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Cannot transition from '{order.Status}' to '{request.Status}'. " +
                 "Allowed next statuses: " + string.Join(", ", GetAllowedNextStatuses(order.Status)));
 
@@ -138,7 +139,7 @@ public class LogisticsServiceImpl : ILogisticsService
         if (order == null) return false;
 
         if (order.Status != "Draft" && order.Status != "Cancelled")
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Transfer order {id} cannot be deleted in '{order.Status}' status. " +
                 "Only Draft or Cancelled orders can be deleted.");
 

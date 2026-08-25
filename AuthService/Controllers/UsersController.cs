@@ -4,6 +4,7 @@ using AuthService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Shared.Constants;
+using Shared.Exceptions;
 using Shared.Filters;
 
 namespace AuthService.Controllers;
@@ -62,15 +63,9 @@ public class UsersController : ControllerBase
             if (updated == null) return NotFound(new { message = $"User {id} not found." });
             return Ok(updated);
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
-        }
-        catch (DbUpdateException)
-        {
-            // Safety net: race condition past the pre-check that still trips
-            // the IX_User_Email unique constraint at SaveChanges time.
-            return Conflict(new { message = "A user with this email already exists." });
         }
     }
 

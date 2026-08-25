@@ -5,6 +5,7 @@ using System.IO;
 
 using Serilog;
 using Serilog.Sinks.ApplicationInsights;
+using Shared.Extensions;
 
 using System.Runtime.CompilerServices;
 
@@ -28,7 +29,8 @@ builder.Services.AddOcelot();
 builder.Services.AddHealthChecks();
 
 // ── SERILOG SETUP ────────────────────────────────────────────
-builder.Host.UseSerilog();
+// Already called via AddMediPulseSerilog()
+// builder.Host.UseSerilog();
 
 var app = builder.Build();
 

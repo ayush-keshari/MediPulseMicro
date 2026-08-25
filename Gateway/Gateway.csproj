@@ -14,6 +14,8 @@
     <PackageReference Include="Serilog.AspNetCore" />
     <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" />
-      </ItemGroup>
+    <!-- Reference to Shared project -->
+    <ProjectReference Include="..\Shared\Shared.csproj" />
+  </ItemGroup>
 
 </Project>

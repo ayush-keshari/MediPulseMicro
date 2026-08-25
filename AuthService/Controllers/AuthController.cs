@@ -2,6 +2,7 @@ using AuthService.DTOs;
 using AuthService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 using Shared.Filters;
 
 namespace AuthService.Controllers;
@@ -40,13 +41,9 @@ public class AuthController : ControllerBase
             // can immediately chain a role-assignment call. Self-registrants ignore the body.
             return StatusCode(StatusCodes.Status201Created, newUser);
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
-        }
-        catch (DbUpdateException)
-        {
-            return Conflict(new { message = "A user with this email already exists." });
         }
     }
 

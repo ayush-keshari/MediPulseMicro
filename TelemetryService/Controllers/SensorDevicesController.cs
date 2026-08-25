@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TelemetryService.DTOs;
 using TelemetryService.Services;
 using Shared.Constants;
+using Shared.Exceptions;
 using Shared.Filters;
 
 namespace TelemetryService.Controllers;
@@ -69,7 +70,7 @@ public class SensorDevicesController : ControllerBase
             if (!result) return NotFound(new { message = $"Sensor {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }

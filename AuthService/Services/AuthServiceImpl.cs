@@ -6,6 +6,7 @@ using AuthService.DTOs;
 using AuthService.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Exceptions;
 
 namespace AuthService.Services;
 
@@ -64,7 +65,7 @@ public class AuthServiceImpl : IAuthService
     public async Task<UserDto> RegisterAsync(RegisterRequest request)
     {
         if (await _db.Users.AnyAsync(u => u.Email.ToLower() == request.Email.ToLower()))
-            throw new InvalidOperationException("A user with this email already exists.");
+            throw new BusinessRuleException("A user with this email already exists.");
 
         // Role is intentionally hardcoded to "Unassigned" on this public endpoint —
         // never trust a client-sent role here. Admins assign the real role via
@@ -124,7 +125,7 @@ public class AuthServiceImpl : IAuthService
             await _db.Users.AnyAsync(u => u.UserId != id &&
                                           u.Email.ToLower() == request.Email.ToLower()))
         {
-            throw new InvalidOperationException("A user with this email already exists.");
+            throw new BusinessRuleException("A user with this email already exists.");
         }
 
         user.Name = request.Name;

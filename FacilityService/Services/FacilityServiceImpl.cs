@@ -2,6 +2,7 @@ using FacilityService.Data;
 using FacilityService.DTOs;
 using FacilityService.Models;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 
 namespace FacilityService.Services;
 
@@ -33,7 +34,7 @@ public class FacilityServiceImpl : IFacilityService
                 f.Name.ToLower() == request.Name.ToLower() &&
                 f.Type == request.Type &&
                 f.Region == request.Region))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"A facility named '{request.Name}' of type '{request.Type}' in region '{request.Region}' already exists.");
 
         var facility = new Facility
@@ -58,7 +59,7 @@ public class FacilityServiceImpl : IFacilityService
                 f.Name.ToLower() == request.Name.ToLower() &&
                 f.Type == request.Type &&
                 f.Region == request.Region))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"A facility named '{request.Name}' of type '{request.Type}' in region '{request.Region}' already exists.");
 
         facility.Name = request.Name;
@@ -120,7 +121,7 @@ public class FacilityServiceImpl : IFacilityService
     {
         var facilityExists = await _db.Facilities.AnyAsync(f => f.FacilityId == request.FacilityId);
         if (!facilityExists)
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Facility with ID {request.FacilityId} does not exist.");
 
         var normalizedName = request.Name.ToLower();
@@ -128,7 +129,7 @@ public class FacilityServiceImpl : IFacilityService
                 z.FacilityId == request.FacilityId &&
                 z.Name != null &&
                 z.Name.ToLower() == normalizedName))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"A zone named '{request.Name}' already exists in this facility.");
 
         var zone = new StorageZone
@@ -155,7 +156,7 @@ public class FacilityServiceImpl : IFacilityService
                 z.FacilityId == zone.FacilityId &&
                 z.Name != null &&
                 z.Name.ToLower() == normalizedName))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"A zone named '{request.Name}' already exists in this facility.");
 
         zone.Name = request.Name;

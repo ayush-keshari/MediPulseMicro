@@ -20,8 +20,13 @@ public static class SerilogExtensions
     /// <returns>The same WebApplicationBuilder instance for chaining.</returns>
     public static WebApplicationBuilder AddMediPulseSerilog(this WebApplicationBuilder builder)
     {
+        var serviceName = builder.Configuration["ServiceName"] ?? "UnknownService";
+        var environment = builder.Environment.EnvironmentName;
+
         var loggerConfiguration = new LoggerConfiguration()
             .Enrich.FromLogContext()
+            .Enrich.WithProperty("ServiceName", serviceName)
+            .Enrich.WithProperty("Environment", environment)
             .WriteTo.Console(new JsonFormatter())
             .MinimumLevel.Information();
 

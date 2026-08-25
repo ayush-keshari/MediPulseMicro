@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ProcurementService.Data;
 using ProcurementService.DTOs;
 using ProcurementService.Models;
+using Shared.Exceptions;
 
 namespace ProcurementService.Services;
 
@@ -30,7 +31,7 @@ public class ProcurementServiceImpl : IProcurementService
         if (await _db.Suppliers.AnyAsync(s =>
                 s.Name.ToLower() == request.Name.ToLower() &&
                 s.SupplierType == request.SupplierType))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
 
         var supplier = new Supplier
@@ -53,7 +54,7 @@ public class ProcurementServiceImpl : IProcurementService
                 s.SupplierId != id &&
                 s.Name.ToLower() == request.Name.ToLower() &&
                 s.SupplierType == request.SupplierType))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"A supplier named '{request.Name}' of type '{request.SupplierType}' already exists.");
 
         supplier.Name = request.Name;
@@ -114,7 +115,7 @@ public class ProcurementServiceImpl : IProcurementService
     {
         var supplierExists = await _db.Suppliers.AnyAsync(s => s.SupplierId == request.SupplierId);
         if (!supplierExists)
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Supplier with ID {request.SupplierId} does not exist.");
 
         var po = new PurchaseOrder
@@ -137,14 +138,14 @@ public class ProcurementServiceImpl : IProcurementService
         if (po == null) return false;
 
         if (po.Status != "Draft")
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Purchase order {id} cannot be edited in '{po.Status}' status. Only Draft orders can be modified.");
 
         if (po.SupplierId != request.SupplierId)
         {
             var supplierExists = await _db.Suppliers.AnyAsync(s => s.SupplierId == request.SupplierId);
             if (!supplierExists)
-                throw new InvalidOperationException(
+                throw new BusinessRuleException(
                     $"Supplier with ID {request.SupplierId} does not exist.");
             po.SupplierId = request.SupplierId;
         }
@@ -163,7 +164,7 @@ public class ProcurementServiceImpl : IProcurementService
         if (po == null) return false;
 
         if (!IsValidStatusTransition(po.Status, request.Status))
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Cannot transition from '{po.Status}' to '{request.Status}'. " +
                 "Allowed: " + string.Join(", ", GetAllowedNextStatuses(po.Status)));
 
@@ -216,10 +217,10 @@ public class ProcurementServiceImpl : IProcurementService
         var po = await _db.PurchaseOrders.FindAsync(request.PoId);
 
         if (po == null)
-            throw new InvalidOperationException($"Purchase order {request.PoId} does not exist.");
+            throw new BusinessRuleException($"Purchase order {request.PoId} does not exist.");
 
         if (po.Status != "Approved" && po.Status != "Shipped" && po.Status != "PartiallyReceived")
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Cannot create a receipt against PO {request.PoId} in '{po.Status}' status. " +
                 "The PO must be Approved, Shipped, or PartiallyReceived.");
 

@@ -2,6 +2,7 @@ using LogisticsService.DTOs;
 using LogisticsService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Constants;
+using Shared.Exceptions;
 using Shared.Filters;
 
 namespace LogisticsService.Controllers;
@@ -43,17 +44,31 @@ public class ConsumptionController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateConsumptionRequest request)
     {
-        await _service.CreateConsumptionAsync(request);
-        return NoContent();
+        try
+        {
+            await _service.CreateConsumptionAsync(request);
+            return NoContent();
+        }
+        catch (BusinessRuleException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // PUT /api/consumption/{id}
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateConsumptionRequest request)
     {
-        var updated = await _service.UpdateConsumptionAsync(id, request);
-        if (!updated) return NotFound(new { message = $"Consumption record {id} not found." });
-        return NoContent();
+        try
+        {
+            var updated = await _service.UpdateConsumptionAsync(id, request);
+            if (!updated) return NotFound(new { message = $"Consumption record {id} not found." });
+            return NoContent();
+        }
+        catch (BusinessRuleException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 
     // DELETE /api/consumption/{id}
@@ -61,8 +76,15 @@ public class ConsumptionController : ControllerBase
     [RoleAuthorize(Roles.Admin, Roles.SupplyManager)]
     public async Task<IActionResult> Delete(int id)
     {
-        var result = await _service.DeleteConsumptionAsync(id);
-        if (!result) return NotFound(new { message = $"Consumption record {id} not found." });
-        return NoContent();
+        try
+        {
+            var result = await _service.DeleteConsumptionAsync(id);
+            if (!result) return NotFound(new { message = $"Consumption record {id} not found." });
+            return NoContent();
+        }
+        catch (BusinessRuleException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
     }
 }

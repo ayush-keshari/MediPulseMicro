@@ -2,6 +2,7 @@ using FacilityService.DTOs;
 using FacilityService.Services;
 using Microsoft.AspNetCore.Mvc;
 using Shared.Constants;
+using Shared.Exceptions;
 using Shared.Filters;
 
 namespace FacilityService.Controllers;
@@ -44,7 +45,7 @@ public class StorageZonesController : ControllerBase
             await _service.CreateZoneAsync(request);
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }
@@ -61,7 +62,7 @@ public class StorageZonesController : ControllerBase
             if (!updated) return NotFound(new { message = $"StorageZone {id} not found." });
             return NoContent();
         }
-        catch (InvalidOperationException ex)
+        catch (BusinessRuleException ex)
         {
             return Conflict(new { message = ex.Message });
         }

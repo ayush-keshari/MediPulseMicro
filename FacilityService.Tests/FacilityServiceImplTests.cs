@@ -4,6 +4,7 @@ using FacilityService.Services;
 using FacilityService.DTOs;
 using FacilityService.Data;
 using Microsoft.EntityFrameworkCore;
+using Shared.Exceptions;
 
 namespace FacilityService.Tests;
 
@@ -77,7 +78,7 @@ public class FacilityServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateFacilityAsync(duplicateRequest));
     }
 
@@ -243,7 +244,7 @@ public class FacilityServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdateFacilityAsync(facility2.FacilityId, updateRequest));
     }
 
@@ -348,7 +349,7 @@ public class FacilityServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateZoneAsync(zoneRequest));
     }
 
@@ -390,7 +391,7 @@ public class FacilityServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.CreateZoneAsync(zoneRequest2));
     }
 
@@ -664,7 +665,7 @@ public class FacilityServiceImplTests
         };
 
         // Act & Assert
-        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+        await Assert.ThrowsAsync<BusinessRuleException>(() =>
             service.UpdateZoneAsync(zone2.ZoneId, updateRequest));
     }
 

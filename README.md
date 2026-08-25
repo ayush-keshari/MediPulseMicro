@@ -150,17 +150,41 @@ npm run lint
 ```
 
 ### Integration Tests (Requires Docker)
-Integration tests require Docker and SQL Server. They are run in the CI pipeline but can be executed locally:
+Integration tests require Docker and SQL Server to test the full microservices stack. They validate service-to-service communication, API endpoints, and database interactions.
+
+#### Local Execution
+You can run integration tests locally using the provided script:
 ```bash
-# Start dependencies (SQL Server)
-docker compose up -d sqlserver
+# PowerShell (Windows/Linux/macOS)
+powershell -ExecutionPolicy Bypass -File Run-IntegrationTests.ps1
 
-# Run migrations and load test data
-docker compose up migrator --abort-on-container-exit --exit-code-from migrator
-
-# Run integration tests (example: using a test project or script)
-# Note: Integration tests are primarily run in CI via the integration-validation job.
+# Optional parameters:
+#   -Rebuild    : Force rebuild of Docker images
+#   -NoBuild    : Use existing Docker images (skip build)
+#   -TestFilter : Filter tests (e.g., "-TestFilter 'AuthService'")
 ```
+
+#### How It Works
+The integration testing mechanism:
+1. Uses `docker-compose.test.yml` (optimized for testing - lighter weight, fixed versions)
+2. Starts SQL Server and all backend services
+3. Runs EF Core migrations and loads mock data via the migrator service
+4. Executes integration tests that make HTTP requests to the running services
+5. Preserves test output and returns proper exit codes
+6. Cleans up all containers and volumes after completion
+
+#### CI Pipeline Integration
+The same mechanism is used in the CI pipeline via the `integration-validation` job in `.github/workflows/ci.yml`, which:
+- Uses the same docker-compose.test.yml equivalent configuration
+- Runs the integration tests via the Run-IntegrationTests.ps1 script
+- Requires minimum 60% test coverage (increased from 40%)
+- Preserves test results as artifacts
+
+#### Test Coverage
+Current integration tests cover:
+- Gateway accessibility and routing to backend services
+- Basic endpoint availability for all microservices
+- Service-to-service communication through the API gateway
 
 ## 🐳 Docker Compose Services
 

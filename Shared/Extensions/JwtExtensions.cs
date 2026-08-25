@@ -20,7 +20,7 @@ public static class JwtExtensions
     /// <returns>The same IServiceCollection instance for chaining.</returns>
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
-        var keyString = configuration["JWT_KEY"] ?? throw new InvalidOperationException("JWT_KEY configuration is missing");
+        var keyString = configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key configuration is missing");
         var key = Encoding.ASCII.GetBytes(keyString);
 
         services.AddAuthentication(options =>

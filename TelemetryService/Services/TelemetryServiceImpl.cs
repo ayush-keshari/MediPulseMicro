@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using TelemetryService.Data;
 using TelemetryService.DTOs;
 using TelemetryService.Models;
+using Shared.Exceptions;
 
 namespace TelemetryService.Services;
 
@@ -106,7 +107,7 @@ public class TelemetryServiceImpl : ITelemetryService
     {
         var sensorExists = await _db.SensorDevices.AnyAsync(s => s.SensorId == request.SensorId);
         if (!sensorExists)
-            throw new InvalidOperationException(
+            throw new BusinessRuleException(
                 $"Sensor with ID {request.SensorId} does not exist.");
 
         var record = new TelemetryRecord
