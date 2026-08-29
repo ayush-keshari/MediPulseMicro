@@ -29,38 +29,41 @@ services:
     volumes:
       - .:/src
     working_dir: /src
-    entrypoint: ["/bin/sh", "-c"]
-    command: |
-      set -eu
-      echo "Waiting for SQL Server to be ready..."
-      # Wait for SQL Server to be ready
-      i=1
-      while [ "$$i" -le 30 ]; do
-        if /opt/mssql-tools18/bin/sqlcmd -C -b -S sqlserver -U SA -P "${SA_PASSWORD:-MediPulse@2024!Dev}" -Q "SELECT 1" 2>/dev/null; then
-          echo "SQL Server is ready"
-          break
-        fi
-        echo "Waiting for SQL Server to start..."
-        sleep 2
-        i=$$(($$i + 1))
-      done
+    entrypoint: []
+    command:
+      - /bin/sh
+      - -c
+      - |
+          set -eu
+          echo "Waiting for SQL Server to be ready..."
+          # Wait for SQL Server to be ready
+          i=1
+          while [ "$$i" -le 30 ]; do
+            if /opt/mssql-tools18/bin/sqlcmd -C -b -S sqlserver -U SA -P "${SA_PASSWORD:-MediPulse@2024!Dev}" -Q "SELECT 1" 2>/dev/null; then
+              echo "SQL Server is ready"
+              break
+            fi
+            echo "Waiting for SQL Server to start..."
+            sleep 2
+            i=$$(($$i + 1))
+          done
 
-      echo "Running EF Core migrations for all services..."
-      MAIN_CONNECTION="Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;"
-      AUDIT_CONNECTION="Server=sqlserver,1433;Database=MedipulseAudit;User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;"
-      dotnet ef database update --project AuthService/AuthService.csproj --connection "$$MAIN_CONNECTION"
-      dotnet ef database update --project FacilityService/FacilityService.csproj --connection "$$MAIN_CONNECTION"
-      dotnet ef database update --project InventoryService/InventoryService.csproj --connection "$$MAIN_CONNECTION"
-      dotnet ef database update --project ProcurementService/ProcurementService.csproj --connection "$$MAIN_CONNECTION"
-      dotnet ef database update --project LogisticsService/LogisticsService.csproj --connection "$$MAIN_CONNECTION"
-      dotnet ef database update --project TelemetryService/TelemetryService.csproj --connection "$$MAIN_CONNECTION"
-      dotnet ef database update --project NotificationService/NotificationService.csproj --connection "$$MAIN_CONNECTION"
-      dotnet ef database update --project AuditService/AuditService.csproj --connection "$$AUDIT_CONNECTION"
+          echo "Running EF Core migrations for all services..."
+          MAIN_CONNECTION="Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;"
+          AUDIT_CONNECTION="Server=sqlserver,1433;Database=MedipulseAudit;User Id=sa;Password=${SA_PASSWORD:-MediPulse@2024!Dev};TrustServerCertificate=True;"
+          dotnet ef database update --project AuthService/AuthService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project FacilityService/FacilityService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project InventoryService/InventoryService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project ProcurementService/ProcurementService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project LogisticsService/LogisticsService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project TelemetryService/TelemetryService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project NotificationService/NotificationService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project AuditService/AuditService.csproj --connection "$$AUDIT_CONNECTION"
 
-      echo "Loading mock data..."
-      /opt/mssql-tools18/bin/sqlcmd -C -S sqlserver -U SA -P "${SA_PASSWORD:-MediPulse@2024!Dev}" -i MockData_InsertOnly.sql -d MedipulseMain
+          echo "Loading mock data..."
+          /opt/mssql-tools18/bin/sqlcmd -C -b -S sqlserver -U SA -P "${SA_PASSWORD:-MediPulse@2024!Dev}" -i MockData_InsertOnly.sql -d MedipulseMain
 
-      echo "All migrations and data loading completed successfully!"
+          echo "All migrations and data loading completed successfully!"
     networks:
       - medipulse
 
