@@ -98,9 +98,9 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          dotnet test --no-build --verbosity normal --configuration Release `
-            /p:CollectCoverage=true `
-            /p:CoverletOutputFormat=cobertura `
+          dotnet test --no-build --verbosity normal --configuration Release \
+            /p:CollectCoverage=true \
+            /p:CoverletOutputFormat=cobertura \
             /p:CoverletOutput=../TestResults/coverage.cobertura.xml
 
       - name: Report test coverage
@@ -158,19 +158,8 @@ jobs:
   integration_and_data_quality:
     runs-on: ubuntu-latest
     needs: [backend_build]  # Ensure backend builds successfully before running integration tests
-    services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2022-latest
-        env:
-          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
-          ACCEPT_EULA: Y
-        ports:
-          - 1433:1433
-        options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P $SA_PASSWORD -Q 'SELECT 1'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    env:
+      SA_PASSWORD: ${{ secrets.SA_PASSWORD || 'MediPulse@2024!Dev' }}
 
     steps:
       - name: Checkout code
@@ -178,29 +167,26 @@ jobs:
 
       - name: Wait for SQL Server to be ready
         run: |
+          docker compose -f docker-compose.yml up -d sqlserver
           for i in {1..30}; do
-            if docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" 2>/dev/null; then
+            if docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1" 2>/dev/null; then
               echo "SQL Server is ready"
               break
             fi
             echo "Waiting for SQL Server to start..."
             sleep 2
           done
+          docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1"
 
       - name: Apply migrations and load mock data
         run: |
           # Run EF Core migrations using the migrator service
           docker compose -f docker-compose.yml up migrator --abort-on-container-exit --exit-code-from migrator
-          migrator_exit_code=$?
-          if [ $migrator_exit_code -ne 0 ]; then
-            echo "Migrations failed with exit code: $migrator_exit_code"
-            exit $migrator_exit_code
-          fi
           echo "Migrations completed successfully"
 
       - name: Validate mock data integrity
         run: |
-          RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/validate_mock_data.sql -d MedipulseMain -h -1 | tail -n 1)
+          RESULT=$(docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain -h -1 < Scripts/validate_mock_data.sql | tail -n 1)
           if [ "$RESULT" -gt 0 ]; then
             echo "Mock data validation failed with $RESULT errors"
             exit 1
@@ -216,9 +202,9 @@ jobs:
               continue
             fi
             echo "Running $sqlfile against MedipulseMain..."
-            RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i "$sqlfile" -d MedipulseMain -h -1 | tail -n 1)
-            if [ "$RESULT" -gt 0 ]; then
-              echo "Data quality check failed in $(basename "$sqlfile") with $RESULT error(s)"
+            RESULT=$(docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain -h -1 < "$sqlfile")
+            if echo "$RESULT" | jq -e 'any(.Checks[]; .Status != 0)' >/dev/null; then
+              echo "Data quality check failed in $(basename "$sqlfile")"
               EXIT_CODE=1
             else
               echo "Data quality check passed in $(basename "$sqlfile")"
@@ -232,9 +218,9 @@ jobs:
       - name: Run data quality check on MedipulseAudit
         run: |
           echo "Running Scripts/DQ/AuditService.sql against MedipulseAudit..."
-          RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/DQ/AuditService.sql -d MedipulseAudit -h -1 | tail -n 1)
-          if [ "$RESULT" -gt 0 ]; then
-            echo "Data quality check failed in AuditService.sql with $RESULT error(s)"
+          RESULT=$(docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit -h -1 < Scripts/DQ/AuditService.sql)
+          if echo "$RESULT" | jq -e 'any(.Checks[]; .Status != 0)' >/dev/null; then
+            echo "Data quality check failed in AuditService.sql"
             exit 1
           fi
           echo "Data quality check passed in AuditService.sql"

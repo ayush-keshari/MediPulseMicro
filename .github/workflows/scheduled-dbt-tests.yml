@@ -11,20 +11,8 @@ on:
 jobs:
   dbt-tests:
     runs-on: ubuntu-latest
-
-    services:
-      sqlserver:
-        image: mcr.microsoft.com/mssql/server:2022-latest
-        env:
-          SA_PASSWORD: ${{ secrets.SA_PASSWORD }}
-          ACCEPT_EULA: Y
-        ports:
-          - 1433:1433
-        options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P $SA_PASSWORD -Q 'SELECT 1'"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    env:
+      SA_PASSWORD: ${{ secrets.SA_PASSWORD || 'MediPulse@2024!Dev' }}
 
     steps:
     - name: Checkout code
@@ -37,14 +25,16 @@ jobs:
 
     - name: Wait for SQL Server to be ready
       run: |
+        docker compose -f docker-compose.yml up -d sqlserver
         for i in {1..30}; do
-          if docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -Q "SELECT 1" 2>/dev/null; then
+          if docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1" 2>/dev/null; then
             echo "SQL Server is ready"
             break
           fi
           echo "Waiting for SQL Server to start..."
           sleep 2
         done
+        docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1"
 
     - name: Apply migrations and load mock data
       run: |
@@ -59,7 +49,7 @@ jobs:
 
     - name: Validate mock data integrity
       run: |
-        RESULT=$(docker compose -f docker-compose.yml exec sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "${{ secrets.SA_PASSWORD }}" -i Scripts/validate_mock_data.sql -d MedipulseMain -h -1 | tail -n 1)
+        RESULT=$(docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain -h -1 < Scripts/validate_mock_data.sql | tail -n 1)
         if [ "$RESULT" -gt 0 ]; then
           echo "Mock data validation failed with $RESULT errors"
           exit 1
@@ -81,7 +71,7 @@ jobs:
             ci:
               type: sqlserver
               driver: ODBC Driver 17 for SQL Server
-              server: sqlserver
+              server: localhost
               database: MedipulseMain
               schema: dbo
               username: sa
