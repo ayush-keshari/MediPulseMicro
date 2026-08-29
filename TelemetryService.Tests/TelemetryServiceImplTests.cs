@@ -634,7 +634,7 @@ public class TelemetryServiceImplTests
         Assert.False(result);
     }
 
-    
+
     // BOUNDARY CONDITION TESTS FOR EXCURSION DETECTION
     [Fact]
     public async Task DetectExcursion_BoundaryTemperatureValues_CorrectlyIdentifiesExcursions()
