@@ -18,12 +18,12 @@ DECLARE @ExpectedMin INT;
 DECLARE @ActualCount INT;
 DECLARE @NullCount INT;
 
--- Item table
-IF EXISTS (SELECT * FROM sys.tables WHERE name = 'Item')
+-- Items table
+IF EXISTS (SELECT * FROM sys.tables WHERE name = 'Items')
 BEGIN
-    -- Item
-    SELECT @TableName = 'Item', @ExpectedMin = 8;
-    SELECT @ActualCount = COUNT(*) FROM [Item];
+    -- Items
+    SELECT @TableName = 'Items', @ExpectedMin = 8;
+    SELECT @ActualCount = COUNT(*) FROM [Items];
     IF @ActualCount >= @ExpectedMin
     BEGIN
         INSERT INTO @Results (CheckName, Domain, Status, ExpectedCondition, ActualResult, Timestamp, Message)
@@ -41,7 +41,7 @@ BEGIN
                         + SUM(CASE WHEN [Category] IS NULL THEN 1 ELSE 0 END)
                         + SUM(CASE WHEN [Unit] IS NULL THEN 1 ELSE 0 END)
                         + SUM(CASE WHEN [SafetyStock] IS NULL THEN 1 ELSE 0 END)
-    FROM [Item];
+    FROM [Items];
     IF @NullCount = 0
     BEGIN
         INSERT INTO @Results (CheckName, Domain, Status, ExpectedCondition, ActualResult, Timestamp, Message)
@@ -56,7 +56,7 @@ END
 ELSE
 BEGIN
     INSERT INTO @Results (CheckName, Domain, Status, ExpectedCondition, ActualResult, Timestamp, Message)
-    VALUES ('Item.TableExists', 'InventoryService', 0, 'Table Item exists', 'Table not found', GETDATE(), 'INFO: Item table not found. Skipping Item checks.');
+        VALUES ('Items.TableExists', 'InventoryService', 0, 'Table Items exists', 'Table not found', GETDATE(), 'INFO: Items table not found. Skipping Items checks.');
 END
 
 -- InventoryPositions table
@@ -153,7 +153,7 @@ BEGIN
     IF @ActualCount >= @ExpectedMin
     BEGIN
         INSERT INTO @Results (CheckName, Domain, Status, ExpectedCondition, ActualResult, Timestamp, Message)
-        VALUES ('RecallAction.RowCount', 'InventoryService', 0, 'Row count >= ' + CAST(@ExpectedMin AS NVARCHAR), 'Row count = ' + CAST(@ActualCount AS NVARCHAR), GETDATE(), 'OK: RecallAction row count ' = CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR));
+        VALUES ('RecallAction.RowCount', 'InventoryService', 0, 'Row count >= ' + CAST(@ExpectedMin AS NVARCHAR), 'Row count = ' + CAST(@ActualCount AS NVARCHAR), GETDATE(), 'OK: RecallAction row count ' + CAST(@ActualCount AS NVARCHAR) + ' meets minimum ' + CAST(@ExpectedMin AS NVARCHAR));
     END
     ELSE
     BEGIN
