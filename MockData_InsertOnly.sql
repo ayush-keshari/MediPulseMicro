@@ -36,9 +36,9 @@ END
 -- 2. INVENTORY SERVICE - Mock Data
 -- ============================================================================
 
-IF NOT EXISTS (SELECT 1 FROM [Item] WHERE [ItemId] = 1)
+IF NOT EXISTS (SELECT 1 FROM [Items] WHERE [ItemId] = 1)
 BEGIN
-    INSERT INTO [Item] ([ItemCode], [Name], [Category], [Unit], [StorageRequirement], [SafetyStock]) VALUES
+    INSERT INTO [Items] ([ItemCode], [Name], [Category], [Unit], [StorageRequirement], [SafetyStock]) VALUES
     ('MED-001', 'Insulin Vial 100IU', 'Pharma', 'Box', 'Refrigerated', 50),
     ('MED-002', 'Amoxicillin 500mg Tablet', 'Pharma', 'Box', 'Ambient', 100),
     ('MED-003', 'Saline Solution 0.9%', 'Pharma', 'Box', 'Ambient', 200),
