@@ -1,0 +1,24 @@
+<Solution>
+  <Folder Name="/Services/">
+    <Project Path="AuditService/AuditService.csproj" />
+    <Project Path="AuthService/AuthService.csproj" />
+    <Project Path="FacilityService/FacilityService.csproj" />
+    <Project Path="InventoryService/InventoryService.csproj" />
+    <Project Path="LogisticsService/LogisticsService.csproj" />
+    <Project Path="NotificationService/NotificationService.csproj" />
+    <Project Path="ProcurementService/ProcurementService.csproj" />
+    <Project Path="TelemetryService/TelemetryService.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="AuthService.Tests/AuthService.Tests.csproj" />
+    <Project Path="FacilityService.Tests/FacilityService.Tests.csproj" />
+    <Project Path="Gateway.Tests/Gateway.Tests.csproj" />
+    <Project Path="InventoryService.Tests/InventoryService.Tests.csproj" />
+    <Project Path="LogisticsService.Tests/LogisticsService.Tests.csproj" />
+    <Project Path="NotificationService.Tests/NotificationService.Tests.csproj" />
+    <Project Path="ProcurementService.Tests/ProcurementService.Tests.csproj" />
+    <Project Path="TelemetryService.Tests/TelemetryService.Tests.csproj" />
+  </Folder>
+  <Project Path="Gateway/Gateway.csproj" />
+  <Project Path="Shared/Shared.csproj" />
+</Solution>
