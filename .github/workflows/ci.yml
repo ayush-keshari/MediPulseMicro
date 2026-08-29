@@ -33,7 +33,7 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
-        run: dotnet restore --use-lock-file
+        run: dotnet restore Backend.slnx --use-lock-file
 
       - name: Build solution
         run: dotnet build Backend.slnx --no-restore --configuration Release
@@ -82,7 +82,7 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore dependencies
-        run: dotnet restore --use-lock-file
+        run: dotnet restore Backend.slnx --use-lock-file
 
       - name: Build solution
         run: dotnet build Backend.slnx --no-restore --configuration Release
