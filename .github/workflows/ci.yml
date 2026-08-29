@@ -99,16 +99,14 @@ jobs:
       - name: Run unit tests with coverage
         run: |
           dotnet test Backend.slnx --no-build --verbosity normal --configuration Release \
-            /p:CollectCoverage=true \
-            /p:CoverletOutputFormat=cobertura \
-            /p:CoverletOutput=../TestResults/coverage.cobertura.xml
+            --collect:"XPlat Code Coverage"
 
       - name: Report test coverage
         run: |
           # Install reportgenerator to convert cobertura to human-readable format
           dotnet tool install --global dotnet-reportgenerator-globaltool
           # Generate coverage report
-          reportgenerator "-reports:../TestResults/coverage.cobertura.xml" "-targetdir:../TestResults/CoverageReport" "-reporttypes:TextSummary"
+          reportgenerator "-reports:**/TestResults/**/coverage.cobertura.xml" "-targetdir:../TestResults/CoverageReport" "-reporttypes:TextSummary"
           # Extract coverage percentage from summary
           COVERAGE_PERCENT=$(awk '/Line coverage:/ {gsub(/%/, ""); print $NF}' ../TestResults/CoverageReport/Summary.txt)
           echo "Coverage: $COVERAGE_PERCENT%"
@@ -182,6 +180,7 @@ jobs:
         run: |
           # Run EF Core migrations using the migrator service
           docker compose -f docker-compose.yml up migrator --abort-on-container-exit --exit-code-from migrator
+          docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
           echo "Migrations completed successfully"
 
       - name: Validate mock data integrity

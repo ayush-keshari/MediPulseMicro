@@ -45,6 +45,7 @@ jobs:
           echo "Migrations failed with exit code: $migrator_exit_code"
           exit $migrator_exit_code
         fi
+        docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
         echo "Migrations completed successfully"
 
     - name: Validate mock data integrity
