@@ -2,6 +2,17 @@
 
 All notable changes to MediPulseMicro will be documented in this file.
 
+## [0.1.0] - 2026-08-30
+### Added
+- Reproducible .NET and frontend dependency lockfiles across the repository
+- CI data-quality gates with Docker-backed migrations and machine-readable checks
+- Offline test documentation and a dedicated Docker integration-test profile
+- Structured request metrics at Gateway and AuthService via `/metrics`
+
+### Fixed
+- Corrected SQL fixture and data-quality table names to match the EF Core schema
+- Stabilized frontend linting, backend test execution, and integration migration startup
+
 ## [Unreleased]
 ### Added
 - Data quality check script (`Scripts/dq_checks.sql`) with row-count and null constraints per table
