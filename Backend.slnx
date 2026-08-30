@@ -10,6 +10,7 @@
     <Project Path="TelemetryService/TelemetryService.csproj" />
   </Folder>
   <Folder Name="/Tests/">
+    <Project Path="AuditService.Tests/AuditService.Tests.csproj" />
     <Project Path="AuthService.Tests/AuthService.Tests.csproj" />
     <Project Path="FacilityService.Tests/FacilityService.Tests.csproj" />
     <Project Path="Gateway.Tests/Gateway.Tests.csproj" />
