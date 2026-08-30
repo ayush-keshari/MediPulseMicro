@@ -112,7 +112,7 @@ sources:
       - name: ExceptionEvent
         description: Exceptions detected in inventory
         columns:
-          - name: ExceptionEventID
+          - name: ExceptionId
             tests:
               - unique
               - not_null
@@ -140,7 +140,7 @@ sources:
       - name: RecallAction
         description: Actions taken in response to exceptions
         columns:
-          - name: RecallActionID
+          - name: RecallActionId
             tests:
               - unique
               - not_null
@@ -165,7 +165,7 @@ sources:
       - name: Forecast
         description: Demand forecast for items
         columns:
-          - name: ForecastID
+          - name: ForecastId
             tests:
               - unique
               - not_null
@@ -190,7 +190,7 @@ sources:
       - name: ReplenishmentPlan
         description: Suggested replenishment actions
         columns:
-          - name: ReplenishmentPlanID
+          - name: PlanId
             tests:
               - unique
               - not_null
@@ -296,7 +296,7 @@ sources:
       - name: TransferOrder
         description: Transfer orders between facilities
         columns:
-          - name: TransferOrderID
+          - name: TransferOrderId
             tests:
               - unique
               - not_null
@@ -335,7 +335,7 @@ sources:
       - name: TransferOrderItem
         description: Items within a transfer order
         columns:
-          - name: TransferOrderItemID
+          - name: TransferOrderItemId
             tests:
               - unique
               - not_null
@@ -363,7 +363,7 @@ sources:
       - name: ConsumptionRecord
         description: Consumption of items by wards/patients
         columns:
-          - name: ConsumptionRecordID
+          - name: ConsumptionId
             tests:
               - unique
               - not_null
@@ -444,7 +444,7 @@ sources:
       - name: Notification
         description: System notifications to users
         columns:
-          - name: NotificationID
+          - name: NotificationId
             tests:
               - unique
               - not_null
@@ -494,7 +494,7 @@ sources:
       - name: AuditLog
         description: Audit trail of system actions
         columns:
-          - name: AuditLogID
+          - name: AuditLogId
             tests:
               - unique
               - not_null

@@ -76,7 +76,7 @@ jobs:
               database: MedipulseMain
               schema: dbo
               username: sa
-              password: ${{ secrets.SA_PASSWORD }}
+              password: $SA_PASSWORD
               port: 1433
               encrypt: true
               trust_server_certificate: true
