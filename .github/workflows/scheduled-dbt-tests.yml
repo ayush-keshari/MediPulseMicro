@@ -86,7 +86,7 @@ jobs:
               password: $SA_PASSWORD
               port: 1433
               encrypt: true
-              trust_server_certificate: true
+              trust_cert: true
         EOF
 
     - name: Install dbt project dependencies

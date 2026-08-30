@@ -12,4 +12,4 @@ mediapulse_dq:
       port: 1433
       # Optional: if you need to encrypt
       encrypt: true
-      trust_server_certificate: true
+      trust_cert: true
