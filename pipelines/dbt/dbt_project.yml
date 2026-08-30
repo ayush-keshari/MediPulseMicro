@@ -16,7 +16,3 @@ clean-targets:
   - "dbt_modules"
 
 require-dbt-version: [">=1.0.0", "<2.0.0"]
-
-models:
-  mediapulse_dq:
-    +materialized: view
