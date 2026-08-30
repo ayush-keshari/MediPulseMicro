@@ -90,4 +90,17 @@ public class GatewayTests : IClassFixture<WebApplicationFactory<Program>>
         var logger = host.GetService(typeof(ILogger<Program>));
         Assert.NotNull(logger);
     }
+
+    [Fact]
+    public async Task Gateway_MetricsEndpoint_ReturnsPrometheusCounters()
+    {
+        using var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/metrics");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("medipulse_http_requests_total", body);
+        Assert.Contains("medipulse_http_errors_total", body);
+    }
 }

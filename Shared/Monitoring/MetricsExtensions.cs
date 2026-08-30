@@ -37,7 +37,15 @@ public sealed class MetricsMiddleware(RequestDelegate next)
         var failed = false;
         try
         {
-            await next(context);
+            if (context.Request.Path == "/metrics")
+            {
+                context.Response.ContentType = "text/plain; version=0.0.4";
+                await context.Response.WriteAsync(MetricsRegistry.Render());
+            }
+            else
+            {
+                await next(context);
+            }
             failed = context.Response.StatusCode >= 500;
         }
         catch
