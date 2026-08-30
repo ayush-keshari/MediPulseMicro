@@ -227,7 +227,7 @@ jobs:
       - name: Install dbt SQL Server adapter
         run: |
           python -m pip install --upgrade pip
-          pip install dbt-core dbt-sqlserver
+          pip install -r pipelines/dbt/requirements.txt
 
       - name: Configure dbt profile
         run: |
