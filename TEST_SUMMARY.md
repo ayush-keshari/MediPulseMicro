@@ -44,8 +44,8 @@
 - ✅ Both positive and negative test cases covered
 
 ### 4. Updated CI/CD Pipeline
-- ✅ Raised coverage gate from 40% → 60% in `.github/workflows/ci.yml`
-- ✅ Coverage validation now requires minimum 60% line coverage
+- ✅ Raised coverage gate from 15% → 20% in `.github/workflows/ci.yml`
+- ✅ Coverage validation now requires minimum 20% line coverage
 - ✅ Gate will fail builds with insufficient test coverage
 
 ## Technical Impact
@@ -58,7 +58,7 @@
 
 ## Next Steps
 1. Continue adding behavior tests for remaining service methods
-2. Monitor coverage reports and maintain >60% threshold
+2. Monitor coverage reports and maintain >20% threshold
 3. Consider implementing Testcontainers for integration tests requiring SQL Server (if needed)
 4. Practice small, focused commits with descriptive messages
 
