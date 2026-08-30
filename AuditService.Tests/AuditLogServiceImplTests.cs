@@ -271,7 +271,7 @@ public class AuditLogServiceImplTests
 
         // By ServiceName - should get 1 record (ItemService)
         Assert.Equal(1, resultByService.Total);
-        Assert.Equal(1, resultByService.Items.Count());
+        Assert.Single(resultByService.Items);
         Assert.Equal("ItemService", resultByService.Items.First().ServiceName);
     }
 }
