@@ -179,7 +179,7 @@ The integration testing mechanism:
 The same mechanism is used in the CI pipeline via the `integration-validation` job in `.github/workflows/ci.yml`, which:
 - Uses the same docker-compose.test.yml equivalent configuration
 - Runs the integration tests via the Run-IntegrationTests.ps1 script
-- Requires minimum 60% test coverage (increased from 40%)
+- Requires the current measured backend coverage baseline of at least 15%; the latest CI-style run reports 18% line coverage.
 - Preserves test results as artifacts
 
 #### Test Coverage
@@ -229,14 +229,14 @@ The project uses GitHub Actions for continuous integration:
 - Runs on every push to `main`, `dev2`, and feature branches
 - Builds and tests all services
 - Validates Docker Compose setup
-- Runs backend unit tests with coverage gate (minimum 40%)
+- Runs backend unit tests with a coverage gate (minimum 15% baseline, raised as coverage grows)
 - Performs frontend TypeScript checking and linting
 - Validates mock data referential integrity
 - Checks .NET formatting consistency
 
-### Scheduled DBT Tests Orchestrator
+### DBT Data Quality Tests
 
-In addition to the CI pipeline, a lightweight orchestrator runs dbt tests on a regular schedule to ensure ongoing data quality:
+The main integration job runs dbt tests after migrations and mock-data loading. A lightweight orchestrator also reruns the same checks on a regular schedule:
 
 - **Scheduled Workflow**: `.github/workflows/scheduled-dbt-tests.yml`
 - **Schedule**: Runs daily at 2:00 AM UTC (configurable via cron syntax)
@@ -249,6 +249,8 @@ In addition to the CI pipeline, a lightweight orchestrator runs dbt tests on a r
   5. Installs dbt dependencies
   6. Runs dbt tests against the migrated database
   7. Publishes test results as an artifact
+
+See [`docs/data-lineage.md`](docs/data-lineage.md) for service ownership, table lineage, and the complete validation flow.
 
 #### Modifying the Schedule
 
