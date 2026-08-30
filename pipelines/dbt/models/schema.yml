@@ -492,6 +492,7 @@ sources:
           - min_rows:
               min_value: 7
       - name: AuditLog
+        database: MedipulseAudit
         description: Audit trail of system actions
         columns:
           - name: AuditLogId
