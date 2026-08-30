@@ -41,7 +41,7 @@ This approach ensures:
 The initialization flow in docker-compose.yml:
 1. The `migrator` service waits for SQL Server to be ready
 2. Applies EF Core migrations for all services using `dotnet ef database update`
-3. Loads mock data using `sqlcmd` with `Scripts/MockData_InsertOnly.sql`
+3. Mock data is loaded explicitly with the scripts in `Scripts/mockdata/`
 4. Services start only after migrator completes successfully
 
 ## 📋 Data Quality Checks
@@ -49,10 +49,15 @@ The initialization flow in docker-compose.yml:
 You can run the data quality checks locally to validate the database schema and data integrity.
 
 ```bash
-# Ensure SQL Server is running (via docker compose) and the MediPulseMicro database is populated.
-# If you have not yet started the stack, do:
-docker compose up -d sqlserver migrator
+# Start SQL Server and apply the EF Core migrations.
+docker compose up -d sqlserver
 docker compose up migrator --abort-on-container-exit --exit-code-from migrator
+
+# Load the main and audit mock data (all scripts are idempotent).
+docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
+docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/AuthService.sql
+docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/NotificationService.sql
+docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit < Scripts/mockdata/AuditService.sql
 
 # Set the SA_PASSWORD environment variable (matches the one in .env or docker-compose.yml)
 export SA_PASSWORD=MediPulse@2024!Dev   # Linux/macOS
@@ -136,7 +141,7 @@ dotnet test AuthService/AuthService.csproj
 ### Frontend Tests (Offline)
 ```bash
 cd Frontend
-npm test
+npm test -- --watch=false
 ```
 
 ### Linting and Formatting (Offline)
@@ -147,8 +152,6 @@ dotnet format --verify-no-changes
   # Frontend linting
   cd Frontend
   npm run lint
-cd Frontend
-npm run lint
 ```
 
 ### Integration Tests (Requires Docker)
@@ -176,7 +179,7 @@ The integration testing mechanism:
 6. Cleans up all containers and volumes after completion
 
 #### CI Pipeline Integration
-The same mechanism is used in the CI pipeline via the `integration-validation` job in `.github/workflows/ci.yml`, which:
+The same mechanism is used in the CI pipeline via the `integration_and_data_quality` job in `.github/workflows/ci.yml`, which:
 - Uses the same docker-compose.test.yml equivalent configuration
 - Runs the integration tests via the Run-IntegrationTests.ps1 script
 - Requires the current measured backend coverage baseline of at least 15%; the latest CI-style run reports 18% line coverage.

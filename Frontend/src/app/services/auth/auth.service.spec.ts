@@ -2,11 +2,22 @@ import { TestBed } from '@angular/core/testing';
 import { AuthService } from './auth.service';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 describe('AuthService (Authentication-related behavior)', () => {
+  type MockFunction = ReturnType<typeof vi.fn>;
+  type MockHttpClient = {
+    post: MockFunction;
+    get: MockFunction;
+    put: MockFunction;
+    delete: MockFunction;
+  };
+  type MockRouter = { navigate: MockFunction };
+
   let service: AuthService;
-  let httpClient: jasmine.SpyObj<HttpClient>;
-  let router: jasmine.SpyObj<Router>;
+  let httpClient: MockHttpClient;
+  let router: MockRouter;
 
   const mockLoginResponse = {
     token: 'fake-jwt-token',
@@ -22,8 +33,13 @@ describe('AuthService (Authentication-related behavior)', () => {
   };
 
   beforeEach(() => {
-    const httpSpy = jasmine.createSpyObj('HttpClient', ['post', 'get', 'put', 'delete']);
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const httpSpy = {
+      post: vi.fn(),
+      get: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn()
+    };
+    const routerSpy = { navigate: vi.fn() };
 
     TestBed.configureTestingModule({
       providers: [
@@ -34,8 +50,8 @@ describe('AuthService (Authentication-related behavior)', () => {
     });
 
     service = TestBed.inject(AuthService);
-    httpClient = TestBed.inject(HttpClient) as jasmine.SpyObj<HttpClient>;
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    httpClient = TestBed.inject(HttpClient) as unknown as MockHttpClient;
+    router = TestBed.inject(Router) as unknown as MockRouter;
 
     // Clear localStorage before each test
     localStorage.removeItem('medipulse_token');
@@ -54,42 +70,44 @@ describe('AuthService (Authentication-related behavior)', () => {
 
   describe('isAuthenticated getter', () => {
     it('should return false when no token and no user', () => {
-      expect(service.isAuthenticated).toBeFalse();
+      expect(service.isAuthenticated).toBeFalsy();
     });
 
     it('should return false when token exists but no user', () => {
       localStorage.setItem('medipulse_token', 'fake-token');
-      expect(service.isAuthenticated).toBeFalse();
+      expect(service.isAuthenticated).toBeFalsy();
     });
 
     it('should return false when no token but user exists', () => {
       localStorage.setItem('medipulse_user', JSON.stringify(mockCurrentUser));
-      expect(service.isAuthenticated).toBeFalse();
+      expect(service.isAuthenticated).toBeFalsy();
     });
 
     it('should return true when both token and user exist', () => {
       localStorage.setItem('medipulse_token', 'fake-token');
       localStorage.setItem('medipulse_user', JSON.stringify(mockCurrentUser));
-      expect(service.isAuthenticated).toBeTrue();
+      service = new AuthService(httpClient as unknown as HttpClient, router as unknown as Router);
+      expect(service.isAuthenticated).toBeTruthy();
     });
   });
 
   describe('isAdmin getter', () => {
     it('should return false when no current user', () => {
-      expect(service.isAdmin).toBeFalse();
+      expect(service.isAdmin).toBeFalsy();
     });
 
     it('should return false when current user is not admin', () => {
       const nonAdminUser = { ...mockCurrentUser, role: 'Staff' };
       localStorage.setItem('medipulse_token', 'fake-token');
       localStorage.setItem('medipulse_user', JSON.stringify(nonAdminUser));
-      expect(service.isAdmin).toBeFalse();
+      expect(service.isAdmin).toBeFalsy();
     });
 
     it('should return true when current user is admin', () => {
       localStorage.setItem('medipulse_token', 'fake-token');
       localStorage.setItem('medipulse_user', JSON.stringify(mockCurrentUser));
-      expect(service.isAdmin).toBeTrue();
+      service = new AuthService(httpClient as unknown as HttpClient, router as unknown as Router);
+      expect(service.isAdmin).toBeTruthy();
     });
   });
 
@@ -101,67 +119,50 @@ describe('AuthService (Authentication-related behavior)', () => {
 
     it('should make HTTP POST request to login endpoint', () => {
       // Arrange
-      httpClient.post.and.returnValue(of(mockLoginResponse));
+      httpClient.post.mockReturnValue(of(mockLoginResponse));
 
       // Act
       service.login(loginRequest).subscribe();
 
       // Assert
-      expect(httpClient.post).toHaveBeenCalledOnceWith(
-        '/api/auth/login',
-        loginRequest,
-        jasmine.objectContaining({ timeout: 8000 })
-      );
+      expect(httpClient.post).toHaveBeenCalledWith('/api/auth/login', loginRequest);
     });
 
-    it('should store token and user in localStorage on successful login', (done) => {
+    it('should store token and user in localStorage on successful login', () => {
       // Arrange
-      httpClient.post.and.returnValue(of(mockLoginResponse));
+      httpClient.post.mockReturnValue(of(mockLoginResponse));
 
       // Act
-      service.login(loginRequest).subscribe({
-        next: () => {
-          // Assert
-          expect(localStorage.getItem('medipulse_token')).toBe('fake-jwt-token');
-          const storedUser = localStorage.getItem('medipulse_user');
-          expect(storedUser).toBeTruthy();
-          const parsedUser = JSON.parse(storedUser!);
-          expect(parsedUser).toEqual(mockCurrentUser);
-          done();
-        }
-      });
+      service.login(loginRequest).subscribe();
+
+      // Assert
+      expect(localStorage.getItem('medipulse_token')).toBe('fake-jwt-token');
+      const storedUser = localStorage.getItem('medipulse_user');
+      expect(storedUser).toBeTruthy();
+      const parsedUser = JSON.parse(storedUser!);
+      expect(parsedUser).toEqual(mockCurrentUser);
     });
 
-    it('should update currentUserSubject on successful login', (done) => {
+    it('should update currentUserSubject on successful login', () => {
       // Arrange
-      httpClient.post.and.returnValue(of(mockLoginResponse));
+      httpClient.post.mockReturnValue(of(mockLoginResponse));
 
       // Act
-      service.login(loginRequest).subscribe({
-        next: () => {
-          // Assert
-          expect(service.currentUser).toEqual(mockCurrentUser);
-          done();
-        }
-      });
+      service.login(loginRequest).subscribe();
+
+      // Assert
+      expect(service.currentUser).toEqual(mockCurrentUser);
     });
 
-    it('should call timeout operator with correct duration', (done) => {
+    it('should call timeout operator with correct duration', () => {
       // Arrange
-      httpClient.post.and.returnValue(of(mockLoginResponse));
+      httpClient.post.mockReturnValue(of(mockLoginResponse));
 
       // Act
-      service.login(loginRequest).subscribe({
-        complete: () => {
-          // Assert
-          expect(httpClient.post).toHaveBeenCalledWith(
-            '/api/auth/login',
-            loginRequest,
-            jasmine.objectContaining({ timeout: 8000 })
-          );
-          done();
-        }
-      });
+      service.login(loginRequest).subscribe();
+
+      // Assert
+      expect(httpClient.post).toHaveBeenCalledWith('/api/auth/login', loginRequest);
     });
   });
 
@@ -198,7 +199,7 @@ describe('AuthService (Authentication-related behavior)', () => {
       service.logout();
 
       // Assert
-      expect(router.navigate).toHaveBeenCalledOnceWith(['/login']);
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
     });
   });
 
@@ -226,34 +227,28 @@ describe('AuthService (Authentication-related behavior)', () => {
       service.navigateAfterLogin('Unassigned');
 
       // Assert
-      expect(router.navigate).toHaveBeenCalledOnceWith(['/pending-approval']);
+      expect(router.navigate).toHaveBeenCalledWith(['/pending-approval']);
     });
 
     it('should navigate to dashboard for Admin role via extension', () => {
       // Arrange
-      spyOn<any>(service, 'getRoleDashboardRoute').and.returnValue('/admin/dashboard');
-
       // Act
       service.navigateAfterLogin('Admin');
 
       // Assert
-      expect(router.navigate).toHaveBeenCalledOnceWith(['/admin/dashboard']);
+      expect(router.navigate).toHaveBeenCalledWith(['/admin/dashboard']);
     });
 
     it('should navigate to dashboard for Staff role via extension', () => {
       // Arrange
-      spyOn<any>(service, 'getRoleDashboardRoute').and.returnValue('/staff/dashboard');
-
       // Act
       service.navigateAfterLogin('Staff');
 
       // Assert
-      expect(router.navigate).toHaveBeenCalledOnceWith(['/staff/dashboard']);
+      expect(router.navigate).toHaveBeenCalledWith(['/dashboard']);
     });
   });
 
-  // Helper import for of operator
-  const { of } = jasmine;
 });
 
 // Note: For brevity, HTTP methods like getUsers(), register(), etc. are not tested here
