@@ -87,8 +87,8 @@ docker compose up -d
 # Wait for services to initialize (~2-3 minutes)
 # Check status with: docker compose ps
 
-# Run tests
-dotnet test
+  # Run backend unit tests without Docker or SQL Server
+  dotnet test Backend.slnx
 ```
 
 ### Access the Application
@@ -127,7 +127,7 @@ You can run many tests offline without any external dependencies (no Docker or S
 ### Backend Tests (Offline)
 ```bash
 # Run all backend tests (uses InMemoryDatabase, no SQL Server needed)
-dotnet test
+dotnet test Backend.slnx
 
 # Run tests for a specific service
 dotnet test AuthService/AuthService.csproj
@@ -144,7 +144,9 @@ npm test
 # Backend formatting check
 dotnet format --verify-no-changes
 
-# Frontend linting
+  # Frontend linting
+  cd Frontend
+  npm run lint
 cd Frontend
 npm run lint
 ```
@@ -191,7 +193,7 @@ Current integration tests cover:
 The `docker-compose.yml` defines the following services:
 
 - **sqlserver** - Microsoft SQL Server 2022
-- **migrator** - Temporary service that runs EF Core migrations and loads mock data
+  - **migrator** - Temporary service that runs EF Core migrations
 - **authservice, facilityservice, inventoryservice, procurementservice, logisticsservice, telemetryservice, notificationservice, auditservice** - Backend microservices
 - **gateway** - Ocelot API Gateway
 - **frontend** - Angular application served via nginx
@@ -215,8 +217,9 @@ docker compose logs -f authservice
 # Rebuild and restart a service after code changes
 docker compose up -d --build <service-name>
 
-# Run a one-off command in a service (e.g., run migrations)
-docker compose run --rm migrator
+  # Run migrations, then load mock data through SQL Server
+  docker compose run --rm migrator
+  docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
 ```
 
 ## 📊 CI/CD Pipeline
