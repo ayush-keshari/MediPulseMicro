@@ -28,33 +28,24 @@ services:
     volumes:
       - .:/src
     working_dir: /src
-    entrypoint: ["/bin/sh", "-c"]
-    command: |
-      echo "Waiting for SQL Server to be ready..."
-      # Wait for SQL Server to be ready
-      for i in {1..30}; do
-        if /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U SA -P "MediPulse@2024!Test" -Q "SELECT 1" 2>/dev/null; then
-          echo "SQL Server is ready"
-          break
-        fi
-        echo "Waiting for SQL Server to start..."
-        sleep 2
-      done
-
-      echo "Running EF Core migrations for all services..."
-      dotnet ef database update --project AuthService/AuthService.csproj
-      dotnet ef database update --project FacilityService/FacilityService.csproj
-      dotnet ef database update --project InventoryService/InventoryService.csproj
-      dotnet ef database update --project ProcurementService/ProcurementService.csproj
-      dotnet ef database update --project LogisticsService/LogisticsService.csproj
-      dotnet ef database update --project TelemetryService/TelemetryService.csproj
-      dotnet ef database update --project NotificationService/NotificationService.csproj
-      dotnet ef database update --project AuditService/AuditService.csproj
-
-      echo "Loading mock data..."
-      /opt/mssql-tools18/bin/sqlcmd -S sqlserver -U SA -P "MediPulse@2024!Test" -i MockData_InsertOnly.sql -d MedipulseMain
-
-      echo "All migrations and data loading completed successfully!"
+    entrypoint: []
+    command:
+      - /bin/sh
+      - -c
+      - |
+          set -eu
+          echo "Running EF Core migrations for all services..."
+          MAIN_CONNECTION="Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=MediPulse@2024!Test;TrustServerCertificate=True;"
+          AUDIT_CONNECTION="Server=sqlserver,1433;Database=MedipulseAudit;User Id=sa;Password=MediPulse@2024!Test;TrustServerCertificate=True;"
+          dotnet ef database update --project AuthService/AuthService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project FacilityService/FacilityService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project InventoryService/InventoryService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project ProcurementService/ProcurementService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project LogisticsService/LogisticsService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project TelemetryService/TelemetryService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project NotificationService/NotificationService.csproj --connection "$$MAIN_CONNECTION"
+          dotnet ef database update --project AuditService/AuditService.csproj --connection "$$AUDIT_CONNECTION"
+          echo "All migrations completed successfully!"
     networks:
       - medipulse-test
 

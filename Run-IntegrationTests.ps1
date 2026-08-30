@@ -83,6 +83,13 @@ try {
 
     Write-Host "Migrator completed successfully!" -ForegroundColor Green
 
+    Write-Host "Loading mock data..." -ForegroundColor Cyan
+    Get-Content -Raw MockData_InsertOnly.sql | docker compose -f docker-compose.test.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'MediPulse@2024!Test' -i /dev/stdin -d MedipulseMain
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "Mock data loading failed with exit code: $LASTEXITCODE"
+        exit $LASTEXITCODE
+    }
+
     # Give services a moment to start
     Write-Host "Waiting for services to start..." -ForegroundColor Cyan
     Start-Sleep -Seconds 10
