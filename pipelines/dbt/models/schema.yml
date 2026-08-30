@@ -491,8 +491,11 @@ sources:
         tests:
           - min_rows:
               min_value: 7
+  - name: medipulse_audit
+    database: MedipulseAudit
+    schema: dbo
+    tables:
       - name: AuditLog
-        database: MedipulseAudit
         description: Audit trail of system actions
         columns:
           - name: AuditLogId
