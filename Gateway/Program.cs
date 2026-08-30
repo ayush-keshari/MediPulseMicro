@@ -6,6 +6,7 @@ using System.IO;
 using Serilog;
 using Serilog.Sinks.ApplicationInsights;
 using Shared.Extensions;
+using Shared.Monitoring;
 
 using System.Runtime.CompilerServices;
 
@@ -35,7 +36,9 @@ builder.Services.AddHealthChecks();
 var app = builder.Build();
 
 app.UseCors("AllowAngular");
+app.UseMediPulseMetrics();
 app.MapHealthChecks("/health");
+app.MapMediPulseMetrics();
 
 // UseOcelot() is the middleware that intercepts every incoming request,
 // matches it against ocelot.json routes, and forwards it to the correct service.
