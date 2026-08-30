@@ -24,7 +24,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 6
+              arguments:
+                min_value: 6
       - name: StorageZone
         description: Storage zones within facilities
         columns:
@@ -36,8 +37,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'Facility')
-                  field: FacilityID
+                  arguments:
+                    to: source('mediapulse_main', 'Facility')
+                    field: FacilityID
           - name: Name
             tests:
               - not_null
@@ -49,7 +51,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 8
+              arguments:
+                min_value: 8
       - name: Items
         description: Medical inventory items
         columns:
@@ -74,7 +77,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 8
+              arguments:
+                min_value: 8
       - name: InventoryPositions
         description: Inventory positions linking items to lots and locations
         columns:
@@ -86,8 +90,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'Items')
-                  field: ItemId
+                  arguments:
+                    to: source('mediapulse_main', 'Items')
+                    field: ItemId
           - name: LotId
             tests:
               - not_null
@@ -98,17 +103,20 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'Facility')
-                  field: FacilityID
+                  arguments:
+                    to: source('mediapulse_main', 'Facility')
+                    field: FacilityID
           - name: StorageZoneId
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'StorageZone')
-                  field: ZoneID
+                  arguments:
+                    to: source('mediapulse_main', 'StorageZone')
+                    field: ZoneID
         tests:
           - min_rows:
-              min_value: 8
+              arguments:
+                min_value: 8
       - name: ExceptionEvent
         description: Exceptions detected in inventory
         columns:
@@ -136,7 +144,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 4
+              arguments:
+                min_value: 4
       - name: RecallAction
         description: Actions taken in response to exceptions
         columns:
@@ -161,7 +170,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 4
+              arguments:
+                min_value: 4
       - name: Forecast
         description: Demand forecast for items
         columns:
@@ -186,7 +196,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 6
+              arguments:
+                min_value: 6
       - name: ReplenishmentPlan
         description: Suggested replenishment actions
         columns:
@@ -214,7 +225,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 4
+              arguments:
+                min_value: 4
       - name: Supplier
         description: Suppliers of medical items
         columns:
@@ -232,10 +244,12 @@ sources:
             tests:
               - not_null
               - accepted_values:
-                  values: ['Active', 'OnHold', 'Inactive']
+                  arguments:
+                    values: ['Active', 'OnHold', 'Inactive']
         tests:
           - min_rows:
-              min_value: 7
+              arguments:
+                min_value: 7
       - name: PurchaseOrder
         description: Purchase orders to suppliers
         columns:
@@ -247,8 +261,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'Supplier')
-                  field: SupplierID
+                  arguments:
+                    to: source('mediapulse_main', 'Supplier')
+                    field: SupplierID
           - name: OrderDate
             tests:
               - not_null
@@ -256,10 +271,12 @@ sources:
             tests:
               - not_null
               - accepted_values:
-                  values: ['Draft', 'Submitted', 'Approved', 'Shipped', 'PartiallyReceived', 'FullyReceived', 'Cancelled']
+                  arguments:
+                    values: ['Draft', 'Submitted', 'Approved', 'Shipped', 'PartiallyReceived', 'FullyReceived', 'Cancelled']
         tests:
           - min_rows:
-              min_value: 6
+              arguments:
+                min_value: 6
       - name: Receipt
         description: Receipt of purchase orders
         columns:
@@ -271,8 +288,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'PurchaseOrder')
-                  field: POID
+                  arguments:
+                    to: source('mediapulse_main', 'PurchaseOrder')
+                    field: POID
           - name: SupplierLot
             tests:
               - not_null
@@ -286,13 +304,15 @@ sources:
             tests:
               - not_null
               - accepted_values:
-                  values: ['Accepted', 'Rejected', 'OnHold']
+                  arguments:
+                    values: ['Accepted', 'Rejected', 'OnHold']
           - name: QuantityReceived
             tests:
               - not_null
         tests:
           - min_rows:
-              min_value: 6
+              arguments:
+                min_value: 6
       - name: TransferOrder
         description: Transfer orders between facilities
         columns:
@@ -304,8 +324,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'Facility')
-                  field: FacilityID
+                  arguments:
+                    to: source('mediapulse_main', 'Facility')
+                    field: FacilityID
           - name: FromFacilityName
             tests:
               - not_null
@@ -313,8 +334,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'Facility')
-                  field: FacilityID
+                  arguments:
+                    to: source('mediapulse_main', 'Facility')
+                    field: FacilityID
           - name: ToFacilityName
             tests:
               - not_null
@@ -328,10 +350,12 @@ sources:
             tests:
               - not_null
               - accepted_values:
-                  values: ['Draft', 'Submitted', 'Approved', 'InTransit', 'Completed', 'Cancelled']
+                  arguments:
+                    values: ['Draft', 'Submitted', 'Approved', 'InTransit', 'Completed', 'Cancelled']
         tests:
           - min_rows:
-              min_value: 4
+              arguments:
+                min_value: 4
       - name: TransferOrderItem
         description: Items within a transfer order
         columns:
@@ -343,8 +367,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'TransferOrder')
-                  field: TransferOrderId
+                  arguments:
+                    to: source('mediapulse_main', 'TransferOrder')
+                    field: TransferOrderId
           - name: ItemId
             tests:
               - not_null
@@ -359,7 +384,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 6
+              arguments:
+                min_value: 6
       - name: ConsumptionRecord
         description: Consumption of items by wards/patients
         columns:
@@ -390,7 +416,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 6
+              arguments:
+                min_value: 6
       - name: SensorDevice
         description: Telemetry sensor devices
         columns:
@@ -412,7 +439,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 8
+              arguments:
+                min_value: 8
       - name: TelemetryRecord
         description: Telemetry readings from sensors
         columns:
@@ -424,8 +452,9 @@ sources:
             tests:
               - not_null
               - relationships:
-                  to: source('mediapulse_main', 'SensorDevice')
-                  field: SensorID
+                  arguments:
+                    to: source('mediapulse_main', 'SensorDevice')
+                    field: SensorID
           - name: Timestamp
             tests:
               - not_null
@@ -440,7 +469,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 12
+              arguments:
+                min_value: 12
       - name: Notification
         description: System notifications to users
         columns:
@@ -468,7 +498,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 6
+              arguments:
+                min_value: 6
       - name: User
         description: Application users
         columns:
@@ -490,7 +521,8 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 7
+              arguments:
+                min_value: 7
   - name: medipulse_audit
     database: MedipulseAudit
     schema: dbo
@@ -519,4 +551,5 @@ sources:
               - not_null
         tests:
           - min_rows:
-              min_value: 7
+              arguments:
+                min_value: 7

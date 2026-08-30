@@ -81,7 +81,7 @@ jobs:
           outputs:
             ci:
               type: sqlserver
-              driver: ODBC Driver 17 for SQL Server
+              driver: ODBC Driver 18 for SQL Server
               server: localhost
               database: MedipulseMain
               schema: dbo
@@ -98,7 +98,8 @@ jobs:
 
     - name: Run dbt tests
       working-directory: ./pipelines/dbt
-      run: dbt test
+      # dbt is the scheduled quality gate; keep parsing deterministic in CI.
+      run: dbt test --no-partial-parse
 
     - name: Publish Test Results
       if: always()
