@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Builder;
+using Serilog;
 
 namespace Shared.Extensions;
 
@@ -18,6 +19,14 @@ public static class WebApplicationExtensions
     //   app.UseMediPulseMiddleware();
     public static WebApplication UseMediPulseMiddleware(this WebApplication app)
     {
+        app.UseSerilogRequestLogging(options =>
+        {
+            options.EnrichDiagnosticContext = (diagnosticContext, httpContext) =>
+            {
+                diagnosticContext.Set("CorrelationId", httpContext.TraceIdentifier);
+                diagnosticContext.Set("RequestHost", httpContext.Request.Host.Value);
+            };
+        });
         app.UseCors("AllowAngular");
         app.UseAuthentication();
         app.UseAuthorization();

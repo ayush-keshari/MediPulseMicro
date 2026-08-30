@@ -3,6 +3,7 @@ using Serilog.Formatting.Json;
 using Serilog.Sinks.ApplicationInsights;
 using System;
 using Microsoft.AspNetCore.Builder;
+using Serilog.Events;
 
 namespace Shared.Extensions;
 
@@ -28,13 +29,21 @@ public static class SerilogExtensions
             .Enrich.WithProperty("ServiceName", serviceName)
             .Enrich.WithProperty("Environment", environment)
             .WriteTo.Console(new JsonFormatter())
-            .MinimumLevel.Information();
+            .MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft.AspNetCore.Hosting.Diagnostics", LogEventLevel.Warning);
 
-        // Add Application Insights if instrumentation key is configured
-        var instrumentationKey = Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY");
-        if (!string.IsNullOrEmpty(instrumentationKey))
+        // Send the same structured events to Application Insights when configured.
+        var connectionString = builder.Configuration["ApplicationInsights:ConnectionString"]
+            ?? Environment.GetEnvironmentVariable("APPLICATIONINSIGHTS_CONNECTION_STRING");
+        var instrumentationKey = builder.Configuration["ApplicationInsights:InstrumentationKey"]
+            ?? Environment.GetEnvironmentVariable("APPINSIGHTS_INSTRUMENTATIONKEY");
+        if (!string.IsNullOrWhiteSpace(connectionString))
         {
-            loggerConfiguration.WriteTo.ApplicationInsights(instrumentationKey, null);
+            loggerConfiguration.WriteTo.ApplicationInsights(connectionString, TelemetryConverter.Traces);
+        }
+        else if (!string.IsNullOrWhiteSpace(instrumentationKey))
+        {
+            loggerConfiguration.WriteTo.ApplicationInsights(instrumentationKey, TelemetryConverter.Traces);
         }
 
         Log.Logger = loggerConfiguration.CreateLogger();

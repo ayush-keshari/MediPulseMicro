@@ -2,6 +2,7 @@ using LogisticsService.Data;
 using LogisticsService.DTOs;
 using LogisticsService.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Shared.Exceptions;
 
 namespace LogisticsService.Services;
@@ -9,8 +10,13 @@ namespace LogisticsService.Services;
 public class LogisticsServiceImpl : ILogisticsService
 {
     private readonly LogisticsDbContext _db;
+    private readonly ILogger<LogisticsServiceImpl> _logger;
 
-    public LogisticsServiceImpl(LogisticsDbContext db) => _db = db;
+    public LogisticsServiceImpl(LogisticsDbContext db, ILogger<LogisticsServiceImpl>? logger = null)
+    {
+        _db = db;
+        _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<LogisticsServiceImpl>.Instance;
+    }
 
     // ── Transfer Orders ───────────────────────────────────────────────────
 
@@ -40,8 +46,11 @@ public class LogisticsServiceImpl : ILogisticsService
     public async Task<bool> CreateTransferOrderAsync(CreateTransferOrderRequest request)
     {
         if (request.FromFacilityId == request.ToFacilityId)
+        {
+            _logger.LogWarning("Transfer order rejected because facilities match. FromFacilityId: {FromFacilityId}, ToFacilityId: {ToFacilityId}", request.FromFacilityId, request.ToFacilityId);
             throw new BusinessRuleException(
                 "Source and destination facility cannot be the same.");
+        }
 
         // Validate each item has enough stock at the source facility
         foreach (var item in request.Items)
@@ -51,9 +60,12 @@ public class LogisticsServiceImpl : ILogisticsService
                 .SumAsync(p => (int?)p.Quantity) ?? 0;
 
             if (item.Quantity > available)
+            {
+                _logger.LogWarning("Transfer order rejected for insufficient stock. ItemId: {ItemId}, FacilityId: {FacilityId}, RequestedQuantity: {RequestedQuantity}, AvailableQuantity: {AvailableQuantity}", item.ItemId, request.FromFacilityId, item.Quantity, available);
                 throw new BusinessRuleException(
                     $"Insufficient stock for '{item.ItemName}' at the source facility. " +
                     $"Requested: {item.Quantity}, Available: {available}.");
+            }
         }
 
         var order = new TransferOrder
@@ -88,8 +100,11 @@ public class LogisticsServiceImpl : ILogisticsService
         if (order == null) return false;
 
         if (order.Status != "Draft")
+        {
+            _logger.LogWarning("Transfer order update rejected because order is not editable. TransferOrderId: {TransferOrderId}, Status: {Status}", id, order.Status);
             throw new BusinessRuleException(
                 $"Transfer order {id} cannot be edited in '{order.Status}' status. Only Draft orders can be modified.");
+        }
 
         _db.TransferOrderItems.RemoveRange(order.Items);
 
@@ -114,9 +129,12 @@ public class LogisticsServiceImpl : ILogisticsService
         if (order == null) return false;
 
         if (!IsValidStatusTransition(order.Status, request.Status))
+        {
+            _logger.LogWarning("Transfer order status transition rejected. TransferOrderId: {TransferOrderId}, CurrentStatus: {CurrentStatus}, RequestedStatus: {RequestedStatus}", id, order.Status, request.Status);
             throw new BusinessRuleException(
                 $"Cannot transition from '{order.Status}' to '{request.Status}'. " +
                 "Allowed next statuses: " + string.Join(", ", GetAllowedNextStatuses(order.Status)));
+        }
 
         order.Status = request.Status;
         await _db.SaveChangesAsync();
@@ -139,9 +157,12 @@ public class LogisticsServiceImpl : ILogisticsService
         if (order == null) return false;
 
         if (order.Status != "Draft" && order.Status != "Cancelled")
+        {
+            _logger.LogWarning("Transfer order deletion rejected. TransferOrderId: {TransferOrderId}, Status: {Status}", id, order.Status);
             throw new BusinessRuleException(
                 $"Transfer order {id} cannot be deleted in '{order.Status}' status. " +
                 "Only Draft or Cancelled orders can be deleted.");
+        }
 
         _db.TransferOrderItems.RemoveRange(order.Items);
         _db.TransferOrders.Remove(order);
