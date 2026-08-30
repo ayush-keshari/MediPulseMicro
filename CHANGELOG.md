@@ -2,6 +2,14 @@
 
 All notable changes to MediPulseMicro will be documented in this file.
 
+## [0.2.0] - 2026-08-30
+### Added
+- Structured JSON request logging with correlation IDs and optional Application Insights traces
+- Prometheus-compatible request, error, and duration metrics in Gateway and AuthService
+- Service-to-table-to-fixture data-lineage documentation
+- Declarative dbt quality contracts with deterministic scheduled execution
+- Split Facility, Procurement, and Telemetry backend test suites for maintainability
+
 ## [0.1.0] - 2026-08-30
 ### Added
 - Reproducible .NET and frontend dependency lockfiles across the repository
