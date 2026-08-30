@@ -28,13 +28,16 @@ sources:
       - name: StorageZone
         description: Storage zones within facilities
         columns:
-          - name: StorageZoneID
+          - name: ZoneID
             tests:
               - unique
               - not_null
           - name: FacilityID
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'Facility')
+                  field: FacilityID
           - name: Name
             tests:
               - not_null
@@ -47,10 +50,10 @@ sources:
         tests:
           - min_rows:
               min_value: 8
-      - name: Item
+      - name: Items
         description: Medical inventory items
         columns:
-          - name: ItemID
+          - name: ItemId
             tests:
               - unique
               - not_null
@@ -75,13 +78,16 @@ sources:
       - name: InventoryPositions
         description: Inventory positions linking items to lots and locations
         columns:
-          - name: InventoryPositionID
+          - name: PositionId
             tests:
               - unique
               - not_null
           - name: ItemId
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'Items')
+                  field: ItemId
           - name: LotId
             tests:
               - not_null
@@ -91,9 +97,15 @@ sources:
           - name: FacilityId
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'Facility')
+                  field: FacilityID
           - name: StorageZoneId
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'StorageZone')
+                  field: ZoneID
         tests:
           - min_rows:
               min_value: 8
@@ -219,25 +231,32 @@ sources:
           - name: Status
             tests:
               - not_null
+              - accepted_values:
+                  values: ['Active', 'OnHold', 'Inactive']
         tests:
           - min_rows:
               min_value: 7
       - name: PurchaseOrder
         description: Purchase orders to suppliers
         columns:
-          - name: PurchaseOrderID
+          - name: POID
             tests:
               - unique
               - not_null
           - name: SupplierID
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'Supplier')
+                  field: SupplierID
           - name: OrderDate
             tests:
               - not_null
           - name: Status
             tests:
               - not_null
+              - accepted_values:
+                  values: ['Draft', 'Submitted', 'Approved', 'Shipped', 'PartiallyReceived', 'FullyReceived', 'Cancelled']
         tests:
           - min_rows:
               min_value: 6
@@ -251,6 +270,9 @@ sources:
           - name: POID
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'PurchaseOrder')
+                  field: POID
           - name: SupplierLot
             tests:
               - not_null
@@ -263,6 +285,8 @@ sources:
           - name: QualityStatus
             tests:
               - not_null
+              - accepted_values:
+                  values: ['Accepted', 'Rejected', 'OnHold']
           - name: QuantityReceived
             tests:
               - not_null
@@ -279,12 +303,18 @@ sources:
           - name: FromFacilityId
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'Facility')
+                  field: FacilityID
           - name: FromFacilityName
             tests:
               - not_null
           - name: ToFacilityId
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'Facility')
+                  field: FacilityID
           - name: ToFacilityName
             tests:
               - not_null
@@ -297,6 +327,8 @@ sources:
           - name: Status
             tests:
               - not_null
+              - accepted_values:
+                  values: ['Draft', 'Submitted', 'Approved', 'InTransit', 'Completed', 'Cancelled']
         tests:
           - min_rows:
               min_value: 4
@@ -310,6 +342,9 @@ sources:
           - name: TransferOrderId
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'TransferOrder')
+                  field: TransferOrderId
           - name: ItemId
             tests:
               - not_null
@@ -359,7 +394,7 @@ sources:
       - name: SensorDevice
         description: Telemetry sensor devices
         columns:
-          - name: SensorDeviceID
+          - name: SensorID
             tests:
               - unique
               - not_null
@@ -381,13 +416,16 @@ sources:
       - name: TelemetryRecord
         description: Telemetry readings from sensors
         columns:
-          - name: TelemetryRecordID
+          - name: TelemetryID
             tests:
               - unique
               - not_null
           - name: SensorID
             tests:
               - not_null
+              - relationships:
+                  to: source('mediapulse_main', 'SensorDevice')
+                  field: SensorID
           - name: Timestamp
             tests:
               - not_null
