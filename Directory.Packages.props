@@ -5,7 +5,7 @@
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.4" />
 
     <!-- Serilog for structured logging -->
-    <PackageVersion Include="Serilog" Version="3.1.1" />
+    <PackageVersion Include="Serilog" Version="4.4.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="8.0.3" />
     <PackageVersion Include="Serilog.Sinks.Console" Version="5.0.0" />
     <PackageVersion Include="Serilog.Formatting.Json" Version="3.0.0" />
