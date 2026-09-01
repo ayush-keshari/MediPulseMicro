@@ -193,7 +193,7 @@ The integration testing mechanism:
 The same mechanism is used in the CI pipeline via the `integration_and_data_quality` job in `.github/workflows/ci.yml`, which:
 - Uses the same docker-compose.test.yml equivalent configuration
 - Runs the integration tests via the Run-IntegrationTests.ps1 script
-- Requires the current measured backend coverage baseline of at least 23%; the latest local solution-wide run reports 23.9% line coverage.
+- Requires the current measured backend coverage baseline of at least 30%; the latest local solution-wide run reports 30.4% line coverage.
 - Preserves test results as artifacts
 
 #### Test Coverage
@@ -243,7 +243,7 @@ The project uses GitHub Actions for continuous integration:
 - Runs on every push to `main`, `dev2`, and feature branches
 - Builds and tests all services
 - Validates Docker Compose setup
-- Runs backend unit tests with a coverage gate (minimum 23% baseline, raised as coverage grows)
+- Runs backend unit tests with a coverage gate (minimum 30% baseline, raised as coverage grows)
 - Performs frontend TypeScript checking and linting
 - Validates mock data referential integrity
 - Checks .NET formatting consistency
