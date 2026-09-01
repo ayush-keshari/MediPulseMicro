@@ -151,6 +151,7 @@ dotnet format --verify-no-changes
 
   # Frontend linting
   cd Frontend
+  npm run typecheck
   npm run lint
 ```
 

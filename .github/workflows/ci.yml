@@ -145,7 +145,7 @@ jobs:
         working-directory: Frontend
 
       - name: TypeScript type checking
-        run: npx tsc --noEmit
+        run: npm run typecheck
         working-directory: Frontend
 
       - name: Lint code
