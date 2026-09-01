@@ -3,7 +3,9 @@ using Serilog.Formatting.Json;
 using Serilog.Sinks.ApplicationInsights;
 using System;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Serilog.Events;
+using Sentry;
 
 namespace Shared.Extensions;
 
@@ -44,6 +46,18 @@ public static class SerilogExtensions
         else if (!string.IsNullOrWhiteSpace(instrumentationKey))
         {
             loggerConfiguration.WriteTo.ApplicationInsights(instrumentationKey, TelemetryConverter.Traces);
+        }
+
+        var sentryDsn = builder.Configuration["Sentry:Dsn"]
+            ?? Environment.GetEnvironmentVariable("SENTRY_DSN");
+        if (!string.IsNullOrWhiteSpace(sentryDsn))
+        {
+            builder.WebHost.UseSentry(options =>
+            {
+                options.Dsn = sentryDsn;
+                options.Environment = environment;
+                options.SendDefaultPii = false;
+            });
         }
 
         Log.Logger = loggerConfiguration.CreateLogger();

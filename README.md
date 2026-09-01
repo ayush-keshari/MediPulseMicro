@@ -129,8 +129,11 @@ Copy `.env.example` to `.env` and adjust as needed:
 | `JWT_KEY` | Secret key for JWT tokens | `YOUR_STRONG_KEY_HERE_MIN_32_CHARS` |
 | `JWT_ISSUER` | JWT token issuer | `MediPulseAuthService` |
 | `JWT_AUDIENCE` | JWT token audience | `MediPulseAPI` |
+| `SENTRY_DSN` | Optional Sentry exception-tracking DSN | empty (disabled) |
 
 > **Warning**: The example values above are for local development only. In production, you MUST override these with strong, unique secrets. Never use the example values in a production environment.
+
+Sentry is disabled when `SENTRY_DSN` is empty. When configured, all services capture handled business-rule and unhandled exceptions with correlation IDs while keeping personally identifiable data disabled.
 
 ## 🧪 Running Tests
 

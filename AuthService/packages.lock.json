@@ -333,6 +333,19 @@
           "Microsoft.NETCore.Platforms": "1.1.0"
         }
       },
+      "Sentry": {
+        "type": "Transitive",
+        "resolved": "6.9.0",
+        "contentHash": "qQIvEwuvjAB6fDLVLLcDj/5f8n5jOyPyHjj3a/GQ1ogTLLQqsSxgQj1fEEquNT9HQuj4ZTyCg3c1DCBMUIvJGQ=="
+      },
+      "Sentry.Extensions.Logging": {
+        "type": "Transitive",
+        "resolved": "6.9.0",
+        "contentHash": "RMaWyrr97VTKIy3jrxeOLLMnCpK6Y9IIBC95IcZIItKUCImtb6GpbJeVPEceRg0V+FT7gjcbFIFVY4m7UvQd0A==",
+        "dependencies": {
+          "Sentry": "6.9.0"
+        }
+      },
       "Serilog.Extensions.Hosting": {
         "type": "Transitive",
         "resolved": "8.0.0",
@@ -520,7 +533,7 @@
         "type": "Project",
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[9.0.4, )",
-          "Microsoft.AspNetCore.Builder": "[9.0.4, )",
+          "Sentry.AspNetCore": "[6.9.0, )",
           "Serilog": "[3.1.1, )",
           "Serilog.AspNetCore": "[8.0.3, )",
           "Serilog.Settings.Configuration": "[8.0.4, )",
@@ -536,6 +549,15 @@
         "contentHash": "0HgfWPfnjlzWFbW4pw6FYNuIMV8obVU+MUkiZ33g4UOpvZcmdWzdayfheKPZ5+EUly8SvfgW0dJwwIrW4IVLZQ==",
         "dependencies": {
           "Microsoft.IdentityModel.Protocols.OpenIdConnect": "8.0.1"
+        }
+      },
+      "Sentry.AspNetCore": {
+        "type": "CentralTransitive",
+        "requested": "[6.9.0, )",
+        "resolved": "6.9.0",
+        "contentHash": "rd4rSrvyanpAFy50co+02Ltst8ozzx/uK2MnSOObP3o6IgAIxod/PjIlxPi6GWfuTdYbQQBFrZycR08rLzE9jg==",
+        "dependencies": {
+          "Sentry.Extensions.Logging": "6.9.0"
         }
       },
       "Serilog": {

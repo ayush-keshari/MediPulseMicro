@@ -27,6 +27,7 @@
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Settings.Configuration" />
     <PackageReference Include="Serilog.Sinks.ApplicationInsights" />
+    <PackageReference Include="Sentry.AspNetCore" />
 
     <!-- Dependency Injection abstractions -->
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />

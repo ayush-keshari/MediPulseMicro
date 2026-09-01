@@ -11,6 +11,8 @@
     <PackageVersion Include="Serilog.Formatting.Json" Version="3.0.0" />
     <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.4" />
     <PackageVersion Include="Serilog.Sinks.ApplicationInsights" Version="3.0.0" />
+    <!-- Optional dedicated exception tracking; disabled when SENTRY_DSN is unset. -->
+    <PackageVersion Include="Sentry.AspNetCore" Version="6.9.0" />
 
     <!-- Other shared dependencies -->
     <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.3.1" />

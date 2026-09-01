@@ -9,6 +9,7 @@ using Shared.Exceptions;
 using Shared.Models;
 using Serilog;
 using Serilog.Context;
+using Sentry;
 
 namespace Shared.Middleware
 {
@@ -45,6 +46,7 @@ namespace Shared.Middleware
                 }
                 catch (BusinessRuleException ex)
                 {
+                    SentrySdk.CaptureException(ex, scope => scope.SetTag("error.type", "business_rule"));
                     // Log the business rule violation (warning level since it's expected)
                     _logger.LogWarning(ex,
                         "Business rule violation. CorrelationId: {CorrelationId}, Method: {Method}, Path: {Path}",
@@ -67,6 +69,7 @@ namespace Shared.Middleware
                 }
                 catch (Exception ex)
                 {
+                    SentrySdk.CaptureException(ex, scope => scope.SetTag("error.type", "unhandled"));
                     // Log the exception with correlation ID and request details
                     _logger.LogError(ex,
                         "Unhandled exception occurred. CorrelationId: {CorrelationId}, Method: {Method}, Path: {Path}",
