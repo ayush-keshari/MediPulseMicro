@@ -181,5 +181,65 @@ namespace InventoryService.Tests
             Assert.Equal(1, stock.ItemId);
             Assert.Equal(10, stock.AvailableQty);
         }
+
+        [Fact]
+        public async Task GetAllItemsAsync_ReturnsItemsWithTotalStock()
+        {
+            await using var context = CreateInMemoryDbContext();
+            var item = new Item { ItemCode = "MED-001", Name = "Test", Category = "Pharma", Unit = "Box" };
+            item.Positions.Add(new InventoryPosition { Quantity = 7, FacilityId = 1, StorageZoneId = 1 });
+            context.Items.Add(item);
+            await context.SaveChangesAsync();
+
+            var result = (await new InventoryServiceImpl(context).GetAllItemsAsync()).ToList();
+
+            var response = Assert.Single(result);
+            Assert.Equal("MED-001", response.ItemCode);
+            Assert.Equal(7, response.TotalStock);
+        }
+
+        [Fact]
+        public async Task PositionQueries_ReturnDistinctPositiveLocations()
+        {
+            await using var context = CreateInMemoryDbContext();
+            context.Items.Add(new Item { ItemCode = "MED-002", Name = "Second", Category = "Pharma", Unit = "Box" });
+            context.InventoryPositions.AddRange(
+                new InventoryPosition { ItemId = 1, FacilityId = 2, StorageZoneId = 1, Quantity = 3 },
+                new InventoryPosition { ItemId = 2, FacilityId = 2, StorageZoneId = 2, Quantity = 4 },
+                new InventoryPosition { ItemId = 1, FacilityId = 3, StorageZoneId = 3, Quantity = 0 });
+            await context.SaveChangesAsync();
+
+            var service = new InventoryServiceImpl(context);
+
+            Assert.Equal(new[] { 2 }, (await service.GetFacilityIdsByItemAsync(1)).ToArray());
+            Assert.Equal(new[] { 1, 2 }, (await service.GetItemIdsByFacilityAsync(2)).ToArray());
+        }
+
+        [Fact]
+        public async Task PositionCrud_ReturnsExpectedResults()
+        {
+            await using var context = CreateInMemoryDbContext();
+            var service = new InventoryServiceImpl(context);
+            var item = new Item { ItemCode = "MED-001", Name = "Test", Category = "Pharma", Unit = "Box" };
+            context.Items.Add(item);
+            await context.SaveChangesAsync();
+            var request = new CreatePositionRequest
+            {
+                ItemId = item.ItemId, LotId = "LOT-1", ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Quantity = 10, FacilityId = 2, StorageZoneId = 3, SafetyStock = 2
+            };
+
+            Assert.True(await service.CreatePositionAsync(request));
+            var position = await context.InventoryPositions.SingleAsync();
+            Assert.Single(await service.GetAllPositionsAsync());
+            Assert.True(await service.UpdatePositionAsync(position.PositionId, new UpdatePositionRequest
+            {
+                Quantity = 4, FacilityId = 4, StorageZoneId = 5, SafetyStock = 1,
+                ExpiryDate = DateTime.UtcNow.AddDays(60)
+            }));
+            Assert.Equal(4, (await context.InventoryPositions.FindAsync(position.PositionId))!.Quantity);
+            Assert.True(await service.DeletePositionAsync(position.PositionId));
+            Assert.False(await service.DeletePositionAsync(position.PositionId));
+        }
     }
 }
