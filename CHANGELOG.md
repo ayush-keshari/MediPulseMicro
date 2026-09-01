@@ -23,7 +23,7 @@ All notable changes to MediPulseMicro will be documented in this file.
 
 ## [Unreleased]
 ### Added
-- Data quality check script (`Scripts/dq_checks.sql`) with row-count and null constraints per table
+- Declarative dbt data-quality contracts with row-count, null, relationship, and accepted-value checks
 - Per-service schema and mock data files under `Scripts/schema/` and `Scripts/mockdata/`
 - Referential integrity validation script (`Scripts/validate_mock_data.sql`)
 - Health check endpoints in all services via `Microsoft.Extensions.Diagnostics.HealthChecks`
@@ -52,7 +52,7 @@ All notable changes to MediPulseMicro will be documented in this file.
 - Updated environment variable documentation with clear placeholders and production usage warnings
 - Enhanced Angular frontend test coverage with meaningful tests for authentication workflows, API services, and business components
 - Replaced manual SQL schema creation with proper EF Core migrations in LogisticsService and ProcurementService
-- Integrated service-specific SQL data quality checks into CI pipeline replacing legacy monolithic checks
+- Replaced the legacy monolithic SQL data-quality gate with the declarative dbt contract in CI
 - Centralized logging configuration, standardized middleware, and enhanced CORS policies for improved architecture
 
 ### Fixed

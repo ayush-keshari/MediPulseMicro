@@ -64,9 +64,16 @@ export SA_PASSWORD=MediPulse@2024!Dev   # Linux/macOS
 # For Windows PowerShell:
 # $env:SA_PASSWORD = "MediPulse@2024!Dev"
 
-# Run the data quality check script
-powershell -ExecutionPolicy Bypass -File Scripts\Run-DqChecks.ps1
+# Run the declarative dbt quality gate
+python -m pip install -r pipelines/dbt/requirements.txt
+copy pipelines\dbt\profiles.yml.example pipelines\dbt\profiles.yml  # Windows
+# cp pipelines/dbt/profiles.yml.example pipelines/dbt/profiles.yml    # Linux/macOS
+# Edit pipelines/dbt/profiles.yml with the local SQL Server credentials.
+dbt deps --project-dir pipelines/dbt
+dbt test --project-dir pipelines/dbt --profiles-dir pipelines/dbt --no-partial-parse
 ```
+
+The CI integration job uses this dbt gate as the authoritative data-quality check. The SQL files under `Scripts/DQ/` are retained as optional diagnostics for service owners.
 
 
 ### Prerequisites

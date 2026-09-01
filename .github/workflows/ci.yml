@@ -199,38 +199,6 @@ jobs:
           fi
           echo "Mock data validation passed"
 
-      - name: Run data quality checks on MedipulseMain
-        run: |
-          EXIT_CODE=0
-          for sqlfile in Scripts/DQ/*.sql; do
-            # Skip AuditService.sql as it runs against MedipulseAudit
-            if [[ "$sqlfile" == *"AuditService.sql" ]]; then
-              continue
-            fi
-            echo "Running $sqlfile against MedipulseMain..."
-            RESULT=$(docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain -h -1 < "$sqlfile")
-            if echo "$RESULT" | jq -e 'any(.Checks[]; .Status != 0)' >/dev/null; then
-              echo "Data quality check failed in $(basename "$sqlfile")"
-              EXIT_CODE=1
-            else
-              echo "Data quality check passed in $(basename "$sqlfile")"
-            fi
-          done
-          if [ $EXIT_CODE -ne 0 ]; then
-            exit $EXIT_CODE
-          fi
-          echo "All MedipulseMain data quality checks passed"
-
-      - name: Run data quality check on MedipulseAudit
-        run: |
-          echo "Running Scripts/DQ/AuditService.sql against MedipulseAudit..."
-          RESULT=$(docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit -h -1 < Scripts/DQ/AuditService.sql)
-          if echo "$RESULT" | jq -e 'any(.Checks[]; .Status != 0)' >/dev/null; then
-            echo "Data quality check failed in AuditService.sql"
-            exit 1
-          fi
-          echo "Data quality check passed in AuditService.sql"
-
       - name: Install Microsoft ODBC Driver 18
         run: |
           curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc >/dev/null

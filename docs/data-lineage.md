@@ -30,7 +30,7 @@ Cross-service reads are explicit in the EF contexts. For example, LogisticsServi
 | `MedipulseMain.Notification` | `Scripts/mockdata/NotificationService.sql` | `schema.yml`: not-null, unique, minimum rows | `Scripts/DQ/NotificationService.sql` |
 | `MedipulseAudit.AuditLog` | `Scripts/mockdata/AuditService.sql` | `schema.yml`: not-null, unique, minimum rows | `Scripts/DQ/AuditService.sql` |
 
-`pipelines/dbt/models/schema.yml` is the declarative quality contract. The SQL scripts remain available for compatibility and focused diagnostics; they are not the source of the dbt assertions.
+`pipelines/dbt/models/schema.yml` is the declarative quality contract. The service-specific SQL files remain available for focused diagnostics; they are not the source of the CI assertions.
 
 ## Validation flow
 
