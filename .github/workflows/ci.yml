@@ -35,6 +35,22 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore Backend.slnx --use-lock-file
 
+      - name: Verify NuGet lockfiles
+        shell: bash
+        run: |
+          missing=0
+          while IFS= read -r project; do
+            lockfile="$(dirname "$project")/packages.lock.json"
+            if [ ! -f "$lockfile" ]; then
+              echo "Missing lockfile for $project"
+              missing=1
+            fi
+          done < <(find . -name '*.csproj' -not -path '*/obj/*' -not -path '*/bin/*')
+          if [ "$missing" -ne 0 ]; then
+            exit 1
+          fi
+          echo "Every project has a packages.lock.json"
+
       - name: Build solution
         run: dotnet build Backend.slnx --no-restore --configuration Release
 
