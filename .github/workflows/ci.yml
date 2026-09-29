@@ -246,6 +246,7 @@ jobs:
         run: |
           docker compose -f docker-compose.yml down -v
           docker compose -f docker-compose.test.yml up -d --build
+          docker compose -f docker-compose.test.yml wait migrator
           for i in {1..60}; do
             if curl --fail --silent --show-error http://localhost:5000/health >/dev/null 2>&1; then
               echo "Gateway is ready"
@@ -260,4 +261,7 @@ jobs:
 
       - name: Tear down integration stack
         if: always()
-        run: docker compose -f docker-compose.test.yml down -v
+        run: |
+          docker compose -f docker-compose.test.yml ps
+          docker compose -f docker-compose.test.yml logs --no-color --tail=200 migrator gateway
+          docker compose -f docker-compose.test.yml down -v
