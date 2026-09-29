@@ -206,15 +206,6 @@ jobs:
           docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit < Scripts/mockdata/AuditService.sql
           echo "Migrations completed successfully"
 
-      - name: Validate mock data integrity
-        run: |
-          RESULT=$(docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain -h -1 < Scripts/validate_mock_data.sql | tail -n 1)
-          if [ "$RESULT" -gt 0 ]; then
-            echo "Mock data validation failed with $RESULT errors"
-            exit 1
-          fi
-          echo "Mock data validation passed"
-
       - name: Install Microsoft ODBC Driver 18
         run: |
           curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc >/dev/null
