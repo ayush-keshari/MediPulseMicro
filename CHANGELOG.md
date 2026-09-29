@@ -25,7 +25,7 @@ All notable changes to MediPulseMicro will be documented in this file.
 ### Added
 - Declarative dbt data-quality contracts with row-count, null, relationship, and accepted-value checks
 - Per-service schema and mock data files under `Scripts/schema/` and `Scripts/mockdata/`
-- Referential integrity validation script (`Scripts/validate_mock_data.sql`)
+- Referential integrity validation through the dbt source-test suite
 - Health check endpoints in all services via `Microsoft.Extensions.Diagnostics.HealthChecks`
 - Optional Application Insights logging integration (requires `APPINSIGHTS_INSTRUMENTATIONKEY`)
 - Comprehensive unit tests for AuditService and LogisticsService with behavior-based testing

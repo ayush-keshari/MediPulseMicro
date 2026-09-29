@@ -36,7 +36,7 @@ Cross-service reads are explicit in the EF contexts. For example, LogisticsServi
 
 1. The `migrator` container applies EF Core migrations to `MedipulseMain` and `MedipulseAudit`.
 2. `MockData_InsertOnly.sql` loads the core deterministic fixtures; the service-specific scripts load `User`, `Notification`, and `AuditLog` fixtures.
-3. `Scripts/validate_mock_data.sql` checks main-database fixture-level referential integrity.
+3. dbt source tests check main-database fixture-level referential integrity.
 4. The main CI integration job runs the legacy SQL diagnostics and then the dbt contract against the seeded databases.
 5. The scheduled workflow runs the same migrations, complete fixture set, and dbt contract as its quality gate, without depending on the legacy SQL loop.
 6. dbt resolves `medipulse_main` to `MedipulseMain.dbo` and `medipulse_audit` to `MedipulseAudit.dbo`, so audit checks execute against the audit database rather than an accidental main-database alias.
