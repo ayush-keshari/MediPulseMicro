@@ -245,8 +245,7 @@ jobs:
       - name: Run integration tests against isolated Compose stack
         run: |
           docker compose -f docker-compose.yml down -v
-          docker compose -f docker-compose.test.yml up -d --build
-          docker compose -f docker-compose.test.yml wait migrator
+          docker compose -f docker-compose.test.yml up -d --build --wait --wait-timeout 180
           for i in {1..60}; do
             if curl --fail --silent --show-error http://localhost:5000/health >/dev/null 2>&1; then
               echo "Gateway is ready"
