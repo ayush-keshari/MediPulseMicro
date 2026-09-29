@@ -250,3 +250,23 @@ jobs:
       - name: Run dbt data quality tests
         working-directory: pipelines/dbt
         run: dbt test --no-partial-parse
+
+      - name: Run integration tests against isolated Compose stack
+        run: |
+          docker compose -f docker-compose.yml down -v
+          docker compose -f docker-compose.test.yml up -d --build
+          for i in {1..60}; do
+            if curl --fail --silent --show-error http://localhost:5000/health >/dev/null 2>&1; then
+              echo "Gateway is ready"
+              break
+            fi
+            echo "Waiting for the integration gateway..."
+            sleep 5
+          done
+          curl --fail --silent --show-error http://localhost:5000/health >/dev/null
+          GATEWAY_BASE_URL=http://localhost:5000 dotnet test IntegrationTests/IntegrationTests.csproj \
+            --configuration Release --logger "console;verbosity=minimal"
+
+      - name: Tear down integration stack
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
