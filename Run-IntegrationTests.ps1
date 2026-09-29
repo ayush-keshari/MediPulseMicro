@@ -106,7 +106,7 @@ try {
     $env:GATEWAY_BASE_URL = "http://localhost:5000"
 
     dotnet test @testArgs `
-        --no-build `
+        --configuration Release `
         --verbosity normal `
         --logger "trx;LogFileName=integration_test_results.trx" `
         --results-directory "./TestResults"
