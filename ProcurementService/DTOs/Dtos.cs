@@ -63,6 +63,7 @@ public class PurchaseOrderDto
 public class CreatePurchaseOrderRequest
 {
     [Required(ErrorMessage = "SupplierId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "SupplierId must be greater than 0.")]
     public int SupplierId { get; set; }
 
     [Required(ErrorMessage = "OrderDate is required.")]
@@ -77,6 +78,7 @@ public class CreatePurchaseOrderRequest
 public class UpdatePurchaseOrderRequest
 {
     [Required(ErrorMessage = "SupplierId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "SupplierId must be greater than 0.")]
     public int SupplierId { get; set; }
 
     [Required(ErrorMessage = "OrderDate is required.")]
@@ -115,6 +117,7 @@ public class ReceiptDto
 public class CreateReceiptRequest
 {
     [Required(ErrorMessage = "PoId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "PoId must be greater than 0.")]
     public int PoId { get; set; }
 
     [MaxLength(100)]

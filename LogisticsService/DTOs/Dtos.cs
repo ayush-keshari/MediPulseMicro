@@ -16,6 +16,7 @@ public class TransferOrderItemDto
 public class TransferOrderItemRequest
 {
     [Required(ErrorMessage = "ItemId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "ItemId must be greater than 0.")]
     public int ItemId { get; set; }
 
     [Required(ErrorMessage = "ItemName is required.")]
@@ -49,6 +50,7 @@ public class TransferOrderDto
 public class CreateTransferOrderRequest
 {
     [Required(ErrorMessage = "FromFacilityId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "FromFacilityId must be greater than 0.")]
     public int FromFacilityId { get; set; }
 
     [Required(ErrorMessage = "FromFacilityName is required.")]
@@ -56,6 +58,7 @@ public class CreateTransferOrderRequest
     public string FromFacilityName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "ToFacilityId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "ToFacilityId must be greater than 0.")]
     public int ToFacilityId { get; set; }
 
     [Required(ErrorMessage = "ToFacilityName is required.")]
@@ -104,11 +107,13 @@ public class ConsumptionRecordDto
 public class CreateConsumptionRequest
 {
     [Required(ErrorMessage = "FacilityId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "FacilityId must be greater than 0.")]
     public int FacilityId { get; set; }
 
     public int? WardId { get; set; }
 
     [Required(ErrorMessage = "ItemId is required.")]
+    [Range(1, int.MaxValue, ErrorMessage = "ItemId must be greater than 0.")]
     public int ItemId { get; set; }
 
     [Required(ErrorMessage = "ItemName is required.")]
