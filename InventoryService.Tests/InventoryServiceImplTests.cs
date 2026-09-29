@@ -225,8 +225,13 @@ namespace InventoryService.Tests
             await context.SaveChangesAsync();
             var request = new CreatePositionRequest
             {
-                ItemId = item.ItemId, LotId = "LOT-1", ExpiryDate = DateTime.UtcNow.AddDays(30),
-                Quantity = 10, FacilityId = 2, StorageZoneId = 3, SafetyStock = 2
+                ItemId = item.ItemId,
+                LotId = "LOT-1",
+                ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Quantity = 10,
+                FacilityId = 2,
+                StorageZoneId = 3,
+                SafetyStock = 2
             };
 
             Assert.True(await service.CreatePositionAsync(request));
@@ -234,7 +239,10 @@ namespace InventoryService.Tests
             Assert.Single(await service.GetAllPositionsAsync());
             Assert.True(await service.UpdatePositionAsync(position.PositionId, new UpdatePositionRequest
             {
-                Quantity = 4, FacilityId = 4, StorageZoneId = 5, SafetyStock = 1,
+                Quantity = 4,
+                FacilityId = 4,
+                StorageZoneId = 5,
+                SafetyStock = 1,
                 ExpiryDate = DateTime.UtcNow.AddDays(60)
             }));
             Assert.Equal(4, (await context.InventoryPositions.FindAsync(position.PositionId))!.Quantity);
