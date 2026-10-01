@@ -4,7 +4,7 @@ namespace InventoryService.DTOs;
 
 public class CreatePositionRequest
 {
-    [Required]
+    [Range(1, int.MaxValue)]
     public int ItemId { get; set; }
 
     [Required, MaxLength(50)]
@@ -16,10 +16,10 @@ public class CreatePositionRequest
     [Range(1, int.MaxValue, ErrorMessage = "Quantity must be at least 1.")]
     public int Quantity { get; set; }
 
-    [Required]
+    [Range(1, int.MaxValue)]
     public int FacilityId { get; set; }
 
-    [Required]
+    [Range(1, int.MaxValue)]
     public int StorageZoneId { get; set; }
 
     [Range(0, int.MaxValue)]

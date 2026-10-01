@@ -1,6 +1,7 @@
 using InventoryService.Controllers;
 using InventoryService.DTOs;
 using InventoryService.Services;
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 
@@ -8,6 +9,34 @@ namespace InventoryService.Tests;
 
 public class InventoryControllerTests
 {
+    [Theory]
+    [InlineData(0, 1, 1)]
+    [InlineData(1, 0, 1)]
+    [InlineData(1, 1, 0)]
+    [InlineData(-1, 1, 1)]
+    public void CreatePositionRequest_RejectsNonPositiveIdentifiers(int itemId, int facilityId, int storageZoneId)
+    {
+        var request = new CreatePositionRequest
+        {
+            ItemId = itemId,
+            LotId = "LOT-1",
+            ExpiryDate = DateTime.UtcNow.AddDays(30),
+            Quantity = 1,
+            FacilityId = facilityId,
+            StorageZoneId = storageZoneId,
+            SafetyStock = 0
+        };
+
+        var results = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(request, new ValidationContext(request), results, true);
+
+        Assert.False(isValid);
+        Assert.Contains(results, result => result.MemberNames.Any(name =>
+            name is nameof(CreatePositionRequest.ItemId)
+                or nameof(CreatePositionRequest.FacilityId)
+                or nameof(CreatePositionRequest.StorageZoneId)));
+    }
+
     [Fact]
     public async Task GetEndpoints_ReturnOkWithServiceResults()
     {
