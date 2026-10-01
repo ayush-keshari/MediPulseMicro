@@ -44,13 +44,12 @@
       },
       "Serilog.Sinks.ApplicationInsights": {
         "type": "Direct",
-        "requested": "[3.0.0, )",
-        "resolved": "3.0.0",
-        "contentHash": "+pBODh+Lafhcp0x23mZOmXIYMzZm9NV+nq8LV/XAQyZZxMeneK3umC2O4ZoJcKzlR629gf1mhHRS7uKu7J5/+Q==",
+        "requested": "[5.0.1, )",
+        "resolved": "5.0.1",
+        "contentHash": "JCM6e7GfR4ZW5fsILjQHL4DrJJYM6k6BLZ6LrGXhsRYt0FbKhvC26dVJ7TNVxf1M0ZGKkEzDywbajsNswUxp6g==",
         "dependencies": {
-          "Microsoft.ApplicationInsights": "2.9.1",
-          "NETStandard.Library": "1.6.1",
-          "Serilog": "2.8.0"
+          "Microsoft.ApplicationInsights": "[2.23.0, 3.0.0)",
+          "Serilog": "4.3.1"
         }
       },
       "Azure.Core": {
@@ -81,11 +80,8 @@
       },
       "Microsoft.ApplicationInsights": {
         "type": "Transitive",
-        "resolved": "2.9.1",
-        "contentHash": "gAC+bFCr10ckAdM6VJ+aL0yfYfbYuklukYJoMjaSCOVHH/h4Xr9SiyPq+Befk/yUSdSv7Fa3nl0ynLATKIwKng==",
-        "dependencies": {
-          "NETStandard.Library": "1.6.1"
-        }
+        "resolved": "2.23.0",
+        "contentHash": "nWArUZTdU7iqZLycLKWe0TDms48KKGE6pONH2terYNa8REXiqixrMOkf1sk5DHGMaUTqONU2YkS4SAXBhLStgw=="
       },
       "Microsoft.Bcl.AsyncInterfaces": {
         "type": "Transitive",
@@ -291,11 +287,6 @@
           "Microsoft.IdentityModel.Logging": "8.0.1"
         }
       },
-      "Microsoft.NETCore.Platforms": {
-        "type": "Transitive",
-        "resolved": "1.1.0",
-        "contentHash": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A=="
-      },
       "Microsoft.OpenApi": {
         "type": "Transitive",
         "resolved": "1.6.22",
@@ -317,14 +308,6 @@
         "contentHash": "YqueG52R/Xej4VVbKuRIodjiAhV0HR/XVbLbNrJhCZnzjnSjgMJ/dCdV0akQQxavX6hp/LC6rqLGLcXeQYU7XA==",
         "dependencies": {
           "System.CodeDom": "6.0.0"
-        }
-      },
-      "NETStandard.Library": {
-        "type": "Transitive",
-        "resolved": "1.6.1",
-        "contentHash": "WcSp3+vP+yHNgS8EV5J7pZ9IRpeDuARBPN28by8zqff1wJQXm26PVU8L3/fYLBJVU7BtDyqNVWq2KlCVvSSR4A==",
-        "dependencies": {
-          "Microsoft.NETCore.Platforms": "1.1.0"
         }
       },
       "Sentry": {
@@ -528,10 +511,10 @@
         "dependencies": {
           "Microsoft.AspNetCore.Authentication.JwtBearer": "[9.0.4, )",
           "Sentry.AspNetCore": "[6.9.0, )",
-          "Serilog": "[3.1.1, )",
+          "Serilog": "[4.3.1, )",
           "Serilog.AspNetCore": "[8.0.3, )",
           "Serilog.Settings.Configuration": "[8.0.4, )",
-          "Serilog.Sinks.ApplicationInsights": "[3.0.0, )",
+          "Serilog.Sinks.ApplicationInsights": "[5.0.1, )",
           "Serilog.Sinks.Console": "[5.0.0, )",
           "Swashbuckle.AspNetCore": "[7.3.1, )"
         }
@@ -556,9 +539,9 @@
       },
       "Serilog": {
         "type": "CentralTransitive",
-        "requested": "[3.1.1, )",
-        "resolved": "3.1.1",
-        "contentHash": "P6G4/4Kt9bT635bhuwdXlJ2SCqqn2nhh4gqFqQueCOr9bK/e7W9ll/IoX1Ter948cV2Z/5+5v8pAfJYUISY03A=="
+        "requested": "[4.3.1, )",
+        "resolved": "4.3.1",
+        "contentHash": "savYe7h5yRlkqBVOwP8cIRDOdqKiPmYCU4W87JH38sBmcKD5EBoXvQIw6bNEvZ/pTe1gsiye3VFCzBsoppGkXQ=="
       },
       "Serilog.Settings.Configuration": {
         "type": "CentralTransitive",
