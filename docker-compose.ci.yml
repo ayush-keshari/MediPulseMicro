@@ -1,0 +1,54 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-CU16-ubuntu-22.04
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      SA_PASSWORD: ${SA_PASSWORD:-MediPulse@2024!CI}
+    ports:
+      - "${SQLSERVER_PORT:-1433}:1433"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U sa -P "$${SA_PASSWORD:-MediPulse@2024!CI}" -Q "SELECT 1"
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 30s
+    networks:
+      - medipulse-ci
+
+  migrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD:-MediPulse@2024!CI}
+    volumes:
+      - .:/src
+    working_dir: /src
+    entrypoint: []
+    command:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        MAIN_CONNECTION="Server=sqlserver,1433;Database=MedipulseMain;User Id=sa;Password=$$SA_PASSWORD;TrustServerCertificate=True;"
+        AUDIT_CONNECTION="Server=sqlserver,1433;Database=MedipulseAudit;User Id=sa;Password=$$SA_PASSWORD;TrustServerCertificate=True;"
+        dotnet ef database update --project AuthService/AuthService.csproj --connection "$$MAIN_CONNECTION"
+        dotnet ef database update --project FacilityService/FacilityService.csproj --connection "$$MAIN_CONNECTION"
+        dotnet ef database update --project InventoryService/InventoryService.csproj --connection "$$MAIN_CONNECTION"
+        dotnet ef database update --project ProcurementService/ProcurementService.csproj --connection "$$MAIN_CONNECTION"
+        dotnet ef database update --project LogisticsService/LogisticsService.csproj --connection "$$MAIN_CONNECTION"
+        dotnet ef database update --project TelemetryService/TelemetryService.csproj --connection "$$MAIN_CONNECTION"
+        dotnet ef database update --project NotificationService/NotificationService.csproj --connection "$$MAIN_CONNECTION"
+        dotnet ef database update --project AuditService/AuditService.csproj --connection "$$AUDIT_CONNECTION"
+    networks:
+      - medipulse-ci
+
+networks:
+  medipulse-ci:
+    driver: bridge
