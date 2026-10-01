@@ -37,7 +37,17 @@ var app = builder.Build();
 
 app.UseCors("AllowAngular");
 app.UseMediPulseMetrics();
-app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/health")
+    {
+        context.Response.StatusCode = StatusCodes.Status200OK;
+        await context.Response.WriteAsJsonAsync(new { status = "Healthy" });
+        return;
+    }
+
+    await next();
+});
 app.MapMediPulseMetrics();
 
 // UseOcelot() is the middleware that intercepts every incoming request,
