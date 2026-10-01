@@ -145,6 +145,9 @@ public class InventoryServiceImpl : IInventoryService
 
     public async Task<bool> CreatePositionAsync(CreatePositionRequest request)
     {
+        if (request.Quantity < 1 || request.SafetyStock < 0)
+            return false;
+
         var position = new InventoryPosition
         {
             ItemId = request.ItemId,
@@ -163,6 +166,9 @@ public class InventoryServiceImpl : IInventoryService
 
     public async Task<bool> UpdatePositionAsync(int id, UpdatePositionRequest request)
     {
+        if (request.Quantity < 0 || request.SafetyStock < 0)
+            return false;
+
         var position = await _context.InventoryPositions.FindAsync(id);
         if (position is null) return false;
 

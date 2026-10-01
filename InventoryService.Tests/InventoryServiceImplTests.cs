@@ -249,5 +249,60 @@ namespace InventoryService.Tests
             Assert.True(await service.DeletePositionAsync(position.PositionId));
             Assert.False(await service.DeletePositionAsync(position.PositionId));
         }
+
+        [Theory]
+        [InlineData(0, 0)]
+        [InlineData(-1, 0)]
+        [InlineData(10, -1)]
+        public async Task CreatePositionAsync_RejectsInvalidQuantities(int quantity, int safetyStock)
+        {
+            await using var context = CreateInMemoryDbContext();
+            var service = new InventoryServiceImpl(context);
+
+            var created = await service.CreatePositionAsync(new CreatePositionRequest
+            {
+                ItemId = 1,
+                LotId = "LOT-INVALID",
+                ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Quantity = quantity,
+                FacilityId = 1,
+                StorageZoneId = 1,
+                SafetyStock = safetyStock
+            });
+
+            Assert.False(created);
+            Assert.Empty(context.InventoryPositions);
+        }
+
+        [Theory]
+        [InlineData(-1, null)]
+        [InlineData(null, -1)]
+        public async Task UpdatePositionAsync_RejectsInvalidQuantities(int? quantity, int? safetyStock)
+        {
+            await using var context = CreateInMemoryDbContext();
+            var position = new InventoryPosition
+            {
+                ItemId = 1,
+                LotId = "LOT-1",
+                Quantity = 10,
+                SafetyStock = 2,
+                FacilityId = 1,
+                StorageZoneId = 1
+            };
+            context.InventoryPositions.Add(position);
+            await context.SaveChangesAsync();
+            var service = new InventoryServiceImpl(context);
+
+            var updated = await service.UpdatePositionAsync(position.PositionId, new UpdatePositionRequest
+            {
+                Quantity = quantity,
+                SafetyStock = safetyStock
+            });
+
+            Assert.False(updated);
+            var saved = await context.InventoryPositions.SingleAsync();
+            Assert.Equal(10, saved.Quantity);
+            Assert.Equal(2, saved.SafetyStock);
+        }
     }
 }
