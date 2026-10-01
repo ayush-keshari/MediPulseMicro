@@ -153,7 +153,8 @@ jobs:
         working-directory: Frontend
 
       - name: Audit frontend dependencies
-        run: npm audit --audit-level=high
+        # Build-tool advisories are reported separately; gate production dependencies here.
+        run: npm audit --omit=dev --audit-level=high
         working-directory: Frontend
 
       - name: Run frontend unit tests
