@@ -25,30 +25,26 @@ jobs:
 
     - name: Wait for SQL Server to be ready
       run: |
-        docker compose -f docker-compose.yml up -d sqlserver
+        docker compose -f docker-compose.ci.yml down --volumes --remove-orphans
+        docker compose -f docker-compose.ci.yml up -d sqlserver
         for i in {1..30}; do
-          if docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1" 2>/dev/null; then
+          if docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1" 2>/dev/null; then
             echo "SQL Server is ready"
             break
           fi
           echo "Waiting for SQL Server to start..."
           sleep 2
         done
-        docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1"
+        docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1"
 
     - name: Apply migrations and load mock data
       run: |
         # Run EF Core migrations using the migrator service
-        docker compose -f docker-compose.yml up migrator --abort-on-container-exit --exit-code-from migrator
-        migrator_exit_code=$?
-        if [ $migrator_exit_code -ne 0 ]; then
-          echo "Migrations failed with exit code: $migrator_exit_code"
-          exit $migrator_exit_code
-        fi
-        docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
-        docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/AuthService.sql
-        docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/NotificationService.sql
-        docker compose -f docker-compose.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit < Scripts/mockdata/AuditService.sql
+        docker compose -f docker-compose.ci.yml run --rm migrator
+        docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
+        docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/AuthService.sql
+        docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/NotificationService.sql
+        docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit < Scripts/mockdata/AuditService.sql
         echo "Migrations completed successfully"
 
     - name: Install Microsoft ODBC Driver 18
@@ -90,7 +86,9 @@ jobs:
     - name: Run dbt tests
       working-directory: ./pipelines/dbt
       # dbt is the scheduled quality gate; keep parsing deterministic in CI.
-      run: dbt test --no-partial-parse
+      run: |
+        dbt debug --no-partial-parse
+        dbt test --no-partial-parse
 
     - name: Publish Test Results
       if: always()
@@ -98,3 +96,9 @@ jobs:
       with:
         name: dbt-test-results
         path: ./pipelines/dbt/target/
+        if-no-files-found: ignore
+        retention-days: 7
+
+    - name: Tear down quality database
+      if: always()
+      run: docker compose -f docker-compose.ci.yml down --volumes --remove-orphans
