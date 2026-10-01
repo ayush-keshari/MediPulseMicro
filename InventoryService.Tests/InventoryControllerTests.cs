@@ -34,7 +34,26 @@ public class InventoryControllerTests
         Assert.Contains(results, result => result.MemberNames.Any(name =>
             name is nameof(CreatePositionRequest.ItemId)
                 or nameof(CreatePositionRequest.FacilityId)
-                or nameof(CreatePositionRequest.StorageZoneId)));
+            or nameof(CreatePositionRequest.StorageZoneId)));
+    }
+
+    [Theory]
+    [InlineData(0, null, null)]
+    [InlineData(null, 0, null)]
+    [InlineData(null, null, -1)]
+    public void UpdatePositionRequest_RejectsInvalidOptionalValues(int? facilityId, int? storageZoneId, int? safetyStock)
+    {
+        var request = new UpdatePositionRequest
+        {
+            FacilityId = facilityId,
+            StorageZoneId = storageZoneId,
+            SafetyStock = safetyStock
+        };
+
+        var results = new List<ValidationResult>();
+        var isValid = Validator.TryValidateObject(request, new ValidationContext(request), results, true);
+
+        Assert.False(isValid);
     }
 
     [Fact]
