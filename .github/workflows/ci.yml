@@ -269,6 +269,9 @@ jobs:
             sleep 5
           done
           curl --fail --silent --show-error http://localhost:5000/health >/dev/null
+          # The root-owned migrator container writes obj/bin through the bind mount.
+          # Restore runner ownership before the host executes IntegrationTests.
+          sudo find . -type d \( -name obj -o -name bin \) -prune -exec chown -R "$(id -u):$(id -g)" {} +
           GATEWAY_BASE_URL=http://localhost:5000 dotnet test IntegrationTests/IntegrationTests.csproj \
             --configuration Release --logger "console;verbosity=minimal"
 
