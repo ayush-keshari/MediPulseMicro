@@ -242,7 +242,18 @@ jobs:
 
       - name: Run dbt data quality tests
         working-directory: pipelines/dbt
-        run: dbt test --no-partial-parse
+        run: |
+          dbt debug --no-partial-parse
+          dbt test --no-partial-parse
+
+      - name: Upload dbt quality artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dbt-quality-artifacts
+          path: pipelines/dbt/target/
+          if-no-files-found: ignore
+          retention-days: 7
 
       - name: Run integration tests against isolated Compose stack
         run: |
