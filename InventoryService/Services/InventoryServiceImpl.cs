@@ -186,6 +186,17 @@ public class InventoryServiceImpl : IInventoryService
         var position = await _context.InventoryPositions.FindAsync(id);
         if (position is null) return false;
 
+        var targetFacilityId = request.FacilityId ?? position.FacilityId;
+        var targetStorageZoneId = request.StorageZoneId ?? position.StorageZoneId;
+        var duplicateLot = await _context.InventoryPositions.AnyAsync(existing =>
+            existing.PositionId != position.PositionId
+            && existing.ItemId == position.ItemId
+            && existing.LotId == position.LotId
+            && existing.FacilityId == targetFacilityId
+            && existing.StorageZoneId == targetStorageZoneId);
+        if (duplicateLot)
+            return false;
+
         if (request.Quantity is not null) position.Quantity = request.Quantity.Value;
         if (request.FacilityId is not null) position.FacilityId = request.FacilityId.Value;
         if (request.StorageZoneId is not null) position.StorageZoneId = request.StorageZoneId.Value;

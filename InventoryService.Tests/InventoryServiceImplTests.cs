@@ -417,6 +417,31 @@ namespace InventoryService.Tests
             Assert.Single(context.InventoryPositions);
         }
 
+        [Fact]
+        public async Task UpdatePositionAsync_RejectsMovingLotIntoDuplicateLocation()
+        {
+            await using var context = CreateInMemoryDbContext();
+            var positions = new[]
+            {
+                new InventoryPosition { ItemId = 1, LotId = "LOT-MOVE", Quantity = 1, FacilityId = 1, StorageZoneId = 1 },
+                new InventoryPosition { ItemId = 1, LotId = "LOT-MOVE", Quantity = 1, FacilityId = 2, StorageZoneId = 2 }
+            };
+            context.InventoryPositions.AddRange(positions);
+            await context.SaveChangesAsync();
+            var service = new InventoryServiceImpl(context);
+
+            var updated = await service.UpdatePositionAsync(positions[1].PositionId, new UpdatePositionRequest
+            {
+                FacilityId = 1,
+                StorageZoneId = 1
+            });
+
+            Assert.False(updated);
+            var saved = await context.InventoryPositions.FindAsync(positions[1].PositionId);
+            Assert.Equal(2, saved!.FacilityId);
+            Assert.Equal(2, saved.StorageZoneId);
+        }
+
         [Theory]
         [InlineData(0, null)]
         [InlineData(null, 0)]
