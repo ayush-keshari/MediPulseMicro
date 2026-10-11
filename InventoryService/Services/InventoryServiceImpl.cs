@@ -147,7 +147,7 @@ public class InventoryServiceImpl : IInventoryService
     {
         if (request.ItemId < 1 || request.FacilityId < 1 || request.StorageZoneId < 1
             || request.Quantity < 1 || request.SafetyStock < 0
-            || string.IsNullOrWhiteSpace(request.LotId))
+            || string.IsNullOrWhiteSpace(request.LotId) || request.LotId.Length > 50)
             return false;
 
         var position = new InventoryPosition

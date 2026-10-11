@@ -351,6 +351,27 @@ namespace InventoryService.Tests
         }
 
         [Theory]
+        [InlineData(50, true)]
+        [InlineData(51, false)]
+        public async Task CreatePositionAsync_EnforcesLotIdLength(int length, bool expected)
+        {
+            await using var context = CreateInMemoryDbContext();
+            var service = new InventoryServiceImpl(context);
+
+            var created = await service.CreatePositionAsync(new CreatePositionRequest
+            {
+                ItemId = 1,
+                LotId = new string('L', length),
+                ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Quantity = 1,
+                FacilityId = 1,
+                StorageZoneId = 1
+            });
+
+            Assert.Equal(expected, created);
+        }
+
+        [Theory]
         [InlineData(0, null)]
         [InlineData(null, 0)]
         public async Task UpdatePositionAsync_RejectsInvalidIdentifiers(int? facilityId, int? storageZoneId)
