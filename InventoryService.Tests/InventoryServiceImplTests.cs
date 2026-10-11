@@ -394,6 +394,29 @@ namespace InventoryService.Tests
             Assert.Empty(context.InventoryPositions);
         }
 
+        [Fact]
+        public async Task CreatePositionAsync_RejectsDuplicateLotAtSameLocation()
+        {
+            await using var context = CreateInMemoryDbContext();
+            var item = new Item { ItemCode = "MED-001", Name = "Test", Category = "Pharma", Unit = "Box" };
+            context.Items.Add(item);
+            await context.SaveChangesAsync();
+            var service = new InventoryServiceImpl(context);
+            var request = new CreatePositionRequest
+            {
+                ItemId = item.ItemId,
+                LotId = "LOT-DUPLICATE",
+                ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Quantity = 1,
+                FacilityId = 1,
+                StorageZoneId = 1
+            };
+
+            Assert.True(await service.CreatePositionAsync(request));
+            Assert.False(await service.CreatePositionAsync(request));
+            Assert.Single(context.InventoryPositions);
+        }
+
         [Theory]
         [InlineData(0, null)]
         [InlineData(null, 0)]

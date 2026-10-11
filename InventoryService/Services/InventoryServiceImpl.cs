@@ -153,6 +153,14 @@ public class InventoryServiceImpl : IInventoryService
         if (!await _context.Items.AnyAsync(item => item.ItemId == request.ItemId))
             return false;
 
+        var duplicateLot = await _context.InventoryPositions.AnyAsync(position =>
+            position.ItemId == request.ItemId
+            && position.LotId == request.LotId
+            && position.FacilityId == request.FacilityId
+            && position.StorageZoneId == request.StorageZoneId);
+        if (duplicateLot)
+            return false;
+
         var position = new InventoryPosition
         {
             ItemId = request.ItemId,
