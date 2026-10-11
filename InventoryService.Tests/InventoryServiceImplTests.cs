@@ -304,5 +304,59 @@ namespace InventoryService.Tests
             Assert.Equal(10, saved.Quantity);
             Assert.Equal(2, saved.SafetyStock);
         }
+
+        [Theory]
+        [InlineData(0, 1, 1)]
+        [InlineData(1, 0, 1)]
+        [InlineData(1, 1, 0)]
+        public async Task CreatePositionAsync_RejectsInvalidIdentifiers(int itemId, int facilityId, int storageZoneId)
+        {
+            await using var context = CreateInMemoryDbContext();
+            var service = new InventoryServiceImpl(context);
+
+            var created = await service.CreatePositionAsync(new CreatePositionRequest
+            {
+                ItemId = itemId,
+                LotId = "LOT-INVALID",
+                ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Quantity = 1,
+                FacilityId = facilityId,
+                StorageZoneId = storageZoneId
+            });
+
+            Assert.False(created);
+            Assert.Empty(context.InventoryPositions);
+        }
+
+        [Theory]
+        [InlineData(0, null)]
+        [InlineData(null, 0)]
+        public async Task UpdatePositionAsync_RejectsInvalidIdentifiers(int? facilityId, int? storageZoneId)
+        {
+            await using var context = CreateInMemoryDbContext();
+            var position = new InventoryPosition
+            {
+                ItemId = 1,
+                LotId = "LOT-1",
+                Quantity = 10,
+                SafetyStock = 2,
+                FacilityId = 1,
+                StorageZoneId = 1
+            };
+            context.InventoryPositions.Add(position);
+            await context.SaveChangesAsync();
+            var service = new InventoryServiceImpl(context);
+
+            var updated = await service.UpdatePositionAsync(position.PositionId, new UpdatePositionRequest
+            {
+                FacilityId = facilityId,
+                StorageZoneId = storageZoneId
+            });
+
+            Assert.False(updated);
+            var saved = await context.InventoryPositions.SingleAsync();
+            Assert.Equal(1, saved.FacilityId);
+            Assert.Equal(1, saved.StorageZoneId);
+        }
     }
 }
