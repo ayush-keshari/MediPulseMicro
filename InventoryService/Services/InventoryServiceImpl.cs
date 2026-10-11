@@ -150,6 +150,9 @@ public class InventoryServiceImpl : IInventoryService
             || string.IsNullOrWhiteSpace(request.LotId) || request.LotId.Length > 50)
             return false;
 
+        if (!await _context.Items.AnyAsync(item => item.ItemId == request.ItemId))
+            return false;
+
         var position = new InventoryPosition
         {
             ItemId = request.ItemId,

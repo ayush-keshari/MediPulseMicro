@@ -356,11 +356,14 @@ namespace InventoryService.Tests
         public async Task CreatePositionAsync_EnforcesLotIdLength(int length, bool expected)
         {
             await using var context = CreateInMemoryDbContext();
+            var item = new Item { ItemCode = "MED-001", Name = "Test", Category = "Pharma", Unit = "Box" };
+            context.Items.Add(item);
+            await context.SaveChangesAsync();
             var service = new InventoryServiceImpl(context);
 
             var created = await service.CreatePositionAsync(new CreatePositionRequest
             {
-                ItemId = 1,
+                ItemId = item.ItemId,
                 LotId = new string('L', length),
                 ExpiryDate = DateTime.UtcNow.AddDays(30),
                 Quantity = 1,
@@ -369,6 +372,26 @@ namespace InventoryService.Tests
             });
 
             Assert.Equal(expected, created);
+        }
+
+        [Fact]
+        public async Task CreatePositionAsync_RejectsUnknownItem()
+        {
+            await using var context = CreateInMemoryDbContext();
+            var service = new InventoryServiceImpl(context);
+
+            var created = await service.CreatePositionAsync(new CreatePositionRequest
+            {
+                ItemId = 999,
+                LotId = "LOT-UNKNOWN",
+                ExpiryDate = DateTime.UtcNow.AddDays(30),
+                Quantity = 1,
+                FacilityId = 1,
+                StorageZoneId = 1
+            });
+
+            Assert.False(created);
+            Assert.Empty(context.InventoryPositions);
         }
 
         [Theory]
