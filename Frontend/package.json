@@ -19,7 +19,6 @@
     "@angular/forms": "21.2.25",
     "@angular/platform-browser": "21.2.25",
     "@angular/router": "21.2.25",
-    "jest-editor-support": "*",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "^0.16.2"
@@ -32,6 +31,7 @@
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^8.57.1",
     "eslint-plugin-rxjs": "^5.0.0",
+    "globals": "^17.13.0",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~5.9.2",
