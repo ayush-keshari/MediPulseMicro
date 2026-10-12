@@ -13,7 +13,7 @@ Thank you for considering contributing to MediPulseMicro! Please read this guide
 ### Local Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ayush-keshari/MediPulseMicro.git
+   git clone <repository-url>
    cd MediPulseMicro
    ```
 

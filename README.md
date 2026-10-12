@@ -84,7 +84,7 @@ The CI integration job uses this dbt gate as the authoritative data-quality chec
 ### One-Command Setup
 ```bash
 # Clone the repository
-git clone https://github.com/ayush-keshari/MediPulseMicro.git
+git clone <repository-url>
 cd MediPulseMicro
 
 # Copy environment template
