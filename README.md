@@ -141,6 +141,15 @@ For the complete command reference, see [TESTING.md](TESTING.md).
 
 The logistics domain includes a documented FEFO multi-lot stock allocation transform; see [docs/fefo-stock-allocation.md](docs/fefo-stock-allocation.md).
 
+## Domain Differentiation
+
+MediPulseMicro is designed around healthcare supply-chain decisions rather than generic CRUD alone:
+
+- **FEFO stock movement:** transfer completion allocates across multiple lots by earliest expiry, preserves lot metadata, and reports partial allocation.
+- **Safety-stock replenishment:** inventory positions are evaluated against safety thresholds and recent consumption to produce prioritized replenishment plans.
+- **Exception detection:** stockout and near-expiry scans create deduplicated operational exceptions for follow-up.
+- **Data-quality contracts:** dbt tests validate healthcare facility, inventory, procurement, logistics, telemetry, and audit sources in CI.
+
 You can run many tests offline without any external dependencies (no Docker or SQL Server required).
 
 ### Backend Tests (Offline)

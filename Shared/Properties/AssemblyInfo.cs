@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Shared")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Cognizant")]
+[assembly: AssemblyCompany("MediPulseMicro")]
 [assembly: AssemblyProduct("Shared")]
-[assembly: AssemblyCopyright("Copyright © Cognizant 2026")]
+[assembly: AssemblyCopyright("Copyright © MediPulseMicro 2026")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
