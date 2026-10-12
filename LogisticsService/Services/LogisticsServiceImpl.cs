@@ -11,11 +11,13 @@ public class LogisticsServiceImpl : ILogisticsService
 {
     private readonly LogisticsDbContext _db;
     private readonly ILogger<LogisticsServiceImpl> _logger;
+    private readonly FefoStockAllocationService _fefoAllocator;
 
     public LogisticsServiceImpl(LogisticsDbContext db, ILogger<LogisticsServiceImpl>? logger = null)
     {
         _db = db;
         _logger = logger ?? Microsoft.Extensions.Logging.Abstractions.NullLogger<LogisticsServiceImpl>.Instance;
+        _fefoAllocator = new FefoStockAllocationService();
     }
 
     // ── Transfer Orders ───────────────────────────────────────────────────
@@ -276,17 +278,10 @@ public class LogisticsServiceImpl : ILogisticsService
             .OrderBy(p => p.ExpiryDate)
             .ToListAsync();
 
-        // Keep a reference to the first source position deducted — used as
-        // template for the destination if no position exists there yet.
-        InventoryPosition? sourceTemplate = sourcePositions.FirstOrDefault();
-
-        var remaining = quantity;
-        foreach (var pos in sourcePositions)
+        var allocationPlan = _fefoAllocator.CreatePlan(sourcePositions, quantity);
+        foreach (var allocation in allocationPlan.Allocations)
         {
-            if (remaining <= 0) break;
-            var take = Math.Min(pos.Quantity, remaining);
-            pos.Quantity -= take;
-            remaining -= take;
+            allocation.Position.Quantity -= allocation.Quantity;
         }
 
         // ── 2. Credit destination ─────────────────────────────────────────
@@ -311,8 +306,8 @@ public class LogisticsServiceImpl : ILogisticsService
                 FacilityId = toFacilityId,
                 StorageZoneId = toStorageZoneId,
                 Quantity = quantity,
-                SafetyStock = sourceTemplate?.SafetyStock ?? 0,
-                ExpiryDate = sourceTemplate?.ExpiryDate ?? DateTime.UtcNow.AddYears(2),
+                SafetyStock = allocationPlan.SourceTemplate?.SafetyStock ?? 0,
+                ExpiryDate = allocationPlan.SourceTemplate?.ExpiryDate ?? DateTime.UtcNow.AddYears(2),
             });
         }
 
