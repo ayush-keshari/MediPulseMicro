@@ -137,6 +137,8 @@ Sentry is disabled when `SENTRY_DSN` is empty. When configured, all services cap
 
 ## 🧪 Running Tests
 
+For the complete command reference, see [TESTING.md](TESTING.md).
+
 You can run many tests offline without any external dependencies (no Docker or SQL Server required).
 
 ### Backend Tests (Offline)
