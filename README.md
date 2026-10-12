@@ -139,6 +139,8 @@ Sentry is disabled when `SENTRY_DSN` is empty. When configured, all services cap
 
 For the complete command reference, see [TESTING.md](TESTING.md).
 
+The logistics domain includes a documented FEFO multi-lot stock allocation transform; see [docs/fefo-stock-allocation.md](docs/fefo-stock-allocation.md).
+
 You can run many tests offline without any external dependencies (no Docker or SQL Server required).
 
 ### Backend Tests (Offline)

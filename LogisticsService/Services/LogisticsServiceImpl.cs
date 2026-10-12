@@ -278,6 +278,12 @@ public class LogisticsServiceImpl : ILogisticsService
             .OrderBy(p => p.ExpiryDate)
             .ToListAsync();
 
+        // FEFO allocation is a correctness-sensitive multi-lot transform:
+        // 1. order positive source lots by expiry, then PositionId for determinism;
+        // 2. consume each lot at most once and never exceed its available quantity;
+        // 3. carry the earliest lot as the destination metadata template.
+        // The pure planner is implemented by FefoStockAllocationService and covered
+        // independently by FefoStockAllocationServiceTests.
         var allocationPlan = _fefoAllocator.CreatePlan(sourcePositions, quantity);
         foreach (var allocation in allocationPlan.Allocations)
         {
