@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Serilog;
+using Shared.Middleware;
 
 namespace Shared.Extensions;
 
@@ -8,6 +9,11 @@ namespace Shared.Extensions;
 // Middleware ORDER is critical in ASP.NET Core — changing the order changes behaviour.
 public static class WebApplicationExtensions
 {
+    public static WebApplication UseMediPulseCorrelationId(this WebApplication app)
+    {
+        app.UseMiddleware<CorrelationIdMiddleware>();
+        return app;
+    }
     // Correct order: CORS → Authentication → Authorization
     //
     // Why this order?

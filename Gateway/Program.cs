@@ -34,6 +34,7 @@ builder.Services.AddHealthChecks();
 // builder.Host.UseSerilog();
 
 var app = builder.Build();
+app.UseMediPulseCorrelationId();
 
 app.UseCors("AllowAngular");
 app.UseMediPulseMetrics();

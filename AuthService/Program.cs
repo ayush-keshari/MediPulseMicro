@@ -26,6 +26,7 @@ builder.Services.AddHealthChecks();
 
 // ── BUILD & PIPELINE ───────────────────────────────────────────────────────
 var app = builder.Build();
+app.UseMediPulseCorrelationId();
 
 // Correct middleware order: Exception handling → CORS → Authentication → Authorization
 app.UseMediPulseExceptionHandling();    // Handle exceptions from entire pipeline
