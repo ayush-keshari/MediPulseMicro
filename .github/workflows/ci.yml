@@ -13,6 +13,28 @@ on:
       - main
 
 jobs:
+  # Fast dbt validation catches broken project configuration before the
+  # database-backed quality gate starts.
+  dbt_parse:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Install dbt dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r pipelines/dbt/requirements.txt
+
+      - name: Parse dbt project
+        working-directory: pipelines/dbt
+        run: dbt parse --no-partial-parse
+
   # Backend build job - validates that the backend solution builds successfully
   backend_build:
     runs-on: ubuntu-latest

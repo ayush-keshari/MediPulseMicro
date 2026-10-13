@@ -3,6 +3,15 @@
 This dbt project is the authoritative data-quality gate for the two SQL Server
 databases used by MediPulse.
 
+## CI validation levels
+
+The pull-request pipeline runs `dbt parse --no-partial-parse` as a fast,
+database-independent validation. This catches invalid YAML, missing macros,
+and broken dbt configuration before the integration job starts.
+
+The authoritative `dbt test` gate runs after SQL Server migrations and
+repository mock data have been loaded.
+
 ## Lineage
 
 - `MedipulseMain` is the operational source for identity, facilities, inventory,
