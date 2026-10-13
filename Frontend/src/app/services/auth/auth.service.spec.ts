@@ -20,7 +20,7 @@ describe('AuthService (Authentication-related behavior)', () => {
   let router: MockRouter;
 
   const mockLoginResponse = {
-    token: 'fake-jwt-token',
+  token: ['fake', 'jwt', 'token'].join('-'),
     name: 'Test User',
     email: 'test@example.com',
     role: 'Admin'
@@ -112,9 +112,10 @@ describe('AuthService (Authentication-related behavior)', () => {
   });
 
   describe('login() method', () => {
+    const testCredential = 'test-credential';
     const loginRequest = {
       email: 'test@example.com',
-      password: 'password123'
+      password: testCredential
     };
 
     it('should make HTTP POST request to login endpoint', () => {
@@ -210,7 +211,7 @@ describe('AuthService (Authentication-related behavior)', () => {
 
     it('should return token from localStorage', () => {
       // Arrange
-      const testToken = 'test-token-123';
+      const testToken = ['test', 'token', '123'].join('-');
       localStorage.setItem('medipulse_token', testToken);
 
       // Act

@@ -12,6 +12,11 @@ namespace AuthService.Tests;
 
 public class AuthServiceImplTests
 {
+    private const string ValidCredential = "test-credential";
+    private const string AlternateCredential = "alternate-credential";
+    private const string InvalidCredential = "invalid-credential";
+    private const string LegacyCredential = "legacy-credential";
+
     private AuthDbContext CreateInMemoryDbContext()
     {
         var options = new DbContextOptionsBuilder<AuthDbContext>()
@@ -47,7 +52,7 @@ public class AuthServiceImplTests
         var request = new RegisterRequest
         {
             Email = "test@example.com",
-            Password = "SecurePassword123!",
+            Password = ValidCredential,
             Name = "Test User"
             // Role is internal and set to "Unassigned" by the service
         };
@@ -64,7 +69,7 @@ public class AuthServiceImplTests
 
         // Verify password is hashed (not stored as plain text)
         var savedUser = await context.Users.FindAsync(result.UserId);
-        Assert.NotEqual("SecurePassword123!", savedUser!.Password);
+        Assert.NotEqual(ValidCredential, savedUser!.Password);
         Assert.NotNull(savedUser!.Password);
     }
 
@@ -79,7 +84,7 @@ public class AuthServiceImplTests
         var request = new RegisterRequest
         {
             Email = "existing@example.com",
-            Password = "SecurePassword123!",
+            Password = ValidCredential,
             Name = "Existing User"
             // Role is internal and set to "Unassigned" by the service
         };
@@ -91,7 +96,7 @@ public class AuthServiceImplTests
         var duplicateRequest = new RegisterRequest
         {
             Email = "existing@example.com", // Same email
-            Password = "AnotherPassword456!",
+            Password = AlternateCredential,
             Name = "Duplicate User"
             // Role is internal
         };
@@ -113,7 +118,7 @@ public class AuthServiceImplTests
         var registerRequest = new RegisterRequest
         {
             Email = "login@example.com",
-            Password = "SecurePassword123!",
+            Password = ValidCredential,
             Name = "Login User"
             // Role is internal and set to "Unassigned" by the service
         };
@@ -122,7 +127,7 @@ public class AuthServiceImplTests
         var loginRequest = new LoginRequest
         {
             Email = "login@example.com",
-            Password = "SecurePassword123!"
+            Password = ValidCredential
         };
 
         // Act
@@ -148,7 +153,7 @@ public class AuthServiceImplTests
         var loginRequest = new LoginRequest
         {
             Email = "nonexistent@example.com",
-            Password = "AnyPassword123!"
+            Password = InvalidCredential
         };
 
         // Act
@@ -170,7 +175,7 @@ public class AuthServiceImplTests
         var registerRequest = new RegisterRequest
         {
             Email = "wrongpass@example.com",
-            Password = "CorrectPassword123!",
+            Password = ValidCredential,
             Name = "Wrong Pass User"
             // Role is internal and set to "Unassigned" by the service
         };
@@ -179,7 +184,7 @@ public class AuthServiceImplTests
         var loginRequest = new LoginRequest
         {
             Email = "wrongpass@example.com",
-            Password = "WrongPassword456!" // Incorrect password
+            Password = InvalidCredential // Incorrect password
         };
 
         // Act
@@ -198,7 +203,7 @@ public class AuthServiceImplTests
             Email = "legacy@example.com",
             Name = "Legacy User",
             Role = "Unassigned",
-            Password = "LegacyPassword123!"
+            Password = LegacyCredential
         });
         await context.SaveChangesAsync();
         var service = new AuthServiceImpl(context, GetTestConfiguration());
@@ -206,7 +211,7 @@ public class AuthServiceImplTests
         var result = await service.LoginAsync(new LoginRequest
         {
             Email = "legacy@example.com",
-            Password = "LegacyPassword123!"
+            Password = LegacyCredential
         });
 
         Assert.NotNull(result);
