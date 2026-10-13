@@ -105,6 +105,20 @@ namespace NotificationService.Tests
         }
 
         [Fact]
+        public async Task MarkReadAsync_ReturnsFalseForMissingNotification_AndDoesNotRewriteReadNotification()
+        {
+            await using var context = CreateInMemoryDbContext();
+            var notification = new Notification { UserId = "owner", Title = "Already read", IsRead = true };
+            context.Notifications.Add(notification);
+            await context.SaveChangesAsync();
+            var service = new NotificationServiceImpl(context);
+
+            Assert.False(await service.MarkReadAsync(999, "owner", false));
+            Assert.True(await service.MarkReadAsync(notification.NotificationId, "owner", false));
+            Assert.True((await context.Notifications.FindAsync(notification.NotificationId))!.IsRead);
+        }
+
+        [Fact]
         public async Task MarkAllReadAsync_MarksOnlyUsersUnreadNotifications()
         {
             await using var context = CreateInMemoryDbContext();
@@ -133,6 +147,42 @@ namespace NotificationService.Tests
             Assert.False(await service.DeleteAsync(notification.NotificationId, "another-user", false));
             Assert.True(await service.DeleteAsync(notification.NotificationId, "owner", false));
             Assert.Null(await context.Notifications.FindAsync(notification.NotificationId));
+        }
+
+        [Fact]
+        public async Task DeleteAsync_ReturnsFalseForMissingNotification_AndAdminCanDeleteAnyUserNotification()
+        {
+            await using var context = CreateInMemoryDbContext();
+            var notification = new Notification { UserId = "owner", Category = "Expiry", Title = "Alert" };
+            context.Notifications.Add(notification);
+            await context.SaveChangesAsync();
+            var service = new NotificationServiceImpl(context);
+
+            Assert.False(await service.DeleteAsync(999, "admin", true));
+            Assert.True(await service.DeleteAsync(notification.NotificationId, "admin", true));
+            Assert.Empty(context.Notifications);
+        }
+
+        [Fact]
+        public async Task GetNotificationsAsync_FiltersCategoryAndClampsInvalidPaging()
+        {
+            await using var context = CreateInMemoryDbContext();
+            context.Notifications.AddRange(
+                new Notification { UserId = "user", Category = "Expiry", Title = "Expiry alert", CreatedAt = DateTime.UtcNow },
+                new Notification { UserId = "user", Category = "Exception", Title = "Exception alert", CreatedAt = DateTime.UtcNow.AddMinutes(-1) });
+            await context.SaveChangesAsync();
+            var service = new NotificationServiceImpl(context);
+
+            var result = await service.GetNotificationsAsync(new NotificationQueryParams
+            {
+                UserId = "user",
+                Category = "Expiry",
+                Page = 0,
+                PageSize = 0
+            });
+
+            var notification = Assert.Single(result);
+            Assert.Equal("Expiry alert", notification.Title);
         }
     }
 }
