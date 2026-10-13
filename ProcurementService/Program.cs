@@ -2,6 +2,7 @@ using ProcurementService.Data;
 using ProcurementService.Services;
 using Microsoft.EntityFrameworkCore;
 using Shared.Extensions;
+using Shared.Monitoring;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,7 @@ app.UseMediPulseCorrelationId();
 // Correct middleware order: Exception handling → CORS → Authentication → Authorization
 app.UseMediPulseExceptionHandling();    // Handle exceptions from entire pipeline
 app.UseMediPulseMiddleware();           // CORS → Authentication → Authorization
+app.UseMediPulseMetrics();
 
 // Auto-create / migrate database on startup (retry handles concurrent-start race on shared DB)
 using (var scope = app.Services.CreateScope())
@@ -48,6 +50,7 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 app.MapHealthChecks("/health");
+app.MapMediPulseMetrics();
 
 app.Run();
 
