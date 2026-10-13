@@ -4,6 +4,14 @@ MediPulseMicro has backend unit tests, frontend unit tests, and Docker-backed in
 
 ## Backend Unit Tests
 
+For the complete offline validation suite, run this from the repository root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Run-QualityChecks.ps1
+```
+
+The script returns a non-zero exit code at the first failed check, making it suitable for local validation and automation.
+
 Run the complete backend test suite from the repository root:
 
 ```powershell

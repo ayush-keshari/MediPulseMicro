@@ -139,6 +139,16 @@ Sentry is disabled when `SENTRY_DSN` is empty. When configured, all services cap
 
 For the complete command reference, see [TESTING.md](TESTING.md).
 
+### One-command quality check
+
+From the repository root, run the complete offline validation suite:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\Run-QualityChecks.ps1
+```
+
+This runs backend tests, frontend tests, TypeScript checking, linting, and the production frontend build. It installs frontend dependencies from the committed lockfile when `node_modules` is not present. Use `-SkipFrontend` or `-SkipBackend` when isolating a failing area.
+
 The logistics domain includes a documented FEFO multi-lot stock allocation transform; see [docs/fefo-stock-allocation.md](docs/fefo-stock-allocation.md).
 
 ## Domain Differentiation
