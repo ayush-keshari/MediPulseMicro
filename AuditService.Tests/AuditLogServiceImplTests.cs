@@ -275,66 +275,84 @@ public class AuditLogServiceImplTests
         Assert.Equal("ItemService", resultByService.Items.First().ServiceName);
     }
 
-        [Fact]
-        public async Task QueryAsync_ShouldApplyAllFiltersAndNormalizeHttpMethod()
-        {
-            await using var context = CreateInMemoryDbContext();
-            var service = new AuditLogServiceImpl(context);
-            var now = DateTime.UtcNow;
+    [Fact]
+    public async Task QueryAsync_ShouldApplyAllFiltersAndNormalizeHttpMethod()
+    {
+        await using var context = CreateInMemoryDbContext();
+        var service = new AuditLogServiceImpl(context);
+        var now = DateTime.UtcNow;
 
-            context.AuditLogs.AddRange(
-                new AuditLog
-                {
-                    UserId = "user1", UserRole = "Admin", HttpMethod = "GET", EntityType = "Item",
-                    ServiceName = "InventoryService", StatusCode = 200, Timestamp = now.AddMinutes(-1)
-                },
-                new AuditLog
-                {
-                    UserId = "user1", UserRole = "Admin", HttpMethod = "POST", EntityType = "Item",
-                    ServiceName = "InventoryService", StatusCode = 201, Timestamp = now
-                },
-                new AuditLog
-                {
-                    UserId = "user2", UserRole = "User", HttpMethod = "GET", EntityType = "Facility",
-                    ServiceName = "FacilityService", StatusCode = 200, Timestamp = now.AddMinutes(-2)
-                });
-            await context.SaveChangesAsync();
-
-            var result = await service.QueryAsync(new AuditQueryParams
+        context.AuditLogs.AddRange(
+            new AuditLog
             {
                 UserId = "user1",
                 UserRole = "Admin",
-                HttpMethod = "get",
+                HttpMethod = "GET",
                 EntityType = "Item",
                 ServiceName = "InventoryService",
                 StatusCode = 200,
-                From = now.AddMinutes(-2),
-                To = now.AddSeconds(-30),
-                Page = 0,
-                PageSize = 0
-            });
-
-            var item = Assert.Single(result.Items);
-            Assert.Equal(1, result.Total);
-            Assert.Equal(1, result.Page);
-            Assert.Equal(1, result.PageSize);
-            Assert.Equal("GET", item.HttpMethod);
-        }
-
-        [Fact]
-        public async Task QueryAsync_ShouldReturnEmptyPageWhenPageIsPastEnd()
-        {
-            await using var context = CreateInMemoryDbContext();
-            var service = new AuditLogServiceImpl(context);
-            await service.CreateAsync(new CreateAuditLogRequest
+                Timestamp = now.AddMinutes(-1)
+            },
+            new AuditLog
             {
-                UserId = "user", HttpMethod = "GET", Endpoint = "/health", StatusCode = 200
+                UserId = "user1",
+                UserRole = "Admin",
+                HttpMethod = "POST",
+                EntityType = "Item",
+                ServiceName = "InventoryService",
+                StatusCode = 201,
+                Timestamp = now
+            },
+            new AuditLog
+            {
+                UserId = "user2",
+                UserRole = "User",
+                HttpMethod = "GET",
+                EntityType = "Facility",
+                ServiceName = "FacilityService",
+                StatusCode = 200,
+                Timestamp = now.AddMinutes(-2)
             });
+        await context.SaveChangesAsync();
 
-            var result = await service.QueryAsync(new AuditQueryParams { Page = 2, PageSize = 1 });
+        var result = await service.QueryAsync(new AuditQueryParams
+        {
+            UserId = "user1",
+            UserRole = "Admin",
+            HttpMethod = "get",
+            EntityType = "Item",
+            ServiceName = "InventoryService",
+            StatusCode = 200,
+            From = now.AddMinutes(-2),
+            To = now.AddSeconds(-30),
+            Page = 0,
+            PageSize = 0
+        });
 
-            Assert.Equal(1, result.Total);
-            Assert.Empty(result.Items);
-            Assert.Equal(2, result.Page);
-        }
+        var item = Assert.Single(result.Items);
+        Assert.Equal(1, result.Total);
+        Assert.Equal(1, result.Page);
+        Assert.Equal(1, result.PageSize);
+        Assert.Equal("GET", item.HttpMethod);
+    }
+
+    [Fact]
+    public async Task QueryAsync_ShouldReturnEmptyPageWhenPageIsPastEnd()
+    {
+        await using var context = CreateInMemoryDbContext();
+        var service = new AuditLogServiceImpl(context);
+        await service.CreateAsync(new CreateAuditLogRequest
+        {
+            UserId = "user",
+            HttpMethod = "GET",
+            Endpoint = "/health",
+            StatusCode = 200
+        });
+
+        var result = await service.QueryAsync(new AuditQueryParams { Page = 2, PageSize = 1 });
+
+        Assert.Equal(1, result.Total);
+        Assert.Empty(result.Items);
+        Assert.Equal(2, result.Page);
+    }
 }

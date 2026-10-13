@@ -31,6 +31,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r pipelines/dbt/requirements.txt
 
+      - name: Configure dbt profile
+        run: |
+          mkdir -p "$HOME/.dbt"
+          cp pipelines/dbt/profiles.yml.example "$HOME/.dbt/profiles.yml"
+
       - name: Parse dbt project
         working-directory: pipelines/dbt
         run: dbt parse --no-partial-parse
