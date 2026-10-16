@@ -10,7 +10,7 @@ Set-Location $repoRoot
 
 if (-not $SkipBackend) {
     Write-Host 'Running backend tests...' -ForegroundColor Cyan
-    dotnet test Backend.slnx --configuration Release --verbosity minimal
+    dotnet test Backend.slnx --configuration Release --verbosity minimal -m:1 -p:UseSharedCompilation=false
     if ($LASTEXITCODE -ne 0) { throw "Backend tests failed with exit code $LASTEXITCODE" }
 }
 
