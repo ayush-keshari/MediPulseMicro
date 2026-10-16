@@ -39,6 +39,9 @@ try {
     # Start services in background
     Write-Host "Starting Docker services..." -ForegroundColor Cyan
     docker compose -f docker-compose.test.yml up -d @buildArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw "Docker Compose failed to start the integration stack with exit code $LASTEXITCODE"
+    }
 
     # Wait for SQL Server to be ready
     Write-Host "Waiting for SQL Server to be ready..." -ForegroundColor Cyan
@@ -56,8 +59,7 @@ try {
     }
 
     if (-not $sqlReady) {
-        Write-Error "SQL Server did not become ready in time"
-        exit 1
+        throw "SQL Server did not become ready in time"
     }
 
     Write-Host "SQL Server is ready!" -ForegroundColor Green
