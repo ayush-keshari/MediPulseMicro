@@ -2,6 +2,25 @@
 
 MediPulseMicro has backend unit tests, frontend unit tests, and Docker-backed integration tests.
 
+## Complete Fresh-Clone Validation
+
+From the repository root, run the complete validation flow:
+
+```powershell
+./scripts/test-all.ps1
+```
+
+Linux/macOS with PowerShell installed:
+
+```bash
+./scripts/test-all.sh
+```
+
+This runs offline backend/frontend validation first, then the isolated Docker
+integration suite. It stops at the first failed stage and returns a non-zero
+exit code. Use `-SkipIntegration`, `-SkipFrontend`, `-SkipBackend`, or
+`-Rebuild` when isolating a local failure.
+
 ## Backend Unit Tests
 
 For the complete offline validation suite, run this from the repository root:
