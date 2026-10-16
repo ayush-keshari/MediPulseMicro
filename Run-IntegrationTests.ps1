@@ -25,13 +25,6 @@ function cleanup {
     docker compose -f docker-compose.test.yml down -v
 }
 
-# Ensure cleanup happens even if script fails or is interrupted
-trap {
-    Write-Host "Interrupted! Cleaning up..." -ForegroundColor Yellow
-    cleanup
-    exit 1
-} EXIT
-
 try {
     Write-Host "Starting integration test environment..." -ForegroundColor Green
 
