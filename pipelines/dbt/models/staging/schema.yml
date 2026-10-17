@@ -33,6 +33,7 @@ models:
         description: Quantity currently held in the position.
         tests:
           - not_null
+          - non_negative
       - name: FacilityId
         description: Facility containing the position.
         tests:

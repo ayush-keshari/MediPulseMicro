@@ -99,6 +99,7 @@ sources:
           - name: Quantity
             tests:
               - not_null
+              - non_negative
           - name: FacilityId
             tests:
               - not_null
@@ -309,6 +310,7 @@ sources:
           - name: QuantityReceived
             tests:
               - not_null
+              - non_negative
         tests:
           - min_rows:
               arguments:
@@ -379,6 +381,7 @@ sources:
           - name: Quantity
             tests:
               - not_null
+              - non_negative
           - name: ToStorageZoneId
             tests:
               - not_null
@@ -408,6 +411,7 @@ sources:
           - name: QuantityConsumed
             tests:
               - not_null
+              - non_negative
           - name: ConsumedDate
             tests:
               - not_null

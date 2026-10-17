@@ -19,7 +19,8 @@ repository mock data have been loaded.
 - `MedipulseAudit` is the operational source for the audit trail.
 - `models/schema.yml` declares the source tables and their quality contracts.
 - dbt generic tests enforce uniqueness, required fields, accepted values,
-  foreign-key relationships, and minimum fixture volumes.
+  foreign-key relationships, non-negative movement quantities, and minimum
+  fixture volumes.
 - CI runs `dbt test --no-partial-parse` after migrations and fixture loading.
 
 ## Local quality gate
