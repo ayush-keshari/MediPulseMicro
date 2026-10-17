@@ -1,0 +1,97 @@
+version: 2
+
+models:
+  - name: receipts
+    description: >
+      Canonical staging view for goods receipts. A receipt is linked to one
+      purchase order and represents the controlled entry point for received
+      quantities and quality status.
+    meta:
+      owner: procurement-platform
+      source_system: MedipulseMain
+      grain: one row per goods receipt
+    columns:
+      - name: ReceiptID
+        tests:
+          - unique
+          - not_null
+      - name: POID
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'PurchaseOrder')
+                field: POID
+      - name: SupplierLot
+        tests:
+          - not_null
+      - name: ReceivedDate
+        tests:
+          - not_null
+      - name: ReceivedBy
+        tests:
+          - not_null
+      - name: QualityStatus
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Accepted', 'Rejected', 'OnHold']
+      - name: QuantityReceived
+        tests:
+          - not_null
+    tests:
+      - min_rows:
+          arguments:
+            min_value: 6
+
+  - name: transfer_orders
+    description: >
+      Canonical staging view for inter-facility transfer orders. The two
+      facility relationships make movement lineage explicit for downstream
+      inventory reconciliation.
+    meta:
+      owner: logistics-platform
+      source_system: MedipulseMain
+      grain: one row per transfer order
+    columns:
+      - name: TransferOrderId
+        tests:
+          - unique
+          - not_null
+      - name: FromFacilityId
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Facility')
+                field: FacilityID
+      - name: FromFacilityName
+        tests:
+          - not_null
+      - name: ToFacilityId
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Facility')
+                field: FacilityID
+      - name: ToFacilityName
+        tests:
+          - not_null
+      - name: RequestedBy
+        tests:
+          - not_null
+      - name: RequestedDate
+        tests:
+          - not_null
+      - name: Status
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Draft', 'Submitted', 'Approved', 'InTransit', 'Completed', 'Cancelled']
+    tests:
+      - min_rows:
+          arguments:
+            min_value: 4
