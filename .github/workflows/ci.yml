@@ -282,6 +282,7 @@ jobs:
         working-directory: pipelines/dbt
         run: |
           dbt debug --no-partial-parse
+          dbt run --no-partial-parse
           dbt test --no-partial-parse
 
       - name: Verify inventory source freshness
