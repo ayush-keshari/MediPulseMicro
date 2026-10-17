@@ -20,7 +20,8 @@ repository mock data have been loaded.
 - `models/schema.yml` declares the source tables and their quality contracts.
 - dbt generic tests enforce uniqueness, required fields, accepted values,
   foreign-key relationships, non-negative movement quantities, and minimum
-  fixture volumes.
+  fixture volumes. Inventory staging also rejects duplicate item/lot/location
+  business keys.
 - CI runs `dbt test --no-partial-parse` after migrations and fixture loading.
 
 ## Local quality gate

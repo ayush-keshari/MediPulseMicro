@@ -15,7 +15,8 @@ lineage layer currently includes `InventoryPositions`, `Receipt`, and
 `stg_inventory_positions`, `stg_receipts`, and `stg_transfer_orders`. Each
 source and model documents its purpose, grain, ownership, key columns,
 nullability, uniqueness, foreign key relationships, and non-negative quantity
-rules. When a new table or
+rules. Inventory position staging also enforces the idempotency invariant that
+one item/lot/location combination has at most one position row. When a new table or
 column is introduced, update the schema contract in the same change as the
 migration and fixture data.
 

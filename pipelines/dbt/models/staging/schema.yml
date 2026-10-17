@@ -54,3 +54,9 @@ models:
       - min_rows:
           arguments:
             min_value: 8
+      - unique_combination_of_columns:
+          combination_of_columns:
+            - ItemId
+            - LotId
+            - FacilityId
+            - StorageZoneId
