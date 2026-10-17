@@ -20,6 +20,11 @@ one item/lot/location combination has at most one position row. When a new table
 column is introduced, update the schema contract in the same change as the
 migration and fixture data.
 
+Inventory freshness is measured from `InventoryPositions.IngestedAt`, a UTC
+load timestamp populated by the database default and checked by CI. It is not
+derived from `ExpiryDate` or other business-event dates, so historical fixtures
+and legitimate backfills remain valid.
+
 ## Idempotency
 
 - `dbt parse` is safe to repeat and does not connect to SQL Server.

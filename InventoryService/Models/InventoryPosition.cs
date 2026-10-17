@@ -24,6 +24,9 @@ public class InventoryPosition
 
     public int SafetyStock { get; set; }                   // reorder threshold for this item at this facility
 
+    // UTC timestamp for freshness checks and operational backfill tracking.
+    public DateTime IngestedAt { get; set; } = DateTime.UtcNow;
+
     // Navigation property — lets us access Item.Name, Item.Unit etc. from a position
     [ForeignKey(nameof(ItemId))]
     public Item? Item { get; set; }

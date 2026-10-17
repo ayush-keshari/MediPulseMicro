@@ -50,6 +50,10 @@ models:
               arguments:
                 to: source('mediapulse_main', 'StorageZone')
                 field: ZoneID
+      - name: IngestedAt
+        description: UTC timestamp when the position entered the operational store.
+        tests:
+          - not_null
     tests:
       - min_rows:
           arguments:

@@ -26,6 +26,11 @@ public class InventoryDbContext : DbContext
 
         // ── InventoryPosition ─────────────────────────────────────────────
         mb.Entity<InventoryPosition>()
+            .Property(p => p.IngestedAt)
+            .HasColumnType("datetime2")
+            .HasDefaultValueSql("SYSUTCDATETIME()");
+
+        mb.Entity<InventoryPosition>()
             .HasOne(p => p.Item)
             .WithMany(i => i.Positions)
             .HasForeignKey(p => p.ItemId)

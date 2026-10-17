@@ -147,6 +147,11 @@ namespace InventoryService.Migrations
                     b.Property<int>("FacilityId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("IngestedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
                     b.Property<int>("ItemId")
                         .HasColumnType("int");
 

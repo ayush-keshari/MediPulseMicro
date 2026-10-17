@@ -24,6 +24,7 @@ CREATE TABLE [InventoryPositions] (
     [FacilityId] INT NOT NULL,
     [StorageZoneId] INT NOT NULL,
     [SafetyStock] INT NOT NULL,
+    [IngestedAt] DATETIME2 NOT NULL CONSTRAINT DF_InventoryPositions_IngestedAt DEFAULT SYSUTCDATETIME(),
     CONSTRAINT FK_InventoryPositions_Item FOREIGN KEY ([ItemId]) REFERENCES [Item]([ItemId]) ON DELETE CASCADE,
     CONSTRAINT FK_InventoryPositions_Facility FOREIGN KEY ([FacilityId]) REFERENCES [Facility]([FacilityID]),
     CONSTRAINT FK_InventoryPositions_StorageZone FOREIGN KEY ([StorageZoneId]) REFERENCES [StorageZone]([ZoneID])

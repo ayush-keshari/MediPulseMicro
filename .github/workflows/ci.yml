@@ -284,6 +284,10 @@ jobs:
           dbt debug --no-partial-parse
           dbt test --no-partial-parse
 
+      - name: Verify inventory source freshness
+        working-directory: pipelines/dbt
+        run: dbt source freshness --select source:mediapulse_main.InventoryPositions --no-partial-parse
+
       - name: Upload dbt quality artifacts
         if: always()
         uses: actions/upload-artifact@v4

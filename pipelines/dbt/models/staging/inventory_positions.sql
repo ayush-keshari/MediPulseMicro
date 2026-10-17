@@ -6,5 +6,6 @@ select
     LotId,
     Quantity,
     FacilityId,
-    StorageZoneId
+    StorageZoneId,
+    IngestedAt
 from {{ source('mediapulse_main', 'InventoryPositions') }}
