@@ -150,16 +150,25 @@ jobs:
           # Install reportgenerator to convert cobertura to human-readable format
           dotnet tool install --global dotnet-reportgenerator-globaltool
           # Generate coverage report
-          reportgenerator "-reports:**/TestResults/**/coverage.cobertura.xml" "-targetdir:../TestResults/CoverageReport" "-reporttypes:TextSummary"
+          reportgenerator "-reports:**/TestResults/**/coverage.cobertura.xml" "-targetdir:TestResults/CoverageReport" "-reporttypes:TextSummary"
           # Extract coverage percentage from summary
-          COVERAGE_PERCENT=$(awk '/Line coverage:/ {gsub(/%/, ""); print $NF}' ../TestResults/CoverageReport/Summary.txt)
+          COVERAGE_PERCENT=$(awk '/Line coverage:/ {gsub(/%/, ""); print $NF}' TestResults/CoverageReport/Summary.txt)
           echo "Coverage: $COVERAGE_PERCENT%"
-          # Keep the gate above the current repository baseline while coverage grows.
-          if [ "$(awk -v cov="$COVERAGE_PERCENT" 'BEGIN {print (cov < 30)}')" -eq 1 ]; then
-            echo "Error: Coverage is below the required baseline"
+          # Keep the gate above the measured repository baseline while coverage grows.
+          if [ "$(awk -v cov="$COVERAGE_PERCENT" 'BEGIN {print (cov < 35)}')" -eq 1 ]; then
+            echo "Error: Coverage is below the required target of 35%"
             exit 1
           fi
-          echo "Coverage gate passed: $COVERAGE_PERCENT% >= 30%"
+          echo "Coverage gate passed: $COVERAGE_PERCENT% >= 35%"
+
+      - name: Upload backend coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage-report
+          path: TestResults/CoverageReport/
+          if-no-files-found: warn
+          retention-days: 14
 
   # Frontend test job - runs unit tests, linting, type checking, and vulnerability checks
   frontend_test:
