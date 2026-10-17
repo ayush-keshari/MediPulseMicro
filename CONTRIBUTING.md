@@ -108,4 +108,10 @@ docker compose up migrator --abort-on-container-exit --exit-code-from migrator
 - CI checks must pass (build, tests, formatting, linting).
 - Be responsive to feedback and be prepared to make adjustments.
 
+Security checks also run on every push and pull request. CodeQL analyzes the
+application languages, dependency review blocks high-severity dependency
+changes, and Gitleaks scans for committed secrets. Never commit real
+connection strings, JWT keys, passwords, tokens, or generated local profiles;
+use repository secrets in CI and `pipelines/dbt/profiles.yml.example` locally.
+
 Thank you for your contribution!
