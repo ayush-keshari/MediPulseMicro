@@ -1,0 +1,55 @@
+version: 2
+
+models:
+  - name: inventory_positions
+    description: >
+      Canonical staging view for inventory positions. This is the first
+      executable lineage node between the MedipulseMain source table and
+      downstream inventory analytics and quality checks.
+    meta:
+      owner: inventory-platform
+      source_system: MedipulseMain
+      grain: one row per inventory position and lot
+      refresh: on-demand in CI and scheduled quality checks
+    columns:
+      - name: PositionId
+        description: Stable inventory-position identifier.
+        tests:
+          - unique
+          - not_null
+      - name: ItemId
+        description: Medical item assigned to the position.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Items')
+                field: ItemId
+      - name: LotId
+        description: Lot identifier used for traceability and FEFO allocation.
+        tests:
+          - not_null
+      - name: Quantity
+        description: Quantity currently held in the position.
+        tests:
+          - not_null
+      - name: FacilityId
+        description: Facility containing the position.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Facility')
+                field: FacilityID
+      - name: StorageZoneId
+        description: Storage zone containing the position.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'StorageZone')
+                field: ZoneID
+    tests:
+      - min_rows:
+          arguments:
+            min_value: 8
