@@ -61,6 +61,24 @@ and legitimate backfills remain valid.
    as the evidence for the run. These artifacts identify the exact tests,
    relationships, and row counts evaluated.
 
+For a repeatable local recovery check, use the repository runner after placing
+the target connection in `profiles.yml` (or setting `DBT_PROFILES_DIR`):
+
+```powershell
+./pipelines/dbt/Invoke-QualityGate.ps1
+```
+
+To validate only one source/model after a targeted backfill, pass a selector:
+
+```powershell
+./pipelines/dbt/Invoke-QualityGate.ps1 -Selector stg_inventory_positions
+```
+
+The runner parses metadata, materializes the selected staging models, runs the
+selected tests, and checks inventory freshness. It never writes to source
+tables; repeatable writes belong to the service migration or controlled
+backfill process that produced the data.
+
 ## Change checklist
 
 - Add or update the source/table description and column contract.
