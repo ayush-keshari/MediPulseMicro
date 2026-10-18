@@ -33,6 +33,7 @@ if (-not [string]::IsNullOrWhiteSpace($Selector)) {
     $selectorArgs = @('--select', $Selector)
 }
 
+Invoke-Dbt 'Install dbt project dependencies' (@('deps') + $commonArgs)
 Invoke-Dbt 'Validate dbt metadata' (@('parse') + $commonArgs)
 
 if (-not $SkipRun) {

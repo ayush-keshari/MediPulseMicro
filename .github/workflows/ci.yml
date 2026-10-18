@@ -31,6 +31,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r pipelines/dbt/requirements.txt
 
+      - name: Install dbt project dependencies
+        working-directory: pipelines/dbt
+        run: dbt deps
+
       - name: Configure dbt profile
         run: |
           mkdir -p "$HOME/.dbt"
@@ -257,6 +261,10 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r pipelines/dbt/requirements.txt
+
+      - name: Install dbt project dependencies
+        working-directory: pipelines/dbt
+        run: dbt deps
 
       - name: Configure dbt profile
         run: |
