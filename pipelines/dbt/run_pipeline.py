@@ -29,7 +29,15 @@ def run_pipeline(root=ROOT, output_root=None, timeout=1200):
     stage = "preflight"
     cleanup_needed = False
 
+    def save_summary():
+        summary["duration_seconds"] = round(time.monotonic() - started, 2)
+        pending = evidence / "pipeline-summary.tmp"
+        pending.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        pending.replace(evidence / "pipeline-summary.json")
+
     def command(name, args, limit=timeout):
+        summary["active_stage"] = name
+        save_summary()
         print(f"==> {name}", flush=True)
         try:
             result = subprocess.run(args, cwd=root, env=env, text=True,
@@ -84,8 +92,7 @@ def run_pipeline(root=ROOT, output_root=None, timeout=1200):
                 summary["cleanup"] = "passed"
             except Exception:
                 summary.update(status="failed", cleanup="failed")
-        summary["duration_seconds"] = round(time.monotonic() - started, 2)
-        (evidence / "pipeline-summary.json").write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        save_summary()
         print(f"Pipeline {summary['status']}. Reports: {evidence}", flush=True)
     return summary
 

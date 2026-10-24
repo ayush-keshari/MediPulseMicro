@@ -20,6 +20,9 @@ class PipelineTests(unittest.TestCase):
 
         def execute(args, **kwargs):
             calls.append(args)
+            checkpoint = Path(kwargs["env"]["QUALITY_OUTPUT"]) / "pipeline-summary.json"
+            self.assertTrue(checkpoint.is_file())
+            self.assertIn("project", json.loads(checkpoint.read_text()))
             output = "normal output " + kwargs["env"]["SA_PASSWORD"]
             code = 0
             if "config" in args:
