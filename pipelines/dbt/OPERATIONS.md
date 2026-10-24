@@ -53,6 +53,27 @@ counters may advance on rollback, so recreate the disposable database after a
 failed load: fixture relationships assume clean identity sequences. Do not run
 this fixture loader against production.
 
+Both database-backed workflows also run three opt-in transaction tests:
+successful cross-database commit, rollback after a deliberate late failure,
+and rollback after a nested SQL compilation error. They create uniquely named
+probe tables, invoke the same batch builder as the fixture loader, check row
+counts and transaction closure, and remove the probes. Application tables are
+not modified by these tests. The late-failure test also retries successfully.
+This verifies the transaction mechanism, not arbitrary partial-row repair.
+
+To run these tests against a disposable migrated local SQL Server, with
+`SA_PASSWORD` already configured:
+
+```powershell
+$env:MEDIPULSE_SQL_TESTS = '1'
+python -m unittest discover -s pipelines/dbt/runner_tests -p test_atomic_sqlserver.py -v
+Remove-Item Env:MEDIPULSE_SQL_TESTS
+```
+
+Ordinary offline test discovery skips these three tests unless explicitly
+enabled. CI enables them in the database-backed job; an offline pass alone is
+not evidence of successful transaction behavior on SQL Server.
+
 1. Identify the database and table affected by the change, then confirm the
    corresponding source and relationship declarations in `models/schema.yml`.
 2. Restore or refresh the target environment using the normal migration and

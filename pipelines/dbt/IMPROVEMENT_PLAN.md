@@ -28,14 +28,25 @@ The external overall score cannot be predicted from these changes alone.
 Complete-load replay verification is now implemented in
 `verify_fixture_replay.py` and wired into both database-backed workflows. It
 compares exact rows with duplicate multiplicities and always rolls back. Unit
-tests validate change detection and rollback; SQL Server execution remains an
-acceptance requirement when Docker/CI is available.
+tests validate change detection and rollback. SQL Server execution, all 212 dbt
+tests, and the full integration stack passed in CI run 40072804861 at commit
+`7405e05`.
 
-Create an isolated quality database runner using the existing migrator. Load the
-same fixture batch twice and compare primary-key sets, row counts, and domain
-values before and after the second load. Fail on mutation or duplication. Add
-explicit partial-failure recovery and preserve evidence for each replay.
-Validate this against SQL Server before claiming idempotent backfills.
+The canonical fixture loader now wraps all four files in one cross-database
+transaction. Database-backed fault-injection tests exercise successful commit,
+late failure, and nested compilation failure using disposable probe tables.
+The offline suite checks batch construction, command failure propagation,
+password handling, and rejection of unsupported client commands.
+
+Remaining work:
+
+1. Create a single isolated quality-database runner using the existing migrator,
+   with unique Compose projects, cleanup on failure, and preserved evidence.
+2. Recover by rebuilding a failed disposable fixture database before retrying;
+   rollback does not restore SQL Server identity counters.
+3. If partial-row repair is required, redesign fixture keys and per-row guards
+   and test those scenarios explicitly. Current first-row guards cannot repair
+   an already incomplete fixture table. Do not claim idempotent backfills yet.
 
 This requires a running Docker engine and sufficient disk for SQL Server and
 the migrator. The current runner assumes an already provisioned database.
