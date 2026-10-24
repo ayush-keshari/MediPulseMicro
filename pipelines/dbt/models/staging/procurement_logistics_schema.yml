@@ -42,6 +42,10 @@ models:
           - not_null
           - non_negative
     tests:
+      - matches_source:
+          arguments:
+            source_relation: source('mediapulse_main', 'Receipt')
+            columns: [ReceiptID, POID, SupplierLot, ReceivedDate, ReceivedBy, QualityStatus, QuantityReceived]
       - min_rows:
           arguments:
             min_value: 6
@@ -93,6 +97,10 @@ models:
               arguments:
                 values: ['Draft', 'Submitted', 'Approved', 'InTransit', 'Completed', 'Cancelled']
     tests:
+      - matches_source:
+          arguments:
+            source_relation: source('mediapulse_main', 'TransferOrder')
+            columns: [TransferOrderId, FromFacilityId, FromFacilityName, ToFacilityId, ToFacilityName, RequestedBy, RequestedDate, Status]
       - min_rows:
           arguments:
             min_value: 4

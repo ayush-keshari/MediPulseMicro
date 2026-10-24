@@ -84,11 +84,7 @@ jobs:
       run: dbt deps
 
     - name: Run dbt tests
-      working-directory: ./pipelines/dbt
-      # dbt is the scheduled quality gate; keep parsing deterministic in CI.
-      run: |
-        dbt debug --no-partial-parse
-        dbt test --no-partial-parse
+      run: python pipelines/dbt/quality_gate.py
 
     - name: Publish Test Results
       if: always()

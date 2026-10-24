@@ -54,7 +54,7 @@ and legitimate backfills remain valid.
 5. Run the complete gate before declaring recovery complete:
 
    ```text
-   dbt test --project-dir pipelines/dbt --profiles-dir pipelines/dbt --no-partial-parse
+   python pipelines/dbt/quality_gate.py --profiles-dir /path/to/profile-directory
    ```
 
 6. Preserve `target/manifest.json`, `target/run_results.json`, and the CI logs
@@ -62,7 +62,7 @@ and legitimate backfills remain valid.
    relationships, and row counts evaluated.
 
 For a repeatable local recovery check, use the repository runner after placing
-the target connection in `profiles.yml` (or setting `DBT_PROFILES_DIR`):
+the target connection in `~/.dbt/profiles.yml` (or setting `DBT_PROFILES_DIR`):
 
 ```powershell
 ./pipelines/dbt/Invoke-QualityGate.ps1
@@ -71,13 +71,30 @@ the target connection in `profiles.yml` (or setting `DBT_PROFILES_DIR`):
 To validate only one source/model after a targeted backfill, pass a selector:
 
 ```powershell
-./pipelines/dbt/Invoke-QualityGate.ps1 -Selector stg_inventory_positions
+./pipelines/dbt/Invoke-QualityGate.ps1 -Selector inventory_positions
 ```
 
 The runner parses metadata, materializes the selected staging models, runs the
 selected tests, and checks inventory freshness. It never writes to source
 tables; repeatable writes belong to the service migration or controlled
 backfill process that produced the data.
+
+### Recovery evidence and limits
+
+The shared Python runner retains independent parse/build/test/freshness artifacts
+under `target/quality-gate/<run-id>/`. A failed stage stops the run and writes a
+failed summary. Review that summary and the per-stage results before declaring
+recovery complete. Re-running refreshes derived views; it does not reload source
+rows or change their ingestion timestamps. No automatic retry is performed:
+diagnose the failed stage before initiating another run.
+
+Reconciliation tests for inventory, receipts, and transfer orders compare source
+and staging projections in both directions. Missing or changed records fail;
+key uniqueness tests cover duplication separately. Run against a stable source
+snapshot or quiescent maintenance window to avoid concurrent-write differences.
+Freshness measures recent insertion into inventory positions, not every stock
+update. A quiet inventory can legitimately age past the configured threshold;
+operators must assess this instead of rewriting timestamps to silence the check.
 
 ## Change checklist
 

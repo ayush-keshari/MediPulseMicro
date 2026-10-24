@@ -41,8 +41,10 @@ jobs:
           cp pipelines/dbt/profiles.yml.example "$HOME/.dbt/profiles.yml"
 
       - name: Parse dbt project
-        working-directory: pipelines/dbt
-        run: dbt parse --no-partial-parse
+        run: python pipelines/dbt/quality_gate.py --parse-only
+
+      - name: Test quality gate failure handling
+        run: python -m unittest discover -s pipelines/dbt/runner_tests -v
 
   # Backend build job - validates that the backend solution builds successfully
   backend_build:
@@ -287,15 +289,7 @@ jobs:
           EOF
 
       - name: Run dbt data quality tests
-        working-directory: pipelines/dbt
-        run: |
-          dbt debug --no-partial-parse
-          dbt run --no-partial-parse
-          dbt test --no-partial-parse
-
-      - name: Verify inventory source freshness
-        working-directory: pipelines/dbt
-        run: dbt source freshness --select source:mediapulse_main.InventoryPositions --no-partial-parse
+        run: python pipelines/dbt/quality_gate.py
 
       - name: Upload dbt quality artifacts
         if: always()

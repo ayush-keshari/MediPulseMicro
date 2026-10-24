@@ -7,7 +7,7 @@ profile: mediapulse_dq
 model-paths: ["models"]
 seed-paths: ["seeds"]
 test-paths: ["tests"]
-macro-paths: ["macro"]
+macro-paths: ["macros"]
 docs-paths: ["docs"]
 
 target-path: "target"
