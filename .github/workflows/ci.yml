@@ -169,7 +169,7 @@ jobs:
 
       - name: Upload backend coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-coverage-report
           path: TestResults/CoverageReport/
@@ -232,7 +232,7 @@ jobs:
 
       - name: Upload dbt quality artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dbt-quality-artifacts
           path: pipelines/dbt/target/
