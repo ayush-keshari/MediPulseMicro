@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: consumption_records
+    description: >
+      Consumption events used by the daily demand mart. Patient, staff, and ward
+      attributes are deliberately omitted; the output is at facility/item grain.
+    meta:
+      owner: logistics-platform
+      grain: one row per ConsumptionId
+    columns:
+      - name: ConsumptionId
+        tests: [not_null, unique]
+      - name: FacilityId
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Facility')
+                field: FacilityID
+      - name: ItemId
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Items')
+                field: ItemId
+      - name: QuantityConsumed
+        tests: [not_null, non_negative]
+      - name: ConsumedDate
+        tests: [not_null]
+    tests:
+      - matches_source:
+          arguments:
+            source_relation: source('mediapulse_main', 'ConsumptionRecord')
+            columns: [ConsumptionId, FacilityId, ItemId, QuantityConsumed, ConsumedDate]

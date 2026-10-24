@@ -8,6 +8,7 @@ import unittest
 from load_fixtures import fixture_batch
 from quality_gate import run_gate
 from verify_fixture_replay import connect_database, verify
+from verify_mart_rebuild import verify_rebuild
 
 
 PROFILE = """mediapulse_dq:
@@ -61,6 +62,15 @@ def run(evidence=Path("/evidence"), work=Path("/tmp/quality-project")):
             raise RuntimeError("Atomicity tests failed or did not execute; see atomicity-tests.txt")
         summary["stages"].append(stage)
 
+        stage = "verify-transform-semantics"
+        suite = unittest.defaultTestLoader.discover(
+            str(source / "runner_tests"), pattern="test_daily_consumption_sqlserver.py")
+        with (evidence / "transformation-tests.txt").open("w", encoding="utf-8") as stream:
+            result = unittest.TextTestRunner(stream=stream, verbosity=2).run(suite)
+        if result.testsRun != 7 or result.skipped or not result.wasSuccessful():
+            raise RuntimeError("Transformation tests failed or did not execute; see transformation-tests.txt")
+        summary["stages"].append(stage)
+
         stage = "verify-replay"
         connection = connect_database()
         try:
@@ -78,6 +88,9 @@ def run(evidence=Path("/evidence"), work=Path("/tmp/quality-project")):
         summary["stages"].append(stage)
         stage = "dbt-gate"
         run_gate(work, profiles)
+        summary["stages"].append(stage)
+        stage = "verify-mart-rebuild"
+        verify_rebuild(work, profiles, evidence)
         summary["stages"].append(stage)
         summary["status"] = "passed"
     except BaseException:

@@ -1,0 +1,38 @@
+version: 2
+
+models:
+  - name: daily_consumption
+    description: >
+      Daily consumption totals per healthcare facility and medical item, used
+      for demand review and replenishment planning. Dates are stored calendar days;
+      no timezone conversion is applied. Rebuilt from all source events
+      so late arrivals, corrections, and deletions update historical totals.
+    meta:
+      owner: logistics-platform
+      grain: one row per ConsumptionDate, FacilityId, ItemId
+      refresh_strategy: full historical rebuild
+    columns:
+      - name: ConsumptionDate
+        tests: [not_null]
+      - name: FacilityId
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Facility')
+                field: FacilityID
+      - name: ItemId
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: source('mediapulse_main', 'Items')
+                field: ItemId
+      - name: TotalQuantityConsumed
+        tests: [not_null, non_negative]
+      - name: ConsumptionEventCount
+        tests: [not_null, non_negative]
+    tests:
+      - unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [ConsumptionDate, FacilityId, ItemId]

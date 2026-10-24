@@ -36,10 +36,12 @@ Cross-service reads are explicit in the EF contexts. For example, LogisticsServi
 
 1. The `migrator` container applies EF Core migrations to `MedipulseMain` and `MedipulseAudit`.
 2. `MockData_InsertOnly.sql` loads the core deterministic fixtures; the service-specific scripts load `User`, `Notification`, and `AuditLog` fixtures.
-3. dbt source tests check main-database fixture-level referential integrity.
-4. The main CI integration job runs the legacy SQL diagnostics and then the dbt contract against the seeded databases.
-5. The scheduled workflow runs the same migrations, complete fixture set, and dbt contract as its quality gate, without depending on the legacy SQL loop.
-6. dbt resolves `medipulse_main` to `MedipulseMain.dbo` and `medipulse_audit` to `MedipulseAudit.dbo`, so audit checks execute against the audit database rather than an accidental main-database alias.
+3. The isolated runner verifies atomic rollback and exact fixture replay before building dbt models.
+4. dbt source and model tests validate both databases, including reconciliation of the daily consumption mart with source events.
+5. Main CI and scheduled validation use the same runner, including transformation edge cases and an unchanged-source mart rebuild check. Legacy SQL diagnostics remain optional.
+6. dbt resolves `mediapulse_main` to `MedipulseMain.dbo` and `mediapulse_audit` to `MedipulseAudit.dbo`, so audit checks execute against the audit database rather than an accidental main-database alias.
+
+The [analytics lineage and rebuild contract](../pipelines/dbt/docs/lineage.md) describes the source-to-mart path, grain, reconciliation, and historical correction behavior.
 
 The scheduled dbt workflow provides a daily/manual rerun, while the main CI integration job runs the dbt gate on every push and pull request path that reaches integration validation.
 
@@ -47,4 +49,5 @@ The scheduled dbt workflow provides a daily/manual rerun, while the main CI inte
 
 - `dotnet test Backend.slnx` runs backend unit tests offline using in-memory providers.
 - `npm test` and the frontend build/lint/type checks run without SQL Server.
-- `Run-IntegrationTests.ps1` and the integration CI job require Docker and SQL Server because they validate migrations, seeded data, HTTP service wiring, and dbt queries.
+- `Run-IntegrationTests.ps1` validates migrations, seeded data, and HTTP service wiring with Docker and SQL Server.
+- `python pipelines/dbt/run_pipeline.py` separately validates database fixtures, transformations, dbt contracts, freshness, and rebuild stability using disposable containers.

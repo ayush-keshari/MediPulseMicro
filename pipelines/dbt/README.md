@@ -3,6 +3,11 @@
 This dbt project is the authoritative data-quality gate for the two SQL Server
 databases used by MediPulse.
 
+It also builds `dbo.fct_daily_consumption`, a daily facility/item demand dataset
+from logistics consumption events. It retains event counts and uses 64-bit sums.
+See [lineage and historical rebuilds](docs/lineage.md) for its grain, timezone
+limitation, source reconciliation, and recovery procedure.
+
 ## One-command disposable pipeline
 
 From the repository root:
@@ -29,6 +34,10 @@ remain under `target/pipeline/<run-id>/`:
 - `pipeline-summary.json`: stage status, duration, project name, cleanup result.
 - `validation-summary.json`: fixture/atomicity/replay/dbt stage status.
 - `atomicity-tests.txt` and `fixture-replay.json`: database-backed evidence.
+- `transformation-tests.txt`: seven real-SQL tests for aggregation, date boundaries,
+  late arrivals, corrections/deletions, group isolation, overflow, and empty input.
+- `mart-rebuild.json` and `mart-rebuild-{run,test}.json`: exact output comparison
+  and dbt results after a second materialization with unchanged sources.
 - `target/quality-gate/<run-id>/`: separate dbt model/test/freshness results.
 
 `--output-dir` changes the parent report directory; each run still uses a new
@@ -59,7 +68,7 @@ all undefined test macros. The runner regression tests also execute in this job.
 
 The authoritative `dbt test` gate runs after SQL Server migrations and
 repository mock data have been loaded. CI, scheduled runs, and local runs share
-`quality_gate.py`: parse and validate contracts, materialize views, test, then
+`quality_gate.py`: parse and validate contracts, materialize models, test, then
 check inventory freshness. Every failed stage stops subsequent stages.
 
 ## Lineage
