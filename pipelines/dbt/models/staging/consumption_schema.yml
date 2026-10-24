@@ -4,7 +4,7 @@ models:
   - name: consumption_records
     description: >
       Consumption events used by the daily demand mart. Patient, staff, and ward
-      attributes are deliberately omitted; the output is at facility/item grain.
+      attributes are deliberately omitted; this projection retains event grain.
     meta:
       owner: logistics-platform
       grain: one row per ConsumptionId

@@ -2,7 +2,7 @@
 
 A backend-focused healthcare supply-chain application built with .NET 10, Entity
 Framework Core, SQL Server, and an Angular frontend. Eight domain services sit
-behind an API gateway. The dbt project is a supporting database-quality suite,
+behind an API gateway. The dbt project is a supporting analytics and data-quality suite,
 not the primary product or a standalone data warehouse.
 
 ## Build and test from a fresh clone
@@ -82,6 +82,12 @@ The same command runs in CI and on the daily schedule. It builds the tools in
 containers, starts an isolated SQL Server, applies migrations, loads fixtures
 atomically, verifies rollback and replay behavior, and runs dbt model, test,
 and freshness checks.
+
+The pipeline builds a daily consumption mart by facility and item, reconciles
+each aggregate with source events, tests late-arrival and correction behavior
+on SQL Server, and checks that rebuilding unchanged data preserves every row.
+See the [analytics lineage and rebuild contract](pipelines/dbt/docs/lineage.md)
+for its grain, stored-date semantics, failure recovery, and production limits.
 
 No local dbt installation, ODBC driver, profile, database password, or manual
 SQL commands are required for this disposable run. Reports are retained under

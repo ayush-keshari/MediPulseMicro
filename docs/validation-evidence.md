@@ -1,24 +1,29 @@
 # Verified validation evidence
 
 MediPulseMicro is primarily a .NET/Angular healthcare supply-chain application.
-Its dbt suite validates the operational SQL Server data; it is not a dedicated
+Its dbt suite validates operational SQL Server data and builds daily consumption
+analytics; it is not a dedicated
 data-engineering platform. Use executed test results, rather than file counts
 alone, when assessing its current reliability.
 
 ## Verified commit
 
-- Commit: `348c15d6e5763611f25a7892bb45c0fd52cf6bc2`.
+- Commit: `851f630120e9981f7f5ce76252e5e4c74c837799`.
 - Date: 2026-10-24.
-- [Full passing GitHub Actions run](https://github.com/ayush-keshari/MediPulseMicro/actions/runs/40076563780).
+- [Full passing GitHub Actions run](https://github.com/ayush-keshari/MediPulseMicro/actions/runs/40096498570).
 - Backend: 200 tests passed across 9 test projects; reported line coverage 36.5%.
 - CI coverage minimum: 35%, enforced in `.github/workflows/ci.yml`.
 - API integration: 3 tests passed against the running Compose stack.
-- Database quality: 19 sources, 3 staging models, 212 passing dbt tests, and
+- Database quality: 19 sources, 4 staging models, 1 aggregate mart, 233 passing dbt tests, and
   inventory freshness verification.
 - Atomic fixture loading: 3 SQL Server tests passed, including late failure
   and nested compilation-error rollback across both databases.
 - Fixture replay: passed exact row/multiplicity comparison.
-- Isolated pipeline: all stages passed; automatic cleanup passed; 138.16 seconds
+- Transformation semantics: all 7 SQL Server cases passed, including late arrivals,
+  corrections/deletions, date boundaries, and overflow-safe sums.
+- Mart rebuild: 6 fixture-derived rows compared exactly after a second build;
+  all rows and multiplicities unchanged, with model tests rerun successfully.
+- Isolated pipeline: all stages passed; automatic cleanup passed; 157.2 seconds
   on this runner (not a performance guarantee).
 - Frontend build, tests, dependency audit, type checking and lint job passed.
   Lint warnings still exist; a green job is not a claim of zero warnings.
@@ -28,6 +33,10 @@ Artifacts on that run include `dbt-quality-artifacts` and
 `pipeline-summary.json`, `validation-summary.json`, atomicity test output,
 replay results, and dbt results. Download them before the configured retention
 expires (quality reports: 7 days). Later runs publish fresh evidence.
+
+The artifact also includes `transformation-tests.txt`, `mart-rebuild.json`, and
+`mart-rebuild-{run,test}.json`. These distinguish actual SQL execution from
+offline compile checks. Security checks and CodeQL also passed for this commit.
 
 ## Reproduce
 
@@ -50,6 +59,8 @@ Prioritize business-rule branches, rejected state transitions, multi-lot FEFO
 allocation, and persistence/transaction failures. The 3 API integration tests
 are smoke-level coverage, not exhaustive service-to-service validation.
 
-The fixture pipeline provides disposable setup and repeat-load checks, not
-production incremental ingestion, historical backfills, or partial-row repair.
+The fixture pipeline provides disposable setup and repeat-load checks. The
+consumption mart supports full historical recomputation from retained source
+events, not production incremental ingestion, recovery of deleted history, or
+partial-row fixture repair. See the [lineage contract](../pipelines/dbt/docs/lineage.md).
 No external assessment score is guaranteed by these results.

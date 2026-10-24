@@ -34,9 +34,10 @@ should be checked against the evaluated branch/commit and actual CI evidence.
 
 1. Reproducibility: the shared disposable pipeline is implemented and has passed
    CI. Keep direct test commands and evidence linked from onboarding documents.
-2. Pipeline depth: implement the daily consumption mart, source reconciliation,
+2. Pipeline depth: implemented the daily consumption mart, source reconciliation,
    adversarial SQL Server cases, exact rebuild comparison, and lineage/recovery
-   documentation. Accept only after the live CI checks pass, not parse alone.
+   documentation. Live CI at `851f630` passed 233 dbt tests, all seven transformation
+   cases, and the unchanged-source rebuild check; see the evidence link below.
 3. Backend depth: measure uncovered business branches, improve tests and actual
    behavior, then raise the gate based on achieved coverage. The verified
    previous baseline was 36.5% with a 35% gate, not the screenshot's stale 30%.
