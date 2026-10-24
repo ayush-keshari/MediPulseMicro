@@ -98,6 +98,25 @@ operators must assess this instead of rewriting timestamps to silence the check.
 
 ## Change checklist
 
+### Complete fixture replay verification
+
+After migrations and the first fixture load, CI and the scheduled workflow run
+`python pipelines/dbt/verify_fixture_replay.py`. It uses the existing ODBC driver
+and `SA_PASSWORD` environment variable against local disposable SQL Server.
+The check captures every application-table row in both databases (excluding EF
+migration history), replays the same four fixture scripts, then compares row
+values and multiplicities. It detects duplicates, deletions, modified quantities,
+keys, and timestamps. It rolls back the replay transaction on both success and
+failure and reports only table names/counts, never row contents.
+
+`target/fixture-replay.json` records the result and is uploaded with dbt artifacts.
+Run only against quiescent disposable databases: serializable reads can block
+other writers. A pass proves replay safety for a complete initial fixture load;
+it does not prove repair of a partially loaded table. Existing first-row guards
+can skip missing rows, so partial-load recovery remains a separate milestone.
+
+### Contract changes
+
 - Add or update the source/table description and column contract.
 - Add relationship, uniqueness, not-null, accepted-value, or volume tests as
   appropriate.

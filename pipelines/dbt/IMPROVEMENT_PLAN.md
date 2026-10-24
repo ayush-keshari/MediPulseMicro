@@ -25,6 +25,12 @@ The external overall score cannot be predicted from these changes alone.
 
 ## Next milestone: fixture replay and self-contained execution
 
+Complete-load replay verification is now implemented in
+`verify_fixture_replay.py` and wired into both database-backed workflows. It
+compares exact rows with duplicate multiplicities and always rolls back. Unit
+tests validate change detection and rollback; SQL Server execution remains an
+acceptance requirement when Docker/CI is available.
+
 Create an isolated quality database runner using the existing migrator. Load the
 same fixture batch twice and compare primary-key sets, row counts, and domain
 values before and after the second load. Fail on mutation or duplication. Add

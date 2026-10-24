@@ -288,7 +288,10 @@ jobs:
                 trust_cert: true
           EOF
 
-      - name: Run dbt data quality tests
+      - name: Verify fixture replay preserves all rows
+        run: python pipelines/dbt/verify_fixture_replay.py
+
+      - name: Build and validate dbt contracts
         run: python pipelines/dbt/quality_gate.py
 
       - name: Upload dbt quality artifacts
