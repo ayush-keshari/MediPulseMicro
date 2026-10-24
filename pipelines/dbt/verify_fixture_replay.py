@@ -69,14 +69,19 @@ def verify(connection, root=ROOT):
         cursor.close()
 
 
-if __name__ == "__main__":
+def connect_database(autocommit=False):
     import pyodbc
 
     password = os.environ["SA_PASSWORD"].replace("}", "}}")
-    connection = pyodbc.connect(
-        "DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost,1433;"
+    server = (os.environ.get("SQLSERVER_HOST", "localhost") + ",1433").replace("}", "}}")
+    return pyodbc.connect(
+        f"DRIVER={{ODBC Driver 18 for SQL Server}};SERVER={{{server}}};"
         f"UID=sa;PWD={{{password}}};Encrypt=yes;TrustServerCertificate=yes;",
-        autocommit=False, timeout=30)
+        autocommit=autocommit, timeout=30)
+
+
+if __name__ == "__main__":
+    connection = connect_database()
     try:
         report = verify(connection)
     finally:

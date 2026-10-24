@@ -1,0 +1,37 @@
+# Overlay for the isolated quality runner; requires Compose 2.24.4 or newer.
+services:
+  sqlserver:
+    ports: !reset []
+
+  migrator:
+    volumes: !override
+      - .:/workspace:ro
+    entrypoint:
+      - /bin/sh
+      - -c
+      - |
+        set -eu
+        tar -C /workspace --exclude=bin --exclude=obj -cf /tmp/migration-source.tar \
+          Directory.Build.props Directory.Packages.props Shared AuthService \
+          FacilityService InventoryService ProcurementService LogisticsService \
+          TelemetryService NotificationService AuditService
+        tar -xf /tmp/migration-source.tar -C /src
+        exec "$$@"
+      - --
+
+  quality:
+    build:
+      context: ./pipelines/dbt
+      dockerfile: Dockerfile
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD:?The runner provides a disposable password}
+      DBT_ENV_SECRET_SA_PASSWORD: ${SA_PASSWORD}
+      SQLSERVER_HOST: sqlserver
+      MEDIPULSE_SQL_TESTS: '1'
+      PYTHONDONTWRITEBYTECODE: '1'
+    volumes:
+      - .:/workspace:ro
+      - ${QUALITY_OUTPUT:?The runner provides an evidence directory}:/evidence
+    command: [python, /workspace/pipelines/dbt/container_pipeline.py]
+    networks:
+      - medipulse-ci

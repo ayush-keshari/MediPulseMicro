@@ -1,105 +1,26 @@
 name: Scheduled DBT Tests
 
-# Run the workflow on a schedule
 on:
   schedule:
-    # Run daily at 2:00 AM UTC
     - cron: '0 2 * * *'
-  # Allow manual triggering
   workflow_dispatch:
 
 jobs:
   dbt-tests:
     runs-on: ubuntu-latest
-    env:
-      SA_PASSWORD: ${{ secrets.SA_PASSWORD || 'MediPulse@2024!Dev' }}
-
+    timeout-minutes: 40
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v7
+      - name: Checkout code
+        uses: actions/checkout@v7
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v6
-      with:
-        dotnet-version: '10.0.x'
+      - name: Run isolated quality pipeline
+        run: python pipelines/dbt/run_pipeline.py
 
-    - name: Wait for SQL Server to be ready
-      run: |
-        docker compose -f docker-compose.ci.yml down --volumes --remove-orphans
-        docker compose -f docker-compose.ci.yml up -d sqlserver
-        for i in {1..30}; do
-          if docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1" 2>/dev/null; then
-            echo "SQL Server is ready"
-            break
-          fi
-          echo "Waiting for SQL Server to start..."
-          sleep 2
-        done
-        docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -Q "SELECT 1"
-
-    - name: Apply migrations and load mock data
-      run: |
-        # Run EF Core migrations using the migrator service
-        docker compose -f docker-compose.ci.yml run --rm migrator
-        python pipelines/dbt/load_fixtures.py
-        echo "Migrations completed successfully"
-
-    - name: Install Microsoft ODBC Driver 18
-      run: |
-        curl -sSL https://packages.microsoft.com/keys/microsoft.asc | sudo tee /etc/apt/trusted.gpg.d/microsoft.asc >/dev/null
-        curl -sSL https://packages.microsoft.com/config/ubuntu/24.04/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list >/dev/null
-        sudo apt-get update
-        sudo ACCEPT_EULA=Y apt-get install -y msodbcsql18
-
-    - name: Install dbt dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r pipelines/dbt/requirements.txt
-
-    - name: Write dbt profile
-      run: |
-        mkdir -p ~/.dbt
-        cat > ~/.dbt/profiles.yml <<EOF
-        mediapulse_dq:
-          target: ci
-          outputs:
-            ci:
-              type: sqlserver
-              driver: ODBC Driver 18 for SQL Server
-              server: localhost
-              database: MedipulseMain
-              schema: dbo
-              username: sa
-              password: $SA_PASSWORD
-              port: 1433
-              encrypt: true
-              trust_cert: true
-        EOF
-
-    - name: Install dbt project dependencies
-      working-directory: ./pipelines/dbt
-      run: dbt deps
-
-    - name: Verify atomic fixture rollback against SQL Server
-      env:
-        MEDIPULSE_SQL_TESTS: '1'
-      run: python -m unittest discover -s pipelines/dbt/runner_tests -p test_atomic_sqlserver.py -v
-
-    - name: Verify fixture replay preserves all rows
-      run: python pipelines/dbt/verify_fixture_replay.py
-
-    - name: Build and validate dbt contracts
-      run: python pipelines/dbt/quality_gate.py
-
-    - name: Publish Test Results
-      if: always()
-      uses: actions/upload-artifact@v7
-      with:
-        name: dbt-test-results
-        path: ./pipelines/dbt/target/
-        if-no-files-found: ignore
-        retention-days: 7
-
-    - name: Tear down quality database
-      if: always()
-      run: docker compose -f docker-compose.ci.yml down --volumes --remove-orphans
+      - name: Publish quality evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dbt-test-results
+          path: pipelines/dbt/target/pipeline/
+          if-no-files-found: error
+          retention-days: 7

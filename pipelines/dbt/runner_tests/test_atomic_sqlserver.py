@@ -8,7 +8,7 @@ import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from load_fixtures import fixture_batch
-from verify_fixture_replay import DATABASES, quote
+from verify_fixture_replay import DATABASES, connect_database, quote
 
 
 @unittest.skipUnless(os.environ.get("MEDIPULSE_SQL_TESTS") == "1",
@@ -18,11 +18,7 @@ class AtomicSqlServerTests(unittest.TestCase):
         import pyodbc
 
         self.sql_error = pyodbc.Error
-        password = os.environ["SA_PASSWORD"].replace("}", "}}")
-        self.connection = pyodbc.connect(
-            "DRIVER={ODBC Driver 18 for SQL Server};SERVER=localhost,1433;"
-            f"UID=sa;PWD={{{password}}};Encrypt=yes;TrustServerCertificate=yes;",
-            autocommit=True, timeout=30)
+        self.connection = connect_database(autocommit=True)
         self.addCleanup(self.connection.close)
         self.cursor = self.connection.cursor()
         self.addCleanup(self.cursor.close)
