@@ -8,9 +8,9 @@ import subprocess
 from verify_fixture_replay import FIXTURES, ROOT, quote
 
 
-def fixture_batch(root=ROOT):
+def fixture_batch(root=ROOT, fixtures=None):
     statements = ["SET XACT_ABORT ON;", "BEGIN TRY", "BEGIN TRANSACTION;"]
-    for database, path in FIXTURES:
+    for database, path in FIXTURES if fixtures is None else fixtures:
         sql = (root / path).read_text(encoding="utf-8-sig")
         if re.search(r"^\s*(GO\s*(?:--.*)?$|:|!!)", sql, re.MULTILINE | re.IGNORECASE):
             raise ValueError(f"Batch separators and sqlcmd commands are unsupported: {path}")

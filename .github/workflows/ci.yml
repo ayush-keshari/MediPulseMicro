@@ -285,6 +285,11 @@ jobs:
                 trust_cert: true
           EOF
 
+      - name: Verify atomic fixture rollback against SQL Server
+        env:
+          MEDIPULSE_SQL_TESTS: '1'
+        run: python -m unittest discover -s pipelines/dbt/runner_tests -p test_atomic_sqlserver.py -v
+
       - name: Verify fixture replay preserves all rows
         run: python pipelines/dbt/verify_fixture_replay.py
 
