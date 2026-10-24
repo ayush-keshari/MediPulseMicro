@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
+using Shared.Exceptions;
 
 namespace Shared.Filters;
 
@@ -22,7 +23,11 @@ public class GlobalExceptionFilter : IExceptionFilter
 
     public void OnException(ExceptionContext context)
     {
-        _logger.LogError(context.Exception,
+        if (context.ExceptionHandled || context.HttpContext.Response.HasStarted)
+            return;
+
+        var businessRule = context.Exception is BusinessRuleException;
+        _logger.Log(businessRule ? LogLevel.Warning : LogLevel.Error, context.Exception,
             "[EXCEPTION] {Method} {Path} => {Message}",
             context.HttpContext.Request.Method,
             context.HttpContext.Request.Path,
@@ -30,11 +35,12 @@ public class GlobalExceptionFilter : IExceptionFilter
 
         context.Result = new ObjectResult(new
         {
-            message = "An unexpected server error occurred.",
-            detail = context.Exception.Message
+            message = businessRule ? context.Exception.Message : "An unexpected server error occurred.",
+            errorCode = businessRule ? "BUSINESS_RULE_VIOLATION" : "INTERNAL_SERVER_ERROR",
+            correlationId = context.HttpContext.TraceIdentifier
         })
         {
-            StatusCode = StatusCodes.Status500InternalServerError
+            StatusCode = businessRule ? StatusCodes.Status409Conflict : StatusCodes.Status500InternalServerError
         };
 
         context.ExceptionHandled = true;

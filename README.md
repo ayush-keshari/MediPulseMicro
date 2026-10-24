@@ -30,7 +30,7 @@ python pipelines/dbt/run_pipeline.py
 
 This command does not run the application API integration tests. See
 [TESTING.md](TESTING.md) for those commands and [verified CI evidence](docs/validation-evidence.md)
-for measured results. Coverage is currently 36.5% with a 35% CI minimum, not a
+for measured results. Coverage is currently 37.2% with a 37% CI minimum, not a
 claim of comprehensive business-logic coverage.
 
 ## 🏗️ Architecture
@@ -245,7 +245,7 @@ The integration testing mechanism:
 The same mechanism is used in the CI pipeline via the `integration_and_data_quality` job in `.github/workflows/ci.yml`, which:
 - Uses the same docker-compose.test.yml equivalent configuration
 - Runs API integration tests against the Compose stack with `dotnet test IntegrationTests/IntegrationTests.csproj`
-- Runs the separate `backend_test` job with a 35% minimum line-coverage gate; the verified run at `348c15d` measured 36.5%.
+- Runs the separate `backend_test` job with a 37% minimum line-coverage gate; see the linked validation evidence for measured results.
 - Preserves test results as artifacts
 
 #### Test Coverage
@@ -295,7 +295,7 @@ The project uses GitHub Actions for continuous integration:
 - Runs on every push to `main`, `dev2`, and feature branches
 - Builds and tests all services
 - Validates Docker Compose setup
-- Runs backend unit tests with an enforced 35% minimum line-coverage gate
+- Runs backend unit tests with an enforced 37% minimum line-coverage gate
 - Performs frontend TypeScript checking and linting
 - Validates mock data referential integrity
 - Checks .NET formatting consistency

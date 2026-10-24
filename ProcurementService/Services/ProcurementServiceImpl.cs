@@ -304,17 +304,7 @@ public class ProcurementServiceImpl : IProcurementService
 
     private static bool IsValidStatusTransition(string current, string next)
     {
-        if (next == "Cancelled") return current != "FullyReceived";
-        return (current, next) switch
-        {
-            ("Draft", "Submitted") => true,
-            ("Submitted", "Approved") => true,
-            ("Submitted", "Draft") => true,
-            ("Approved", "Shipped") => true,
-            ("Shipped", "PartiallyReceived") => true,
-            ("PartiallyReceived", "FullyReceived") => true,
-            _ => false
-        };
+        return GetAllowedNextStatuses(current).Contains(next, StringComparer.Ordinal);
     }
 
     private static IEnumerable<string> GetAllowedNextStatuses(string current) =>

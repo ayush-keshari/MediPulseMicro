@@ -88,7 +88,7 @@ GitHub Actions runs these checks through `.github/workflows/ci.yml`:
 - frontend build, tests, type checking, linting, and production dependency audit
 - Docker-backed integration tests and dbt data-quality tests
 
-The backend CI job enforces at least 35% line coverage. The run at commit
+The backend CI job now enforces at least 37% line coverage. The earlier run at commit
 `348c15d` measured 36.5%, with 200 backend tests and 3 API integration tests
 passing. These numbers describe that commit, not a permanent baseline promise.
 See [validation evidence](docs/validation-evidence.md) for the run and artifacts.

@@ -160,12 +160,12 @@ jobs:
           # Extract coverage percentage from summary
           COVERAGE_PERCENT=$(awk '/Line coverage:/ {gsub(/%/, ""); print $NF}' TestResults/CoverageReport/Summary.txt)
           echo "Coverage: $COVERAGE_PERCENT%"
-          # Keep the gate above the measured repository baseline while coverage grows.
-          if [ "$(awk -v cov="$COVERAGE_PERCENT" 'BEGIN {print (cov < 35)}')" -eq 1 ]; then
-            echo "Error: Coverage is below the required target of 35%"
+          # Ratchet the floor only after measuring coverage with unchanged exclusions.
+          if [ "$(awk -v cov="$COVERAGE_PERCENT" 'BEGIN {print (cov < 37)}')" -eq 1 ]; then
+            echo "Error: Coverage is below the required target of 37%"
             exit 1
           fi
-          echo "Coverage gate passed: $COVERAGE_PERCENT% >= 35%"
+          echo "Coverage gate passed: $COVERAGE_PERCENT% >= 37%"
 
       - name: Upload backend coverage report
         if: always()

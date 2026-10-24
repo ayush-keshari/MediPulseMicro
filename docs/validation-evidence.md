@@ -40,6 +40,27 @@ offline compile checks. Security checks and CodeQL also passed for this commit.
 
 ## Reproduce
 
+### Lifecycle and safe-error regression checks (2026-10-25)
+
+The follow-up backend suite passed 268 tests locally with 37.2% line coverage
+and 68.2% branch coverage, using the same unfiltered collector as CI. The CI
+minimum is raised from 35% to 37%; the verified commit above records the prior
+baseline rather than claiming this follow-up has already passed remote CI.
+
+New assertions cover all 49 known purchase-order state pairs, unknown statuses,
+receipt acceptance across all seven states, deletion isolation, safe error
+payloads, logging severity, and preservation of already-handled responses.
+They exposed permissive cancellation from unknown/already-cancelled states.
+The exception filter now preserves business-rule 409 responses and keeps
+unexpected exception details out of client responses. Database assertions use
+fresh EF reads after clearing tracking; these unit tests do not prove SQL Server
+foreign-key enforcement or concurrent transaction behavior.
+
+Generated migrations remain in the coverage denominator. No coverage exclusion
+was added to inflate the result. Overall coverage is still below the 50% target.
+
+### Commands
+
 From the root of a fresh checkout:
 
 ```text
@@ -53,7 +74,7 @@ inside containers. See `TESTING.md` for frontend and API integration commands.
 
 ## Remaining gaps
 
-36.5% backend coverage is limited. Raising the minimum to 50% without first
+37.2% backend coverage is limited. Raising the minimum to 50% without first
 adding and measuring meaningful behavior tests would only break the gate.
 Prioritize business-rule branches, rejected state transitions, multi-lot FEFO
 allocation, and persistence/transaction failures. The 3 API integration tests

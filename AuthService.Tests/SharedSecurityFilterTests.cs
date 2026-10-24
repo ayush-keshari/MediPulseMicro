@@ -76,7 +76,8 @@ public class SharedSecurityFilterTests
         var result = Assert.IsType<ObjectResult>(context.Result);
         Assert.Equal(StatusCodes.Status500InternalServerError, result.StatusCode);
         Assert.True(context.ExceptionHandled);
-        Assert.Contains("database unavailable", result.Value!.ToString());
+        Assert.DoesNotContain("database unavailable", result.Value!.ToString());
+        Assert.Contains("INTERNAL_SERVER_ERROR", result.Value!.ToString());
     }
 
     private static AuthorizationFilterContext CreateAuthorizationContext(ClaimsPrincipal user)
