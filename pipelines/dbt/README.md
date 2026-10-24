@@ -3,6 +3,52 @@
 This dbt project is the authoritative data-quality gate for the two SQL Server
 databases used by MediPulse.
 
+## One-command disposable pipeline
+
+From the repository root:
+
+```text
+python pipelines/dbt/run_pipeline.py
+```
+
+Requirements: Python 3.10+, Docker Engine using Linux containers, Compose
+2.24.4+, internet access for the first image/package downloads, and sufficient
+Docker disk space. No host .NET SDK, dbt, ODBC driver, SQL Server, password,
+or profile is required. The images contain the migration and validation tools.
+
+Each run gets a unique Compose project, a generated temporary password, and
+fresh databases with no host ports. The checkout is read-only inside containers;
+migration build outputs and dbt working files remain container-local. After
+migrations, the runner loads fixtures atomically, tests cross-database rollback,
+verifies replay preserves rows, then builds and tests dbt models and freshness.
+
+CI and the scheduled workflow execute this exact command. It returns nonzero
+if any stage, required report, or cleanup fails. Reports and redacted stage logs
+remain under `target/pipeline/<run-id>/`:
+
+- `pipeline-summary.json`: stage status, duration, project name, cleanup result.
+- `validation-summary.json`: fixture/atomicity/replay/dbt stage status.
+- `atomicity-tests.txt` and `fixture-replay.json`: database-backed evidence.
+- `target/quality-gate/<run-id>/`: separate dbt model/test/freshness results.
+
+`--output-dir` changes the parent report directory; each run still uses a new
+subdirectory. `--timeout-seconds` controls each build/run stage (default 1200).
+Logs are saved per stage, so a long image build can be inspected in `build.log`
+after completion or timeout. No unrelated Docker resources are pruned. Images
+and build cache are retained; database containers, networks, and volumes are
+removed in a `finally` block, including after a handled keyboard interrupt.
+Forced process termination or host shutdown cannot guarantee cleanup. For an
+interrupted run, use the exact project name from its report directory/logs:
+
+```text
+docker compose --project-name <recorded-project-name> -f docker-compose.ci.yml down --volumes --remove-orphans
+```
+
+Never substitute the project name of another development stack. Re-run the
+pipeline to recover with new databases; it does not repair existing partial
+fixtures or perform production backfills. This quality pipeline is distinct
+from the full application's API integration suite.
+
 ## CI validation levels
 
 The pull-request pipeline runs `python pipelines/dbt/quality_gate.py --parse-only`

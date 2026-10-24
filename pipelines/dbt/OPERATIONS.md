@@ -38,7 +38,12 @@ and legitimate backfills remain valid.
 
 ## Backfill and recovery runbook
 
-CI and scheduled runs load all four canonical fixture files with
+CI and scheduled runs use `python pipelines/dbt/run_pipeline.py` to provision
+disposable databases and run all validation in containers. See `README.md` for
+prerequisites, reports, and cleanup. The container uses the shared atomic batch
+builder in `load_fixtures.py`.
+
+For an already migrated disposable Compose database, the standalone loader is
 `python pipelines/dbt/load_fixtures.py`. This requires Python, Docker Compose,
 the migrated disposable databases, and `SA_PASSWORD`. An optional
 `--project-name` selects an isolated Compose project. The loader sends the
@@ -136,7 +141,8 @@ operators must assess this instead of rewriting timestamps to silence the check.
 
 ### Complete fixture replay verification
 
-After migrations and the first fixture load, CI and the scheduled workflow run
+After migrations and the first fixture load, the isolated container invokes
+the replay verifier from `verify_fixture_replay.py`. Its standalone command is
 `python pipelines/dbt/verify_fixture_replay.py`. It uses the existing ODBC driver
 and `SA_PASSWORD` environment variable against local disposable SQL Server.
 The check captures every application-table row in both databases (excluding EF
@@ -145,7 +151,9 @@ values and multiplicities. It detects duplicates, deletions, modified quantities
 keys, and timestamps. It rolls back the replay transaction on both success and
 failure and reports only table names/counts, never row contents.
 
-`target/fixture-replay.json` records the result and is uploaded with dbt artifacts.
+The isolated run saves `fixture-replay.json` in its unique evidence directory;
+the standalone command saves `target/fixture-replay.json`. CI uploads the report
+with dbt artifacts.
 Run only against quiescent disposable databases: serializable reads can block
 other writers. A pass proves replay safety for a complete initial fixture load;
 it does not prove repair of a partially loaded table. Existing first-row guards

@@ -1,6 +1,37 @@
 # MediPulseMicro - Healthcare Supply Chain Microservices
 
-A comprehensive microservices architecture for healthcare supply chain management, built with .NET 10 and Angular.
+A backend-focused healthcare supply-chain application built with .NET 10, Entity
+Framework Core, SQL Server, and an Angular frontend. Eight domain services sit
+behind an API gateway. The dbt project is a supporting database-quality suite,
+not the primary product or a standalone data warehouse.
+
+## Build and test from a fresh clone
+
+Backend unit tests require the .NET 10 SDK. They do not require Docker or SQL
+Server; the first run restores NuGet packages.
+
+```text
+dotnet test Backend.slnx --configuration Release
+```
+
+Frontend tests require Node.js 22.23.1 and npm:
+
+```text
+npm --prefix Frontend ci --legacy-peer-deps
+npm --prefix Frontend test -- --watch=false
+```
+
+The separate database-quality suite requires Python 3.10+ and Docker Compose
+2.24.4+ with Linux containers. It provisions its own disposable databases:
+
+```text
+python pipelines/dbt/run_pipeline.py
+```
+
+This command does not run the application API integration tests. See
+[TESTING.md](TESTING.md) for those commands and [verified CI evidence](docs/validation-evidence.md)
+for measured results. Coverage is currently 36.5% with a 35% CI minimum, not a
+claim of comprehensive business-logic coverage.
 
 ## 🏗️ Architecture
 
@@ -34,7 +65,7 @@ The database initialization follows a two-step process:
 
 This approach ensures:
 - Schema changes are managed through EF Core migrations (versioned, reversible)
-- Data insertion is idempotent (safe to run multiple times without duplication)
+- Complete fixture replay is tested for duplicate and value preservation; partial-row repair is not supported
 - Clear separation of concerns between schema and data
 - Integration with existing Docker Compose orchestration
 
@@ -46,35 +77,23 @@ The initialization flow in docker-compose.yml:
 
 ## 📋 Data Quality Checks
 
-You can run the data quality checks locally to validate the database schema and data integrity.
+Run `python pipelines/dbt/run_pipeline.py` from the repository root.
+The same command runs in CI and on the daily schedule. It builds the tools in
+containers, starts an isolated SQL Server, applies migrations, loads fixtures
+atomically, verifies rollback and replay behavior, and runs dbt model, test,
+and freshness checks.
 
-```bash
-# Start SQL Server and apply the EF Core migrations.
-docker compose up -d sqlserver
-docker compose up migrator --abort-on-container-exit --exit-code-from migrator
+No local dbt installation, ODBC driver, profile, database password, or manual
+SQL commands are required for this disposable run. Reports are retained under
+`pipelines/dbt/target/pipeline/<run-id>/`; containers and volumes are removed
+after success or failure. Docker images and build cache are retained for reuse.
+Allow sufficient Docker disk space before the first run.
 
-# Load the main and audit mock data (all scripts are idempotent).
-docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
-docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/AuthService.sql
-docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/NotificationService.sql
-docker compose exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit < Scripts/mockdata/AuditService.sql
-
-# Set the SA_PASSWORD environment variable (matches the one in .env or docker-compose.yml)
-export SA_PASSWORD=MediPulse@2024!Dev   # Linux/macOS
-# For Windows PowerShell:
-# $env:SA_PASSWORD = "MediPulse@2024!Dev"
-
-# Run the declarative dbt quality gate
-python -m pip install -r pipelines/dbt/requirements.txt
-copy pipelines\dbt\profiles.yml.example pipelines\dbt\profiles.yml  # Windows
-# cp pipelines/dbt/profiles.yml.example pipelines/dbt/profiles.yml    # Linux/macOS
-# Edit pipelines/dbt/profiles.yml with the local SQL Server credentials.
-dbt deps --project-dir pipelines/dbt
-dbt test --project-dir pipelines/dbt --profiles-dir pipelines/dbt --no-partial-parse
-```
-
-The CI integration job uses this dbt gate as the authoritative data-quality check. The SQL files under `Scripts/DQ/` are retained as optional diagnostics for service owners.
-
+Fixture replay is verified for a complete load. Existing first-row guards do
+not repair partially populated tables; a failed isolated run is retried against
+new databases. See [pipeline operations](pipelines/dbt/OPERATIONS.md) for limits
+and [existing-database checks](pipelines/dbt/README.md) for explicit profile setup.
+The SQL files under `Scripts/DQ/` are optional service-owner diagnostics.
 
 ### Prerequisites
 - Docker Engine
@@ -84,7 +103,7 @@ The CI integration job uses this dbt gate as the authoritative data-quality chec
 ### One-Command Setup
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/ayush-keshari/MediPulseMicro.git
 cd MediPulseMicro
 
 # Copy environment template
@@ -172,7 +191,7 @@ You can run many tests offline without any external dependencies (no Docker or S
 dotnet test Backend.slnx
 
 # Run tests for a specific service
-dotnet test AuthService/AuthService.csproj
+dotnet test AuthService.Tests/AuthService.Tests.csproj
 ```
 
 ### Frontend Tests (Offline)
@@ -219,8 +238,8 @@ The integration testing mechanism:
 #### CI Pipeline Integration
 The same mechanism is used in the CI pipeline via the `integration_and_data_quality` job in `.github/workflows/ci.yml`, which:
 - Uses the same docker-compose.test.yml equivalent configuration
-- Runs the integration tests via the Run-IntegrationTests.ps1 script
-- Requires the current measured backend coverage baseline of at least 30%; the latest local solution-wide run reports 30.4% line coverage.
+- Runs API integration tests against the Compose stack with `dotnet test IntegrationTests/IntegrationTests.csproj`
+- Runs the separate `backend_test` job with a 35% minimum line-coverage gate; the verified run at `348c15d` measured 36.5%.
 - Preserves test results as artifacts
 
 #### Test Coverage
@@ -270,7 +289,7 @@ The project uses GitHub Actions for continuous integration:
 - Runs on every push to `main`, `dev2`, and feature branches
 - Builds and tests all services
 - Validates Docker Compose setup
-- Runs backend unit tests with a coverage gate (minimum 30% baseline, raised as coverage grows)
+- Runs backend unit tests with an enforced 35% minimum line-coverage gate
 - Performs frontend TypeScript checking and linting
 - Validates mock data referential integrity
 - Checks .NET formatting consistency

@@ -2,6 +2,25 @@
 
 MediPulseMicro has backend unit tests, frontend unit tests, and Docker-backed integration tests.
 
+Use the .NET 10 SDK for backend tests and Node.js 22.23.1 for frontend tests.
+Initial package restores require network access. Tests described as offline
+need no running application database, not necessarily an offline package cache.
+
+## Disposable Database Quality Pipeline
+
+With Python 3.10+ and Docker Compose 2.24.4+ (Linux containers), run from the root:
+
+```text
+python pipelines/dbt/run_pipeline.py
+```
+
+This is the same entry point used by the CI data-quality stage and daily
+workflow. It provisions SQL Server, migrates, loads fixtures, verifies atomic
+rollback and replay, runs dbt checks, retains reports, and removes its isolated
+stack. It requires no host dbt/ODBC installation or configured SQL credentials.
+It does not replace backend, frontend, or API integration tests below.
+See [pipeline usage](pipelines/dbt/README.md) for storage and recovery details.
+
 ## Complete Fresh-Clone Validation
 
 From the repository root, run the complete validation flow:
@@ -68,3 +87,8 @@ GitHub Actions runs these checks through `.github/workflows/ci.yml`:
 - backend build and unit tests
 - frontend build, tests, type checking, linting, and production dependency audit
 - Docker-backed integration tests and dbt data-quality tests
+
+The backend CI job enforces at least 35% line coverage. The run at commit
+`348c15d` measured 36.5%, with 200 backend tests and 3 API integration tests
+passing. These numbers describe that commit, not a permanent baseline promise.
+See [validation evidence](docs/validation-evidence.md) for the run and artifacts.
