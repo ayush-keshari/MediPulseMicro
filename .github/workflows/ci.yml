@@ -246,10 +246,7 @@ jobs:
         run: |
           # Run EF Core migrations using the migrator service
           docker compose -f docker-compose.ci.yml run --rm migrator
-          docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < MockData_InsertOnly.sql
-          docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/AuthService.sql
-          docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseMain < Scripts/mockdata/NotificationService.sql
-          docker compose -f docker-compose.ci.yml exec -T sqlserver /opt/mssql-tools18/bin/sqlcmd -C -b -S localhost -U SA -P "$SA_PASSWORD" -i /dev/stdin -d MedipulseAudit < Scripts/mockdata/AuditService.sql
+          python pipelines/dbt/load_fixtures.py
           echo "Migrations completed successfully"
 
       - name: Install Microsoft ODBC Driver 18

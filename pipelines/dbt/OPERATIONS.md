@@ -38,6 +38,21 @@ and legitimate backfills remain valid.
 
 ## Backfill and recovery runbook
 
+CI and scheduled runs load all four canonical fixture files with
+`python pipelines/dbt/load_fixtures.py`. This requires Python, Docker Compose,
+the migrated disposable databases, and `SA_PASSWORD`. An optional
+`--project-name` selects an isolated Compose project. The loader sends the
+password through the process environment rather than command arguments.
+
+The complete fixture batch uses one SQL Server transaction across both
+databases. A failed statement rolls back earlier fixture inserts and propagates
+an error to CI. This prevents newly interrupted loads from leaving committed
+partial batches; it does not repair databases already partially populated by
+older loaders. Recreate those disposable databases before loading. Identity
+counters may advance on rollback, so recreate the disposable database after a
+failed load: fixture relationships assume clean identity sequences. Do not run
+this fixture loader against production.
+
 1. Identify the database and table affected by the change, then confirm the
    corresponding source and relationship declarations in `models/schema.yml`.
 2. Restore or refresh the target environment using the normal migration and
