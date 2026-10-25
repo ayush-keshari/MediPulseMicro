@@ -89,5 +89,6 @@ Never run repository fixture loaders against production to repair history.
 Recovery can reconstruct only retained source events. Deleted source history
 cannot be recovered without an external backup/event archive. Full rebuilds
 trade simplicity for source scanning cost and are intended for current project
-scale; incremental ingestion, CDC, coordinated snapshots, production scheduling,
-and atomic publication remain future work.
+scale. The separate journal-backed incremental table supports bounded processing,
+reconciliation, and date-window repair, but coordinated snapshots across systems,
+production scheduling, and atomic publication remain future work.

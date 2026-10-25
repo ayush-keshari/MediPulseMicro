@@ -25,7 +25,8 @@ reviewer recommendations as hypotheses and verify them against HEAD and CI.
    backfill for the incremental consumption mart. Require a drained journal,
    serialize with the normal consumer, preserve other dates, and prove failure
    rollback with live SQL Server tests. Do not claim continuous CDC or recovery
-   of missing source history. Status: in progress.
+   of missing source history. Status: delivered at `0d96a13`; the CI/CD,
+   Security, and CodeQL workflows passed on that commit.
 2. Address incomplete fixture loads separately. Either implement keyed,
    per-row repair with real SQL Server interruption tests or make the loader
    reject partial states clearly before writing. Never silently skip missing
