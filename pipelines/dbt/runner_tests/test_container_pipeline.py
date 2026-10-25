@@ -20,8 +20,11 @@ class ContainerPipelineTests(unittest.TestCase):
         atomicity = Mock(testsRun=3, skipped=[], wasSuccessful=Mock(return_value=True))
         semantics = Mock(testsRun=7, skipped=[], wasSuccessful=Mock(return_value=True))
         journal = Mock(testsRun=8, skipped=[], wasSuccessful=Mock(return_value=True))
+        incremental_tests = Mock(testsRun=4, skipped=[], wasSuccessful=Mock(return_value=True))
         if failure == "journal":
             journal.wasSuccessful.return_value = False
+        if failure == "incremental-tests":
+            incremental_tests.wasSuccessful.return_value = False
         if failure == "atomicity":
             atomicity.skipped = [("test", "disabled")]
         if failure == "semantics":
@@ -42,8 +45,9 @@ class ContainerPipelineTests(unittest.TestCase):
                 container.unittest, "TextTestRunner") as runner, patch.object(
                 container, "verify", return_value={"status": "failed" if failure == "replay" else "passed"}), patch.object(
                 container.subprocess, "run"), patch.object(container, "run_gate", side_effect=gate), patch.object(
-                container, "verify_rebuild", side_effect=RuntimeError("rebuild failed") if failure == "rebuild" else None):
-            runner.return_value.run.side_effect = [atomicity, semantics, journal]
+                container, "verify_rebuild", side_effect=RuntimeError("rebuild failed") if failure == "rebuild" else None), patch.object(
+                container, "verify_incremental", side_effect=RuntimeError("incremental failed") if failure == "incremental" else None):
+            runner.return_value.run.side_effect = [atomicity, semantics, journal, incremental_tests]
             if failure:
                 with self.assertRaises(RuntimeError):
                     container.run(evidence, work)
@@ -57,13 +61,17 @@ class ContainerPipelineTests(unittest.TestCase):
         report, _ = self.exercise()
         self.assertEqual(report["status"], "passed")
         self.assertEqual(report["stages"], ["load-fixtures", "verify-atomicity", "verify-transform-semantics",
-                                           "verify-consumption-journal", "verify-replay", "dbt-dependencies", "dbt-gate", "verify-mart-rebuild"])
+                                           "verify-consumption-journal", "verify-replay", "dbt-dependencies", "dbt-gate",
+                                           "verify-mart-rebuild", "verify-incremental-consumption",
+                                           "test-incremental-consumption"])
 
     def test_failures_stop_pipeline_and_record_stage(self):
         for failure, stage in [("fixtures", "load-fixtures"), ("atomicity", "verify-atomicity"),
                                ("replay", "verify-replay"), ("dbt", "dbt-gate"),
                                ("semantics", "verify-transform-semantics"), ("rebuild", "verify-mart-rebuild"),
-                               ("journal", "verify-consumption-journal")]:
+                               ("journal", "verify-consumption-journal"),
+                               ("incremental", "verify-incremental-consumption"),
+                               ("incremental-tests", "test-incremental-consumption")]:
             with self.subTest(failure=failure):
                 report, evidence = self.exercise(failure)
                 self.assertEqual(report["status"], "failed")

@@ -9,6 +9,7 @@ from load_fixtures import fixture_batch
 from quality_gate import run_gate
 from verify_fixture_replay import connect_database, verify
 from verify_mart_rebuild import verify_rebuild
+from verify_incremental_consumption import verify as verify_incremental
 
 
 PROFILE = """mediapulse_dq:
@@ -100,6 +101,17 @@ def run(evidence=Path("/evidence"), work=Path("/tmp/quality-project")):
         summary["stages"].append(stage)
         stage = "verify-mart-rebuild"
         verify_rebuild(work, profiles, evidence)
+        summary["stages"].append(stage)
+        stage = "verify-incremental-consumption"
+        verify_incremental(evidence)
+        summary["stages"].append(stage)
+        stage = "test-incremental-consumption"
+        suite = unittest.defaultTestLoader.discover(
+            str(source / "runner_tests"), pattern="test_incremental_consumption_sqlserver.py")
+        with (evidence / "incremental-consumption-tests.txt").open("w", encoding="utf-8") as stream:
+            result = unittest.TextTestRunner(stream=stream, verbosity=2).run(suite)
+        if result.testsRun != 4 or result.skipped or not result.wasSuccessful():
+            raise RuntimeError("Incremental tests failed or skipped; see incremental-consumption-tests.txt")
         summary["stages"].append(stage)
         summary["status"] = "passed"
     except BaseException:

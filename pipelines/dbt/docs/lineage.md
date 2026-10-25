@@ -47,10 +47,10 @@ validation; this is not an atomic production publish/promotion mechanism.
 
 ## Historical rebuild and recovery
 
-Consumption changes are now captured transactionally in a separate journal.
-See [change capture](consumption-change-capture.md) for insert/update/delete
-semantics and the future consumer contract. This mart still uses full rebuilds;
-the journal is not yet consumed incrementally.
+Consumption changes are captured transactionally and processed into a separate
+incremental daily table. See [change capture](consumption-change-capture.md)
+for insert/update/delete, retry, and concurrency behavior. This dbt mart still
+uses full rebuilds and provides an independent reconciliation baseline.
 
 The model is a table rebuilt from the entire retained source on every run.
 Late events, quantity corrections, and deleted events therefore recompute their

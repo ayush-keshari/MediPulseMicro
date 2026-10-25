@@ -7,6 +7,8 @@ It also builds `dbo.fct_daily_consumption`, a daily facility/item demand dataset
 from logistics consumption events. It retains event counts and uses 64-bit sums.
 See [lineage and historical rebuilds](docs/lineage.md) for its grain, timezone
 limitation, source reconciliation, and recovery procedure.
+The [bounded journal processor](docs/consumption-change-capture.md) maintains a
+separate incremental table with per-event acknowledgements and retry support.
 
 ## One-command disposable pipeline
 
@@ -36,6 +38,8 @@ remain under `target/pipeline/<run-id>/`:
 - `atomicity-tests.txt` and `fixture-replay.json`: database-backed evidence.
 - `consumption-journal-tests.txt`: eight SQL Server change-capture checks;
   see [the journal contract](docs/consumption-change-capture.md).
+- `incremental-consumption.json` and `incremental-consumption-tests.txt`:
+  full-rebuild comparison, repeat-run evidence, and four live recovery cases.
 - `transformation-tests.txt`: seven real-SQL tests for aggregation, date boundaries,
   late arrivals, corrections/deletions, group isolation, overflow, and empty input.
 - `mart-rebuild.json` and `mart-rebuild-{run,test}.json`: exact output comparison
