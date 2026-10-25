@@ -10,6 +10,7 @@ public class LogisticsDbContext : DbContext
     public DbSet<TransferOrder> TransferOrders => Set<TransferOrder>();
     public DbSet<TransferOrderItem> TransferOrderItems => Set<TransferOrderItem>();
     public DbSet<ConsumptionRecord> ConsumptionRecords => Set<ConsumptionRecord>();
+    public DbSet<ConsumptionChange> ConsumptionChanges => Set<ConsumptionChange>();
 
     // Cross-service: same DB as InventoryService — exclude from migrations so EF
     // never tries to create/drop this table; we only read and update it.
@@ -46,11 +47,26 @@ public class LogisticsDbContext : DbContext
         // ── ConsumptionRecord ─────────────────────────────────────────────
         mb.Entity<ConsumptionRecord>(entity =>
         {
-            entity.ToTable("ConsumptionRecord");
+            entity.ToTable("ConsumptionRecord", table =>
+            {
+                table.HasTrigger("TR_ConsumptionRecord_AnalyticsChanges");
+                table.UseSqlOutputClause(false);
+            });
             entity.HasKey(e => e.ConsumptionId);
             entity.Property(e => e.ItemName).IsRequired().HasMaxLength(150);
             entity.Property(e => e.ConsumedDate).IsRequired().HasColumnType("datetime2");
             entity.Property(e => e.ConsumedBy).IsRequired().HasMaxLength(100);
+        });
+
+        mb.Entity<ConsumptionChange>(entity =>
+        {
+            entity.ToTable("ConsumptionChange");
+            entity.HasKey(e => e.ChangeId);
+            entity.Property(e => e.Operation).IsRequired().HasMaxLength(1).IsUnicode(false);
+            entity.Property(e => e.RecordedAt).HasColumnType("datetime2").HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(e => e.BeforeConsumedDate).HasColumnType("datetime2");
+            entity.Property(e => e.AfterConsumedDate).HasColumnType("datetime2");
+            entity.HasIndex(e => new { e.ConsumptionId, e.ChangeId });
         });
 
         // ── InventoryPositions (cross-service, no migration) ──────────────

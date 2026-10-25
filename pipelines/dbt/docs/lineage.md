@@ -47,6 +47,11 @@ validation; this is not an atomic production publish/promotion mechanism.
 
 ## Historical rebuild and recovery
 
+Consumption changes are now captured transactionally in a separate journal.
+See [change capture](consumption-change-capture.md) for insert/update/delete
+semantics and the future consumer contract. This mart still uses full rebuilds;
+the journal is not yet consumed incrementally.
+
 The model is a table rebuilt from the entire retained source on every run.
 Late events, quantity corrections, and deleted events therefore recompute their
 historical groups. There is no watermark, incremental cursor, or date-window

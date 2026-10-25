@@ -71,6 +71,15 @@ def run(evidence=Path("/evidence"), work=Path("/tmp/quality-project")):
             raise RuntimeError("Transformation tests failed or did not execute; see transformation-tests.txt")
         summary["stages"].append(stage)
 
+        stage = "verify-consumption-journal"
+        suite = unittest.defaultTestLoader.discover(
+            str(source / "runner_tests"), pattern="test_consumption_journal_sqlserver.py")
+        with (evidence / "consumption-journal-tests.txt").open("w", encoding="utf-8") as stream:
+            result = unittest.TextTestRunner(stream=stream, verbosity=2).run(suite)
+        if result.testsRun != 8 or result.skipped or not result.wasSuccessful():
+            raise RuntimeError("Change journal tests failed or skipped; see consumption-journal-tests.txt")
+        summary["stages"].append(stage)
+
         stage = "verify-replay"
         connection = connect_database()
         try:

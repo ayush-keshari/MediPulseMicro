@@ -22,6 +22,59 @@ namespace LogisticsService.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("LogisticsService.Models.ConsumptionChange", b =>
+                {
+                    b.Property<long>("ChangeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ChangeId"));
+
+                    b.Property<DateTime?>("AfterConsumedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("AfterFacilityId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AfterItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("AfterQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("BeforeConsumedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("BeforeFacilityId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BeforeItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BeforeQuantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConsumptionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Operation")
+                        .IsRequired()
+                        .HasMaxLength(1)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(1)");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.HasKey("ChangeId");
+
+                    b.HasIndex("ConsumptionId", "ChangeId");
+
+                    b.ToTable("ConsumptionChange", (string)null);
+                });
+
             modelBuilder.Entity("LogisticsService.Models.ConsumptionRecord", b =>
                 {
                     b.Property<int>("ConsumptionId")
@@ -57,7 +110,51 @@ namespace LogisticsService.Migrations
 
                     b.HasKey("ConsumptionId");
 
-                    b.ToTable("ConsumptionRecord", (string)null);
+                    b.ToTable("ConsumptionRecord", null, t =>
+                        {
+                            t.HasTrigger("TR_ConsumptionRecord_AnalyticsChanges");
+                        });
+
+                    b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
+                });
+
+            modelBuilder.Entity("LogisticsService.Models.InventoryPosition", b =>
+                {
+                    b.Property<int>("PositionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PositionId"));
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("FacilityId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("LotId")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SafetyStock")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StorageZoneId")
+                        .HasColumnType("int");
+
+                    b.HasKey("PositionId");
+
+                    b.ToTable("InventoryPositions", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("LogisticsService.Models.TransferOrder", b =>

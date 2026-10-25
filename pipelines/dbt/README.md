@@ -34,6 +34,8 @@ remain under `target/pipeline/<run-id>/`:
 - `pipeline-summary.json`: stage status, duration, project name, cleanup result.
 - `validation-summary.json`: fixture/atomicity/replay/dbt stage status.
 - `atomicity-tests.txt` and `fixture-replay.json`: database-backed evidence.
+- `consumption-journal-tests.txt`: eight SQL Server change-capture checks;
+  see [the journal contract](docs/consumption-change-capture.md).
 - `transformation-tests.txt`: seven real-SQL tests for aggregation, date boundaries,
   late arrivals, corrections/deletions, group isolation, overflow, and empty input.
 - `mart-rebuild.json` and `mart-rebuild-{run,test}.json`: exact output comparison
