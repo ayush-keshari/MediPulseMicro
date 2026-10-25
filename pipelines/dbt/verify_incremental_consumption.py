@@ -3,6 +3,7 @@ from collections import Counter
 import json
 
 from incremental_consumption import relations, run
+from reconcile_incremental_consumption import reconcile_window
 from verify_fixture_replay import connect_database
 
 
@@ -30,8 +31,14 @@ def verify(evidence):
             replay = run(connection, batch_size=2, max_batches=1)
             if replay["events"] != 0 or not replay["drained"]:
                 raise ValueError("Repeat processing was not idempotent")
+            days = [row[0] for row in full]
+            if not days:
+                raise ValueError("Fixture mart unexpectedly has no consumption groups")
+            reconciliation = reconcile_window(connection, min(days), max(days))
+            if reconciliation["differing_groups"]:
+                raise ValueError("Date-window reconciliation found consumption drift")
             report.update(status="passed", **result, rows_compared=sum(full.values()),
-                          repeat_events=replay["events"])
+                          repeat_events=replay["events"], reconciliation=reconciliation)
         finally:
             connection.close()
     finally:

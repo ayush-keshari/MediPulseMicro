@@ -20,7 +20,7 @@ class ContainerPipelineTests(unittest.TestCase):
         atomicity = Mock(testsRun=3, skipped=[], wasSuccessful=Mock(return_value=True))
         semantics = Mock(testsRun=7, skipped=[], wasSuccessful=Mock(return_value=True))
         journal = Mock(testsRun=8, skipped=[], wasSuccessful=Mock(return_value=True))
-        incremental_tests = Mock(testsRun=4, skipped=[], wasSuccessful=Mock(return_value=True))
+        incremental_tests = Mock(testsRun=7, skipped=[], wasSuccessful=Mock(return_value=True))
         if failure == "journal":
             journal.wasSuccessful.return_value = False
         if failure == "incremental-tests":

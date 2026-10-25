@@ -9,6 +9,8 @@ See [lineage and historical rebuilds](docs/lineage.md) for its grain, timezone
 limitation, source reconciliation, and recovery procedure.
 The [bounded journal processor](docs/consumption-change-capture.md) maintains a
 separate incremental table with per-event acknowledgements and retry support.
+Its [reconciliation and date-window repair](docs/consumption-change-capture.md#date-window-reconciliation-and-repair)
+can detect and rebuild drift against retained source rows during a quiescent window.
 
 ## One-command disposable pipeline
 
@@ -39,7 +41,7 @@ remain under `target/pipeline/<run-id>/`:
 - `consumption-journal-tests.txt`: eight SQL Server change-capture checks;
   see [the journal contract](docs/consumption-change-capture.md).
 - `incremental-consumption.json` and `incremental-consumption-tests.txt`:
-  full-rebuild comparison, repeat-run evidence, and four live recovery cases.
+  full-rebuild comparison, repeat-run evidence, and seven live recovery cases.
 - `transformation-tests.txt`: seven real-SQL tests for aggregation, date boundaries,
   late arrivals, corrections/deletions, group isolation, overflow, and empty input.
 - `mart-rebuild.json` and `mart-rebuild-{run,test}.json`: exact output comparison

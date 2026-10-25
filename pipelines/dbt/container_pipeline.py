@@ -110,7 +110,7 @@ def run(evidence=Path("/evidence"), work=Path("/tmp/quality-project")):
             str(source / "runner_tests"), pattern="test_incremental_consumption_sqlserver.py")
         with (evidence / "incremental-consumption-tests.txt").open("w", encoding="utf-8") as stream:
             result = unittest.TextTestRunner(stream=stream, verbosity=2).run(suite)
-        if result.testsRun != 4 or result.skipped or not result.wasSuccessful():
+        if result.testsRun != 7 or result.skipped or not result.wasSuccessful():
             raise RuntimeError("Incremental tests failed or skipped; see incremental-consumption-tests.txt")
         summary["stages"].append(stage)
         summary["status"] = "passed"

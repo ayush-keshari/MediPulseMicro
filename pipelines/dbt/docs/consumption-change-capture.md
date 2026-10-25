@@ -45,6 +45,31 @@ This is a manually invoked processor, not a production scheduler or an atomic
 cross-system publication process. Retain journal rows until a reviewed purge
 policy exists; deletion from the journal before acknowledgement loses work.
 
+## Date-window reconciliation and repair
+
+After the journal is drained, the following command compares a selected
+inclusive date window against the retained operational source and exits nonzero
+when groups are missing, unexpected, or have changed totals or event counts:
+
+```text
+python pipelines/dbt/reconcile_incremental_consumption.py check --start 2026-10-01 --end 2026-10-07
+```
+
+For a confirmed target drift in an authorized environment, take a quiescent
+maintenance window, preserve the report, and run `backfill` with the same dates
+instead of `check`. It replaces only those dates in one transaction, using the
+processor's application lock. Then run `check` again, drain any later journal
+events, and run the full dbt quality gate. Each invocation is limited to 31
+calendar days. Rebuild both dates when a source correction moves a row across
+the boundary. The command does not modify source rows or acknowledge journal
+events; it refuses to run while any committed journal entries remain pending.
+
+Reconciliation uses serializable SQL reads and can block operational writes.
+It is intended for a planned quiescent window, not continuous production
+monitoring. It cannot recover data no longer retained in the source, infer
+changes that bypassed capture outside the chosen window, or guarantee an
+atomic publication across multiple windows.
+
 ## Ordering and corrections
 
 - Use `ChangeId` as a unique event identity, **not as commit order**. Identity
@@ -87,7 +112,9 @@ column privacy. Tests roll back their changes and publish
 bounded processing, rollback/retry, historical date correction, and competing
 processors in disposable schemas. The runner compares the incremental result
 with the independently rebuilt dbt mart and checks that a second pass has no
-work; evidence is in `incremental-consumption.json` and
+work; three further live cases exercise scoped drift repair, pending-journal
+refusal, and rollback on injected backfill failure. Evidence is in
+`incremental-consumption.json` and
 `incremental-consumption-tests.txt`. EF mapping/migration unit tests verify the
 trigger-compatible mapping, table contract, baseline operation, and rollback
 ordering. A populated production upgrade and concurrent consumers are not
